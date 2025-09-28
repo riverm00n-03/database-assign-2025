@@ -65,3 +65,11 @@ async def check_db_schema_route():
         return schema_info
     except Exception as e:
         return {"status": "error", "message": str(e)}
+    
+@app.get("/debug-db", tags=["Database"])
+def db_schema_view_route():
+    """DB 스키마 정보를 보여주는 HTML 페이지를 반환함."""
+    db_html_path = os.path.join(FRONTEND_DIR, 'db.html')
+    if not os.path.exists(db_html_path):
+        return {"error": "DB View HTML 파일이 없습니다."}
+    return FileResponse(db_html_path)
