@@ -55,7 +55,7 @@ async def login_user(
     - login_data: Pydantic 모델이고, 아이디와 비밀번호 필드를 포함함.
     """
     # 사용자의 정보를 조회부터
-    user_record = await db_core.get_user_by_username(
+    user_record = await db_core.verify_password(
         db_conn=db_conn,
         username=login_data.username
     ) # user_record : 사용자의 정보가 담긴 딕셔너리 또는 None
