@@ -6,7 +6,8 @@ services:
     ports:
       - "8000:8000" # Host의 8000번 포트와 Container의 8000번 포트를 연결
     volumes:
-      - ./app:/app/app # Host의 app 폴더와 Container의 app 폴더를 동기화 (코드 실시간 반영)
+      - ./app:/app/app # Host의 app 폴더와 Container의 app 폴더를 동기화
+      - ./frontend:/app/frontend # Host의 frontend 폴더와 Container의 frontend 폴더를 동기화
     env_file:
       - .env # .env 파일의 환경 변수를 컨테이너에 주입
     depends_on:

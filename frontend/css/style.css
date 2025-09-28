@@ -1,0 +1,123 @@
+/* frontend/css/style.css */
+
+/* 1. CSS Reset & 기본 다크 테마 설정 */
+:root {
+    /* 🎨 다크 테마 색상 변수 정의 */
+    --color-bg: #1e1e1e; /* 주 배경색: 어두운 회색 */
+    --color-text: #e0e0e0; /* 주 텍스트색: 밝은 회색 */
+    --color-primary: #8ab4f8; /* 강조색/액센트: 구글 블루 계열 */
+    --color-secondary: #3c4043; /* 보조 배경색 (Navbar, 입력창 등) */
+    --color-border: #444444; /* 경계선 색상 */
+    
+    /* 레이아웃 변수 */
+    --navbar-height: 48px; /* 얇은 네비게이션 바 높이 (모바일 기준) */
+    --mobile-padding: 15px;
+    --link-hover-bg: rgba(138, 180, 248, 0.1); /* 링크 호버 배경 (Primary 색상의 투명 버전) */
+}
+
+* {
+    /* 모든 요소의 여백/패딩 초기화 및 박스 모델 설정 */
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; 
+}
+
+body, html {
+    /* 전체 배경 및 텍스트 색상 적용 */
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    line-height: 1.6;
+    height: 100%;
+    overflow: hidden; 
+}
+
+/* 2. 상단 네비게이션 바 (Navbar) 스타일 */
+.navbar {
+    height: var(--navbar-height);
+    background-color: var(--color-secondary);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* 요소들을 양 끝과 중앙에 배치 */
+    padding: 0 var(--mobile-padding);
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000; 
+}
+
+.navbar-brand {
+    color: var(--color-primary);
+    font-size: 1.4em;
+    font-weight: 600;
+    text-decoration: none; 
+    padding: 0 10px; /* 클릭 영역 확보 */
+}
+
+/* 주요 메뉴 링크 그룹과 인증 영역의 공통 스타일 */
+.navbar-links, .navbar-auth {
+    display: flex; 
+    align-items: center;
+    gap: 15px; /* 링크 간 간격을 모바일 기준으로 설정 */
+    height: 100%; /* navbar 높이만큼 영역 확보 */
+}
+
+/* navbar-links 그룹이 남은 공간을 차지하여 중앙 정렬이 되도록 함 */
+.navbar-links {
+    flex-grow: 1; 
+    justify-content: center; /* 내부 링크들을 중앙에 배치 */
+}
+
+/* 🚨 링크 요소 스타일 적용 (미려함 강조) */
+.navbar-links a, .navbar-auth a {
+    color: var(--color-text);
+    text-decoration: none;
+    font-size: 0.95em;
+    padding: 10px 15px; /* 호버 영역을 넓게 확보 */
+    border-radius: 6px; /* 살짝 둥근 모서리 */
+    transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out; 
+}
+
+/* 마우스 오버 시 스타일 (다크 테마에서 시인성 확보) */
+.navbar-links a:hover, .navbar-auth a:hover {
+    color: var(--color-primary); /* 텍스트 강조색 */
+    background-color: var(--link-hover-bg); /* 부드러운 배경색 변화 */
+}
+
+
+/* 3. 메인 콘텐츠 영역 (채팅방이 들어갈 곳) */
+.main-content {
+    padding-top: var(--navbar-height); 
+    height: 100%;
+    overflow-y: auto; 
+    padding-left: var(--mobile-padding);
+    padding-right: var(--mobile-padding);
+    display: flex; 
+    flex-direction: column;
+}
+
+/* 4. 모바일 최적화 및 반응형 디자인 (Media Query) */
+@media (min-width: 600px) {
+    :root {
+        /* PC 환경에서는 네비게이션 바를 조금 더 얇게, 패딩을 넓게 설정 */
+        --navbar-height: 45px; 
+        --mobile-padding: 30px; /* PC 패딩을 좀 더 넓게 */
+    }
+    
+    .navbar {
+        height: var(--navbar-height); /* PC용 얇은 높이 적용 */
+    }
+
+    .main-content {
+        max-width: 960px; /* 최대 너비를 더 넓게 (PC 환경) */
+        margin: 0 auto; 
+        padding-top: var(--navbar-height); /* PC용 상단 패딩 재설정 */
+    }
+    
+    /* PC 환경에서 링크 간격 넓히기 */
+    .navbar-links, .navbar-auth {
+        gap: 30px; 
+    }
+}

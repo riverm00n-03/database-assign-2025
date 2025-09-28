@@ -4,6 +4,15 @@ from fastapi import FastAPI
 from .database import core as db_core
 from .routers import users, chat
 
+from fastapi.staticfiles import StaticFiles 
+from fastapi.responses import FileResponse
+import os
+
+# 현재 파일(__file__)의 디렉토리 경로를 가져옵니다. (frontend 폴더 경로를 찾기 위함)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# 프로젝트 루트 폴더에 있는 frontend 폴더의 경로를 설정합니다.
+FRONTEND_DIR = os.path.join(BASE_DIR, '..', 'frontend') 
+
 # FastAPI 앱 인스턴스를 생성하고, API 문서에 표시될 제목, 설명, 버전을 설정함.
 app = FastAPI(
     title="Character Chat API",
@@ -27,13 +36,17 @@ async def on_shutdown():
 app.include_router(users.user_router)
 app.include_router(chat.chat_router)
 
+# /static 이라는 URL 경로로 접속하면, 실제 FRONTEND_DIR(/frontend) 폴더의 파일들을 보여줄 수 있게 됨.
+# 예: /static/index.html, /static/css/style.css
+app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
+
 
 # 라우터들
 
 @app.get("/", tags=["Default"])
 def root():
     #서버의 루트 경로로, 간단한 환영 메시지를 반환함.
-    return {"message": "잘 작동하는듯."}
+    return FileResponse(os.path.join(FRONTEND_DIR, 'index.html'))
 
 @app.get("/init-db", tags=["Database"])
 async def init_db_route():
