@@ -3,7 +3,7 @@
 회원가입, 로그인 등의 기능을 담당함.
 """
 from fastapi import APIRouter, Depends, HTTPException
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash 
 from app.database import core as db_core
 from app.database import schemas
 
@@ -44,3 +44,43 @@ async def register_user(
 
     # 성공 시 생성된 사용자 정보를 반환함.
     return created_user
+
+@user_router.post("/login")
+async def login_user(
+    login_data: schemas.UserLogin,
+    db_conn=Depends(db_core.get_db_connection)
+):
+    """
+    사용자 로그인 처리를 담당하는 API임.
+    - login_data: Pydantic 모델이고, 아이디와 비밀번호 필드를 포함함.
+    """
+    # 사용자의 정보를 조회부터
+    user_record = await db_core.get_user_by_username(
+        db_conn=db_conn,
+        username=login_data.username
+    ) # user_record : 사용자의 정보가 담긴 딕셔너리 또는 None
+    if not user_record: # 사용자의 정보가 없는 경우
+        raise HTTPException(
+            status_code=404,
+            detail="사용자를 찾을 수 없습니다."
+        )
+    # 사용자의 비밀번호가 일치하는지 확인함.
+    if not db_core.verify_password(
+        plain_password=login_data.password,
+        hashed_password=user_record['hashed_password']
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="비밀번호가 올바르지 않습니다."
+        )
+    # 로그인 성공 시 사용자 정보를 반환함.
+    return {
+        "message": "로그인 성공",
+        "user": {
+            "id": user_record['id'],
+            "username": user_record['username'],
+            "email": user_record['email']
+        }
+    }
+
+    
