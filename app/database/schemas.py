@@ -14,3 +14,8 @@ class UserCreate(BaseModel):
 class ChatPrompt(BaseModel):
     """채팅 API 요청 시 Body에 담길 데이터의 형식을 정의함."""
     prompt: str
+
+class UserLogin(BaseModel):
+    """로그인 API 요청 시 Body에 담길 데이터의 형식을 정의함."""
+    username: str
+    password: str

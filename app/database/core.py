@@ -74,3 +74,16 @@ async def create_user(db_conn, username: str, hashed_password: str, email: str):
         return {"id": new_user_id, "username": username, "email": email}
     except pymysql.err.IntegrityError:
         return None
+    
+async def get_user_by_username(db_conn, username: str):
+    """
+    주어진 username에 해당하는 사용자의 정보를 users 테이블에서 조회함.
+    - db_conn: 데이터베이스 연결 객체임.
+    - username: 조회할 사용자의 아이디임.
+    - 반환값: 사용자가 존재하면 사용자 정보를 담은 딕셔너리, 없으면 None임.
+    """
+    select_sql = "SELECT id, username, password, email, is_banned, created_at FROM users WHERE username = %s"
+    with db_conn.cursor() as cursor:
+        cursor.execute(select_sql, (username,))
+        user_record = cursor.fetchone()
+    return user_record
