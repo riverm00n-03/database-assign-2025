@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000" # Host의 8000번 포트와 Container의 8000번 포트를 연결
+    volumes:
+      - ./app:/app/app # Host의 app 폴더와 Container의 app 폴더를 동기화 (코드 실시간 반영)
+    env_file:
+      - .env # .env 파일의 환경 변수를 컨테이너에 주입
+    depends_on:
+      db:
+        condition: service_healthy # db 서비스가 완전히 준비될 때까지 web 서비스를 기다리게 함
+
+  db:
+    image: mysql:8.0
+    ports:
+      - "3307:3306" # Host의 3307번 포트와 Container의 3306번 포트를 연결
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql # DB 데이터를 Host에 저장하여 영속성 유지
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  mysql-data:
