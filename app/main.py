@@ -6,6 +6,7 @@ from werkzeug.security import check_password_hash
 import os
 from urllib.parse import parse_qs
 
+from . import config
 from .database import core as db_core
 from .routers import users, chat
 

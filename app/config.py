@@ -22,3 +22,6 @@ DB_PASSWORD = os.environ.get('MYSQL_PASSWORD')
 
 # 접속할 데이터베이스의 이름임.
 DB_NAME = os.environ.get('MYSQL_DATABASE')
+
+# api 키
+GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')

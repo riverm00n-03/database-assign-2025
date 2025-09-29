@@ -21,8 +21,8 @@ async def get_gemini_response(prompt_text: str) -> str:
     - 반환값: AI가 생성한 응답 텍스트 문자열임.
     """
     try:
-        # 사용할 AI 모델을 지정함. 'gemini-1.5-flash'는 최신 경량 모델임.
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # 사용할 AI 모델을 지정함.
+        model = genai.GenerativeModel('gemini-2.5-flash')
         
         # 비동기 방식으로 API에 콘텐츠 생성을 요청함.
         response = await model.generate_content_async(prompt_text)
