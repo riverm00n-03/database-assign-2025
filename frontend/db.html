@@ -23,19 +23,19 @@
                         return;
                     }
 
-                    for (const tableName in data) {
-                        const tableData = data[tableName];
+                    for (const tableName in data) { // 각 테이블에 대해
+                        const tableData = data[tableName]; // 테이블의 데이터 배열
                         
                         let html = `<h3>Table: ${tableName}</h3>`;
-                        html += `<table><thead><tr>`;
+                        html += `<table><thead><tr>`; // 테이블 헤더 생성
                         
                         if (tableData.length > 0) {
-                            const headers = Object.keys(tableData[0]);
+                            const headers = Object.keys(tableData[0]); // 첫 번째 행의 키를 헤더로 사용
                             headers.forEach(header => {
                                 html += `<th>${header}</th>`;
                             });
                         }
-                        html += `</tr></thead><tbody>`;
+                        html += `</tr></thead><tbody>`; // 테이블 바디 시작. js 부분은 gemini 도움 받음.
 
                         tableData.forEach(row => {
                             html += '<tr>';
@@ -51,13 +51,13 @@
                     }
                 })
                 .catch(error => {
-                    schemaContainer.innerHTML = `<p style="color: red;">네트워크 오류 발생: ${error.message}</p>`;
+                    alert(error.message);
                 });
         });
     </script>
 </head>
 <body>
-    <h2>데이터베이스 스키마 상세 정보</h2>
+    <h2>데이터베이스 상세 정보</h2>
     <div id="schema-container"></div>
 </body>
 </html>
