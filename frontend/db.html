@@ -4,33 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DB 스키마 확인</title>
-    <link rel="stylesheet" href="/static/css/style.css"> 
-    
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        h2, h3 { color: #333; }
+    </style>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const schemaContainer = document.getElementById('schema-container');
-            const statusMessage = document.getElementById('status-message');
-
-            statusMessage.textContent = '데이터베이스 스키마 정보를 불러오는 중...';
 
             fetch('/check-db')
                 .then(response => response.json())
                 .then(data => {
-                    statusMessage.style.display = 'none';
-
                     if (data.status === 'error') {
-                        schemaContainer.innerHTML = `<p style="color: #ff6347;">오류: DB 연결 또는 테이블 생성에 문제가 있습니다. (${data.message})</p>`;
+                        schemaContainer.innerHTML = `<p style="color: red;">오류: DB 연결 또는 테이블 생성에 문제가 있습니다. (${data.message})</p>`;
                         return;
                     }
 
-                    // JSON 데이터를 순회하며 테이블 생성
                     for (const tableName in data) {
                         const tableData = data[tableName];
                         
-                        let html = `<h3 style="color: var(--color-primary); margin-top: 30px; margin-bottom: 10px;">Table: ${tableName}</h3>`;
-                        html += `<table class="db-schema-table"><thead><tr>`;
+                        let html = `<h3>Table: ${tableName}</h3>`;
+                        html += `<table><thead><tr>`;
                         
-                        // 헤더 생성 (Field, Type, Null, Key, Default, Extra)
                         if (tableData.length > 0) {
                             const headers = Object.keys(tableData[0]);
                             headers.forEach(header => {
@@ -39,11 +37,9 @@
                         }
                         html += `</tr></thead><tbody>`;
 
-                        // 행(Row) 데이터 채우기
                         tableData.forEach(row => {
                             html += '<tr>';
                             for (const key in row) {
-                                // 데이터가 null이면 "-"로 표시하여 깔끔하게 보이기
                                 const cellValue = row[key] === null ? '-' : row[key];
                                 html += `<td>${cellValue}</td>`;
                             }
@@ -53,38 +49,15 @@
                         html += `</tbody></table>`;
                         schemaContainer.innerHTML += html;
                     }
-
                 })
                 .catch(error => {
-                    statusMessage.textContent = `네트워크 오류 발생: ${error.message}`;
-                    statusMessage.style.color = '#ff6347';
+                    schemaContainer.innerHTML = `<p style="color: red;">네트워크 오류 발생: ${error.message}</p>`;
                 });
         });
     </script>
 </head>
 <body>
-    
-    <nav class="navbar">
-        <a href="/" class="navbar-brand">CHAT</a>
-        <div class="navbar-links">
-            <a href="/">홈</a>
-            <a href="/chatrooms">채팅방</a>
-            <a href="/create-bot">챗봇 제작</a>
-        </div>
-        <div class="navbar-auth"> 
-            <a href="/login" id="user-link">로그인</a> 
-        </div>
-    </nav>
-    
-    <div class="main-content">
-        <h2 style="margin-top: 20px; margin-bottom: 20px;">데이터베이스 스키마 상세 정보</h2>
-        
-        <p id="status-message" style="color: var(--color-text);"></p>
-
-        <div id="schema-container">
-            </div>
-        
-    </div>
-
-    </body>
+    <h2>데이터베이스 스키마 상세 정보</h2>
+    <div id="schema-container"></div>
+</body>
 </html>

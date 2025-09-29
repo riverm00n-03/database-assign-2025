@@ -66,10 +66,19 @@ async def check_db_schema_route():
     except Exception as e:
         return {"status": "error", "message": str(e)}
     
-@app.get("/debug-db", tags=["Database"])
+@app.get("/check-db-html", tags=["Database"])
 def db_schema_view_route():
-    """DB 스키마 정보를 보여주는 HTML 페이지를 반환함."""
+    # DB 스키마 정보를 보여주는 HTML 페이지를 반환함.
     db_html_path = os.path.join(FRONTEND_DIR, 'db.html')
     if not os.path.exists(db_html_path):
-        return {"error": "DB View HTML 파일이 없습니다."}
+        return {"error": "db.html 파일이 없음.."}
     return FileResponse(db_html_path)
+
+@app.get("/reset-db", tags=["Database"])
+async def reset_db_route():
+    #DB의 모든 테이블을 삭제하고 다시 생성함.
+    try:
+        await db_core.reset_tables()
+        return {"status": "success", "message": "DB 리셋됨."}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}

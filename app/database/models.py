@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS history (
 )
 """
 
+
 # 위에 정의된 모든 CREATE 쿼리들을 리스트로 묶어둠.
 # user_profiles 테이블 쿼리는 제거됨.
 CREATE_TABLE_QUERIES = [
@@ -65,4 +66,12 @@ CREATE_TABLE_QUERIES = [
     CREATE_STORIES_TABLE,
     CREATE_SESSIONS_TABLE,
     CREATE_HISTORY_TABLE,
+]
+
+DROP_TABLE_QUERIES = [
+    "DROP TABLE IF EXISTS history",
+    "DROP TABLE IF EXISTS sessions",
+    "DROP TABLE IF EXISTS stories",
+    "DROP TABLE IF EXISTS user_profiles",
+    "DROP TABLE IF EXISTS users",
 ]

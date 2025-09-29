@@ -122,3 +122,22 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     (routers/users.py 파일에서 사용됨)
     """
     return check_password_hash(hashed_password, plain_password)
+
+async def reset_tables():
+    # 모든 테이블을 삭제하고, 다시 생성함.
+    # 그 전에, alert로 사용자에게 경고 메시지를 띄우도록 프론트엔드에 알림을 보낼 수 있음.
+    global db_connection
+    if db_connection is None:
+        await connect_to_db()
+    with db_connection.cursor() as cursor:
+        # 외래 키 제약 조건 비활성화. 없으면 외래 키 제약 조건 위반으로 삭제가 안 됨.
+        cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
+        # 모든 테이블을 삭제함.
+        for drop_query in models.DROP_TABLE_QUERIES:
+            cursor.execute(drop_query)
+        # 다시 테이블을 생성함.
+        for create_query in models.CREATE_TABLE_QUERIES:
+            cursor.execute(create_query)
+        # 외래 키 제약 조건 재활성화
+        cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
+    db_connection.commit()
