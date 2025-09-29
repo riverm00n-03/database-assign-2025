@@ -23,6 +23,9 @@ async def get_gemini_response(prompt_text: str) -> str:
     try:
         # 사용할 AI 모델을 지정함.
         model = genai.GenerativeModel('gemini-2.5-flash')
+        # 생성할 최대 토큰 수 설정 (필요에 따라 조정 가능) (너무 길면 돈이 비싸짐)
+        model.max_output_tokens = 1024
+
         
         # 비동기 방식으로 API에 콘텐츠 생성을 요청함.
         response = await model.generate_content_async(prompt_text)
