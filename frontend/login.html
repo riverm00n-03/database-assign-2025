@@ -1,0 +1,39 @@
+<!-- frontend/login.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인</title>
+    <!-- 공통 스타일시트 연결 -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- 전체 페이지를 감싸는 메인 콘텐츠 영역 -->
+    <div class="main-content">
+        <!-- 로그인 폼을 담는 컨테이너 -->
+        <div class="form-container">
+            <h1>로그인</h1>
+            <!-- 로그인 처리를 위한 폼. /login 경로로 POST 요청을 보냄 -->
+            <form action="/login" method="post">
+                <!-- 사용자 이름 입력 그룹 -->
+                <div class="form-group">
+                    <label for="username">사용자 이름</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <!-- 비밀번호 입력 그룹 -->
+                <div class="form-group">
+                    <label for="password">비밀번호</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <!-- 로그인 제출 버튼 -->
+                <button type="submit" class="form-button">로그인</button>
+            </form>
+            <!-- 회원가입 페이지로 이동하는 링크 -->
+            <div class="form-link">
+                <p>계정이 없으신가요? <a href="/register">회원가입</a></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

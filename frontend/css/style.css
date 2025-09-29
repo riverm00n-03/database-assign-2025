@@ -147,3 +147,78 @@ body, html {
 .db-schema-table tbody tr:hover {
     background-color: #4a4a4a; 
 }
+
+
+/* 6. 폼(Form) 관련 스타일 (login.html, register.html 등) */
+.form-container {
+    max-width: 420px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: var(--color-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+}
+
+.form-container h1 {
+    color: var(--color-primary);
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 0.9em;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 5px;
+    color: var(--color-text);
+    font-size: 1em;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 5px rgba(138, 180, 248, 0.3);
+}
+
+.form-button {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--color-primary);
+    color: var(--color-bg);
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.form-button:hover {
+    background-color: #a3c5f9; /* 조금 더 밝은 파란색 */
+}
+
+.form-link {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.form-link a {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+.form-link a:hover {
+    text-decoration: underline;
+}

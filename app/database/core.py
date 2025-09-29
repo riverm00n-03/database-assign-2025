@@ -80,6 +80,17 @@ async def get_db_schema():
     return schema_info
 
 
+async def get_table_data(db_conn, table_name: str):
+    """
+    주어진 테이블의 모든 데이터를 조회하여 반환함.
+    """
+    select_sql = f"SELECT * FROM `{table_name}`"
+    with db_conn.cursor() as cursor:
+        cursor.execute(select_sql)
+        data = cursor.fetchall()
+    return data
+
+
 # 사용자 관련 DB 핵심 함수들
 async def create_user(db_conn, username: str, hashed_password: str, email: str): # db_conn을 매개변수로 받음.
     """

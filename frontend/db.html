@@ -12,52 +12,83 @@
         h2, h3 { color: #333; }
     </style>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             const schemaContainer = document.getElementById('schema-container');
+            const dataContainer = document.getElementById('data-container');
 
-            fetch('/check-db')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'error') {
-                        schemaContainer.innerHTML = `<p style="color: red;">오류: DB 연결 또는 테이블 생성에 문제가 있습니다. (${data.message})</p>`;
-                        return;
+            try {
+                const schemaResponse = await fetch('/check-db');
+                const schemaData = await schemaResponse.json();
+
+                if (schemaData.status === 'error') {
+                    schemaContainer.innerHTML = `<p style="color: red;">오류: DB 연결 또는 테이블 생성에 문제가 있습니다. (${schemaData.message})</p>`;
+                    return;
+                }
+
+                for (const tableName in schemaData) {
+                    const tableSchema = schemaData[tableName];
+                    
+                    // Display Schema
+                    let schemaHtml = `<h3>Table: ${tableName} (Schema)</h3>`;
+                    schemaHtml += `<table><thead><tr>`;
+                    
+                    if (tableSchema.length > 0) {
+                        const headers = Object.keys(tableSchema[0]);
+                        headers.forEach(header => {
+                            schemaHtml += `<th>${header}</th>`;
+                        });
                     }
+                    schemaHtml += `</tr></thead><tbody>`;
 
-                    for (const tableName in data) { // 각 테이블에 대해
-                        const tableData = data[tableName]; // 테이블의 데이터 배열
-                        
-                        let html = `<h3>Table: ${tableName}</h3>`;
-                        html += `<table><thead><tr>`; // 테이블 헤더 생성
-                        
-                        if (tableData.length > 0) {
-                            const headers = Object.keys(tableData[0]); // 첫 번째 행의 키를 헤더로 사용
-                            headers.forEach(header => {
-                                html += `<th>${header}</th>`;
-                            });
+                    tableSchema.forEach(row => {
+                        schemaHtml += '<tr>';
+                        for (const key in row) {
+                            const cellValue = row[key] === null ? '-' : row[key];
+                            schemaHtml += `<td>${cellValue}</td>`;
                         }
-                        html += `</tr></thead><tbody>`; // 테이블 바디 시작. js 부분은 gemini 도움 받음.
+                        schemaHtml += '</tr>';
+                    });
+
+                    schemaHtml += `</tbody></table>`;
+                    schemaContainer.innerHTML += schemaHtml;
+
+                    // Display Data
+                    const dataResponse = await fetch(`/table-data/${tableName}`);
+                    const tableData = await dataResponse.json();
+
+                    let dataHtml = `<h3>Table: ${tableName} (Data)</h3>`;
+                    if (tableData.length > 0) {
+                        dataHtml += `<table><thead><tr>`;
+                        const dataHeaders = Object.keys(tableData[0]);
+                        dataHeaders.forEach(header => {
+                            dataHtml += `<th>${header}</th>`;
+                        });
+                        dataHtml += `</tr></thead><tbody>`;
 
                         tableData.forEach(row => {
-                            html += '<tr>';
+                            dataHtml += '<tr>';
                             for (const key in row) {
                                 const cellValue = row[key] === null ? '-' : row[key];
-                                html += `<td>${cellValue}</td>`;
+                                dataHtml += `<td>${cellValue}</td>`;
                             }
-                            html += '</tr>';
+                            dataHtml += '</tr>';
                         });
-
-                        html += `</tbody></table>`;
-                        schemaContainer.innerHTML += html;
+                        dataHtml += `</tbody></table>`;
+                    } else {
+                        dataHtml += `<p>No data available for table ${tableName}.</p>`;
                     }
-                })
-                .catch(error => {
-                    alert(error.message);
-                });
+                    dataContainer.innerHTML += dataHtml;
+                }
+            } catch (error) {
+                schemaContainer.innerHTML = `<p style="color: red;">네트워크 오류 발생: ${error.message}</p>`;
+            }
         });
     </script>
 </head>
 <body>
-    <h2>데이터베이스 상세 정보</h2>
+    <h2>데이터베이스 스키마 상세 정보</h2>
     <div id="schema-container"></div>
+    <h2>데이터베이스 내용</h2>
+    <div id="data-container"></div>
 </body>
 </html>
