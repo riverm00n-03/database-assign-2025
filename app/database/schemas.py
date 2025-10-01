@@ -36,3 +36,15 @@ class Story(StoryBase):
 class UserSessionCreate(BaseModel):
     """채팅방 생성 또는 삭제 요청 시 필요한 사용자 ID"""
     user_id: int
+class UserIdentifier(BaseModel):
+    """요청 시 사용자를 식별하기 위한 user_id"""
+    user_id: int
+
+class SessionInfo(BaseModel):
+    """채팅방 생성 시 반환되는 session_id"""
+    session_id: int
+
+class ChatMessage(BaseModel):
+    """채팅 메시지 응답 형식"""
+    sender: str
+    message: str
