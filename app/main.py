@@ -37,6 +37,7 @@ async def on_shutdown():
 # 기능별로 분리된 라우터들을 메인 앱에 포함시킴.
 app.include_router(users.user_router)
 app.include_router(chat.chat_router)
+app.include_router(stories.story_router)
 
 # /static 이라는 URL 경로로 접속하면, 실제 FRONTEND_DIR(/frontend) 폴더의 파일들을 보여줄 수 있게 됨.
 # 예: /static/index.html, /static/css/style.css
@@ -163,6 +164,4 @@ async def login_user(
     # 6. 로그인 성공 시, 메인 페이지로 리디렉션합니다.
     return RedirectResponse(url="/", status_code=303)
 
-app.include_router(users.user_router)
-app.include_router(chat.chat_router)
-app.include_router(stories.story_router)
+

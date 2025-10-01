@@ -162,6 +162,7 @@ async def create_story(db_conn, story_data: schemas.StoryCreate):
             cursor.execute(sql, (story_data.creator_id, story_data.title, story_data.prompt, story_data.category))
             new_story_id = cursor.lastrowid
         db_conn.commit()
+         # Pydantic 모델을 딕셔너리로 변환(.model_dump())하고, 새 ID를 추가하여 반환합니다.
         return {**story_data.model_dump(), "id": new_story_id}
     except Exception as e:
         print(f"create_story 함수 에러: {e}")
@@ -172,12 +173,14 @@ async def get_all_stories(db_conn):
     sql = "SELECT * FROM stories ORDER BY created_at DESC"
     with db_conn.cursor() as cursor:
         cursor.execute(sql)
+        # fetchall(): 조회된 모든 행을 리스트 형태로 가져옵니다.
         return cursor.fetchall()
 
 async def get_story_by_id(db_conn, story_id: int):
     """ID로 특정 스토리를 조회함."""
     sql = "SELECT * FROM stories WHERE id = %s"
     with db_conn.cursor() as cursor:
+         # execute() 메소드는 영향을 받은 행(row)의 수를 반환합니다.
         cursor.execute(sql, (story_id,))
         return cursor.fetchone()
 
@@ -188,7 +191,8 @@ async def delete_story_by_id(db_conn, story_id: int):
         with db_conn.cursor() as cursor:
             result = cursor.execute(sql, (story_id,))
         db_conn.commit()
-        return result > 0 # 1개 이상의 행이 삭제되었으면 True 반환
+        # 삭제된 행이 1개 이상이면 True, 아니면 False를 반환합니다.
+        return result > 0 
     except Exception as e:
         print(f"delete_story_by_id 함수 에러: {e}")
         db_conn.rollback(); return False
