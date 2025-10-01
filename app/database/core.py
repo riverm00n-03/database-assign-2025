@@ -192,3 +192,37 @@ async def delete_story_by_id(db_conn, story_id: int):
     except Exception as e:
         print(f"delete_story_by_id 함수 에러: {e}")
         db_conn.rollback(); return False
+async def create_session(db_conn, user_id: int, story_id: int):
+    """새로운 채팅 세션을 sessions 테이블에 삽입하고, 생성된 ID를 반환함."""
+    sql = "INSERT INTO sessions (user_id, story_id) VALUES (%s, %s)"
+    try:
+        with db_conn.cursor() as cursor:
+            cursor.execute(sql, (user_id, story_id))
+            session_id = cursor.lastrowid
+        db_conn.commit()
+        return session_id
+    except Exception as e:
+        print(f"🚨 create_session 함수 에러: {e}")
+        db_conn.rollback()
+        return None
+
+async def add_message_to_history(db_conn, session_id: int, sender: str, message: str):
+    """채팅 메시지를 history 테이블에 삽입함."""
+    sql = "INSERT INTO history (session_id, sender, message) VALUES (%s, %s, %s)"
+    try:
+        with db_conn.cursor() as cursor:
+            cursor.execute(sql, (session_id, sender, message))
+        db_conn.commit()
+        return True
+    except Exception as e:
+        print(f"🚨 add_message_to_history 함수 에러: {e}")
+        db_conn.rollback()
+        return False
+
+async def get_history_by_session(db_conn, session_id: int):
+    """특정 세션의 모든 대화 기록을 시간순으로 가져옴."""
+    sql = "SELECT sender, message FROM history WHERE session_id = %s ORDER BY created_at ASC"
+    with db_conn.cursor() as cursor:
+        cursor.execute(sql, (session_id,))
+        history = cursor.fetchall()
+    return history
