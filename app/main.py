@@ -163,3 +163,5 @@ async def login_user(
 
     # 6. 로그인 성공 시, 메인 페이지로 리디렉션합니다.
     return RedirectResponse(url="/", status_code=303)
+
+
