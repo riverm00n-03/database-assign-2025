@@ -154,6 +154,7 @@ async def reset_tables():
         cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
     db_connection.commit()
 
+#챗봇 생성 관련 DB 함수
 async def create_story(db_conn, story_data: schemas.StoryCreate):
     """새로운 스토리를 stories 테이블에 삽입하고, 생성된 정보를 반환함."""
     sql = "INSERT INTO stories (creator_id, title, prompt, category) VALUES (%s, %s, %s, %s)"
