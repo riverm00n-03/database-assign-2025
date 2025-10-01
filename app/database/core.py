@@ -192,22 +192,40 @@ async def delete_story_by_id(db_conn, story_id: int):
     except Exception as e:
         print(f"delete_story_by_id 함수 에러: {e}")
         db_conn.rollback(); return False
+#채팅 관련 db 함수
 async def create_session(db_conn, user_id: int, story_id: int):
     """새로운 채팅 세션을 sessions 테이블에 삽입하고, 생성된 ID를 반환함."""
+    # SQL INSERT 문: sessions 테이블에 user_id와 story_id를 삽입합니다.
     sql = "INSERT INTO sessions (user_id, story_id) VALUES (%s, %s)"
     try:
+        # DB와 통신하기 위해 cursor 객체를 생성합니다.
         with db_conn.cursor() as cursor:
+            # SQL 쿼리를 실행합니다. %s와 튜플을 사용하여 SQL Injection을 방지합니다.
             cursor.execute(sql, (user_id, story_id))
+            # 방금 삽입된 행의 AUTO_INCREMENT ID 값을 가져옵니다. 이것이 새로운 session_id가 됩니다.
             session_id = cursor.lastrowid
+        # 모든 작업이 성공했으므로, 변경사항을 데이터베이스에 최종 반영합니다.
         db_conn.commit()
+        # 생성된 세션 ID를 반환합니다.
         return session_id
     except Exception as e:
-        print(f"🚨 create_session 함수 에러: {e}")
+        # DB 작업 중 어떤 에러라도 발생하면, 터미널에 에러를 출력합니다.
+        print(f"create_session 함수 에러: {e}")
+        # 데이터 일관성을 위해, 진행 중이던 모든 DB 작업을 취소하고 원상 복구합니다.
         db_conn.rollback()
+        # 실패했음을 알리기 위해 None을 반환합니다.
         return None
 
-async def add_message_to_history(db_conn, session_id: int, sender: str, message: str):
-    """채팅 메시지를 history 테이블에 삽입함."""
+
+async def add_message_to_history(db_conn: pymysql.connections.Connection, session_id: int, sender: str, message: str):
+    """
+    주고받은 채팅 메시지를 history 테이블에 한 줄씩 기록합니다.
+    - session_id: 이 메시지가 속한 채팅방의 ID입니다.
+    - sender: 메시지를 보낸 주체 ('user' 또는 'bot')입니다.
+    - message: 실제 메시지 내용입니다.
+    - 반환값: 성공 시 True, 실패 시 False입니다.
+    """
+    # SQL INSERT 문: history 테이블에 채팅방 ID, 발신자, 메시지 내용을 삽입합니다.
     sql = "INSERT INTO history (session_id, sender, message) VALUES (%s, %s, %s)"
     try:
         with db_conn.cursor() as cursor:
@@ -215,14 +233,23 @@ async def add_message_to_history(db_conn, session_id: int, sender: str, message:
         db_conn.commit()
         return True
     except Exception as e:
-        print(f"🚨 add_message_to_history 함수 에러: {e}")
+        print(f"add_message_to_history 함수 에러: {e}")
         db_conn.rollback()
         return False
 
-async def get_history_by_session(db_conn, session_id: int):
-    """특정 세션의 모든 대화 기록을 시간순으로 가져옴."""
+
+async def get_history_by_session(db_conn: pymysql.connections.Connection, session_id: int):
+    """
+    특정 채팅방의 모든 대화 기록을 시간순으로 조회합니다.
+    AI의 기억(context)을 구성하기 위한 가장 중요한 함수입니다.
+    - session_id: 조회할 채팅방의 ID입니다.
+    - 반환값: 성공 시 메시지 기록(dict 리스트), 실패 시 빈 리스트를 반환할 수 있습니다.
+    """
+    # SQL SELECT 문: history 테이블에서 특정 session_id에 해당하는 모든 기록을 조회합니다.
+    # ORDER BY created_at ASC: 메시지 생성 시간순(오름차순)으로 정렬하여 대화의 순서를 보장합니다.
     sql = "SELECT sender, message FROM history WHERE session_id = %s ORDER BY created_at ASC"
     with db_conn.cursor() as cursor:
         cursor.execute(sql, (session_id,))
+        # fetchall(): 조회된 모든 결과를 딕셔너리의 리스트 형태로 가져옵니다. (예: [{'sender': 'user', 'message': '안녕?'}])
         history = cursor.fetchall()
     return history
