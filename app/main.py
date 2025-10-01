@@ -8,7 +8,7 @@ from urllib.parse import parse_qs
 
 from . import config
 from .database import core as db_core
-from .routers import users, chat
+from .routers import users, chat, stories
 
 # 현재 파일(__file__)의 디렉토리 경로를 가져옵니다. (frontend 폴더 경로를 찾기 위함)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -162,3 +162,7 @@ async def login_user(
 
     # 6. 로그인 성공 시, 메인 페이지로 리디렉션합니다.
     return RedirectResponse(url="/", status_code=303)
+
+app.include_router(users.user_router)
+app.include_router(chat.chat_router)
+app.include_router(stories.story_router)
