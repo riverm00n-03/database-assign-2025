@@ -4,8 +4,8 @@
 # 이 딕셔너리를 app과 admin_cli에서 모두 import하여 사용합니다.
 DB_CONFIG = {
     'host': 'localhost',
-    'user': 'your_username',
-    'password': 'your_password',
+    'user': 'root',
+    'password': 'kangmoon03*',
     'database': 'wcheck'
 }
 
