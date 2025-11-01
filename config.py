@@ -5,7 +5,7 @@
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'kangmoon03*',
+    'password': 'password',
     'database': 'wcheck'
 }
 
