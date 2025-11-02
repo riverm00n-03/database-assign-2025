@@ -1,0 +1,27 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>로그인</h1>
+        <form action="/login" method="post">
+            <div class="form-group">
+                <label for="student_number">학번:</label>
+                <input type="text" id="student_number" name="student_number" required>
+            </div>
+            <button type="submit">로그인</button>
+        </form>
+    </div>
+    {% if error %}
+    <script>
+        alert("{{ error }}");
+    </script>
+    {% endif %}
+</body>
+</html>

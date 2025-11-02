@@ -1,6 +1,4 @@
--- 0. 데이터베이스 삭제
-DROP DATABASE IF EXISTS wcheck;
-
+-- 0. 이미 데이터베이스가 구축된 경우, 데이터베이스를 건드리지 않음.
 -- 1. 데이터베이스 생성 (이미 존재하지 않는 경우에만)
 CREATE DATABASE IF NOT EXISTS wcheck
     DEFAULT CHARACTER SET utf8mb4
@@ -10,7 +8,7 @@ CREATE DATABASE IF NOT EXISTS wcheck
 USE wcheck;
 
 -- 3. 학생 정보 테이블
-CREATE TABLE student (
+CREATE TABLE IF NOT EXISTS student (
     student_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL COMMENT '학생 이름',
     student_number VARCHAR(50) NOT NULL UNIQUE COMMENT '학번',
@@ -20,7 +18,7 @@ CREATE TABLE student (
 ) COMMENT '학생 정보';
 
 -- 4. 교수 정보 테이블 (신규 추가!)
-CREATE TABLE professor (
+CREATE TABLE IF NOT EXISTS professor (
     professor_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL COMMENT '교수 이름',
     major VARCHAR(100) COMMENT '전공 (ERD 참조)',
@@ -30,7 +28,7 @@ CREATE TABLE professor (
 ) COMMENT '교수 정보';
 
 -- 5. 과목 정보 테이블 (수정됨)
-CREATE TABLE subject (
+CREATE TABLE IF NOT EXISTS subject (
     subject_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     professor_id INT UNSIGNED DEFAULT NULL COMMENT '교수 외래키', -- 'professor_name' 대신 추가됨
     name VARCHAR(255) NOT NULL COMMENT '과목명',
@@ -46,7 +44,7 @@ CREATE TABLE subject (
 ) COMMENT '과목 정보';
 
 -- 6. 과목 시간표 테이블 (수업 규칙)
-CREATE TABLE subject_schedule (
+CREATE TABLE IF NOT EXISTS subject_schedule (
     schedule_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     subject_id INT UNSIGNED NOT NULL COMMENT '과목 외래키',
     day_of_week ENUM('MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN') NOT NULL COMMENT '수업 요일',
@@ -60,7 +58,7 @@ CREATE TABLE subject_schedule (
 ) COMMENT '과목별 시간표 (수업 규칙 템플릿)';
 
 -- 7. 학생-과목 수강 매핑 테이블 (ERD의 'enrollment')
-CREATE TABLE student_subject (
+CREATE TABLE IF NOT EXISTS student_subject (
     student_id INT UNSIGNED NOT NULL COMMENT '학생 외래키',
     subject_id INT UNSIGNED NOT NULL COMMENT '과목 외래키',
     registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '수강 신청일',
@@ -74,7 +72,7 @@ CREATE TABLE student_subject (
 ) COMMENT '학생-과목 수강 매핑 (M:N 관계)';
 
 -- 8. 개별 수업일 테이블 (신규 추가! ERD의 'class_session')
-CREATE TABLE class_session (
+CREATE TABLE IF NOT EXISTS class_session (
     session_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     schedule_id INT UNSIGNED NOT NULL COMMENT '시간표 외래키',
     class_date DATE NOT NULL COMMENT '실제 수업 날짜',
@@ -89,7 +87,7 @@ CREATE TABLE class_session (
 ) COMMENT '개별 실제 수업일 (출석 대상)';
 
 -- 9. 출석 기록 테이블 (수정됨)
-CREATE TABLE checkin (
+CREATE TABLE IF NOT EXISTS checkin (
     checkin_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     session_id INT UNSIGNED NOT NULL COMMENT '개별 수업 외래키', -- 'subject_id' 대신 추가됨
     student_id INT UNSIGNED NOT NULL COMMENT '학생 외래키',

@@ -1,0 +1,49 @@
+version: '3.8' 
+services:
+  # 데이터베이스 서비스 정의
+  db:
+    image: mysql:8.0
+    # 컨테이너 시작 시 환경 변수를 설정합니다.
+    # .env 파일에서 값을 가져옵니다.
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD} # .env 파일의 DB_PASSWORD 사용
+      MYSQL_DATABASE: ${DB_NAME}         # .env 파일의 DB_NAME 사용
+    # 호스트와 컨테이너 간의 포트 매핑 (호스트:컨테이너)
+    ports:
+      - "3307:3306"
+    # 데이터 지속성을 위한 볼륨 설정
+    volumes:
+      - db_data:/var/lib/mysql # 데이터베이스 데이터 저장
+      - ./db/create.sql:/docker-entrypoint-initdb.d/create.sql # 초기 스키마 및 데이터 로드
+    # 컨테이너가 비정상적으로 종료될 경우 항상 다시 시작합니다.
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 웹 애플리케이션 서비스 정의
+  web:
+    # 현재 디렉토리의 Dockerfile을 사용하여 이미지를 빌드합니다.
+    build: .
+    # 호스트와 컨테이너 간의 포트 매핑 (호스트:컨테이너)
+    ports:
+      - "5000:5000"
+    # web 서비스가 db 서비스에 의존함을 명시합니다.
+    # db 서비스가 시작된 후에 web 서비스가 시작됩니다.
+    depends_on:
+      db:
+        condition: service_healthy
+    # .env 파일에서 환경 변수를 로드합니다.
+    env_file:
+      - ./.env
+    # 코드 변경 사항을 즉시 반영하기 위해 로컬 디렉토리를 컨테이너에 마운트합니다.
+    volumes:
+      - ./app:/app
+    # 컨테이너가 비정상적으로 종료될 경우 항상 다시 시작합니다.
+    restart: always
+
+# Docker 볼륨 정의
+volumes:
+  db_data: # 데이터베이스 데이터를 저장할 명명된 볼륨

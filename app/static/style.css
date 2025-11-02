@@ -1,0 +1,116 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+
+:root {
+    --primary-color: #000080; /* Navy accent color */
+    --primary-dark-color: #000066;
+    --background-color: #f0f2f5; /* Light gray background */
+    --surface-color: #ffffff; /* White surface for cards/containers */
+    --text-color: #333333;
+    --border-color: #e0e0e0;
+    --shadow-light: rgba(0, 0, 0, 0.05);
+    --shadow-medium: rgba(0, 0, 0, 0.1);
+}
+
+body {
+    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans KR", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.container {
+    background-color: var(--surface-color);
+    padding: 30px;
+    border-radius: 15px; /* Softer corners */
+    box-shadow: 0 10px 30px var(--shadow-light), 0 3px 10px var(--shadow-medium); /* iOS-like shadow */
+    width: 100%;
+    max-width: 380px; /* Slightly adjusted for app-like feel */
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+}
+
+h1 {
+    color: var(--primary-color);
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+p {
+    font-size: 16px;
+    color: #555;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+}
+
+label {
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-color);
+    font-size: 15px;
+}
+
+input[type="text"],
+input[type="password"] {
+    width: calc(100% - 24px); /* Adjust for padding */
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px; /* Softer input fields */
+    font-size: 16px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    -webkit-appearance: none; /* Remove default styles for iOS */
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 0, 128, 0.2); /* Focus ring with primary color */
+    outline: none;
+}
+
+button {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 10px; /* Softer button corners */
+    cursor: pointer;
+    font-size: 17px;
+    font-weight: 600;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    width: 100%;
+    -webkit-appearance: none; /* Remove default styles for iOS */
+}
+
+button:hover {
+    background-color: var(--primary-dark-color);
+    transform: translateY(-1px); /* Subtle lift effect */
+}
+
+button:active {
+    transform: translateY(0); /* Press effect */
+}
+
+a {
+    text-decoration: none;
+    color: var(--primary-color);
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: var(--primary-dark-color);
+}
