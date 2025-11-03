@@ -1,0 +1,129 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+
+:root {
+    --primary-color: #4360ff;
+    --primary-dark-color: #3147d8;
+    --background-color: #eef1f6;
+    --card-color: #ffffff;
+    --text-color: #1f2740;
+    --text-muted: #6c7a9c;
+    --border-color: #dce1ec;
+    --input-background: #f7f8fc;
+    --focus-ring: rgba(67, 96, 255, 0.18);
+    --shadow-color: rgba(24, 33, 56, 0.14);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui;
+    margin: 0;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    min-height: 100vh;
+    display: flex;
+}
+
+/* 왼쪽 사이드바 */
+.sidebar {
+    width: 220px;
+    background-color: var(--card-color);
+    border-right: 1px solid var(--border-color);
+    padding: 40px 28px;
+    box-shadow: 6px 0 16px rgba(0,0,0,0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.sidebar h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-color);
+    margin: 0;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sidebar ul li a {
+    text-decoration: none;
+    color: var(--primary-color);
+    font-weight: 500;
+    font-size: 15px;
+    transition: color 0.15s ease;
+}
+
+.sidebar ul li a:hover {
+    color: var(--primary-dark-color);
+}
+
+/* 오른쪽 본문 */
+.main-content {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px;
+}
+
+.container {
+    background-color: var(--card-color);
+    border-radius: 32px;
+    box-shadow: 0 8px 28px rgba(24,33,56,0.08);
+    padding: 60px 80px;
+    text-align: center;
+    max-width: 520px;
+    width: 100%;
+}
+
+.container h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 12px;
+}
+
+.container p {
+    font-size: 16px;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .sidebar {
+        width: 100%;
+        flex-direction: row;
+        justify-content: center;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        box-shadow: none;
+        gap: 16px;
+        padding: 16px;
+    }
+
+    .main-content {
+        padding: 32px 20px;
+    }
+
+    .container {
+        padding: 40px 28px;
+        border-radius: 20px;
+    }
+}

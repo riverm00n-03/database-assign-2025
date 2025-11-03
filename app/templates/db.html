@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>데이터베이스 조회</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='db.css') }}">
+</head>
+<body class="db-page">
+    <div class="admin-container">
+        <nav class="navbar">
+            {% for table_name in tables %}
+            <a href="#{{ table_name }}" class="nav-link {% if loop.first %}active{% endif %}" onclick="showTable('{{ table_name }}'); return false;">
+                {{ table_name.replace('_', ' ').title() }}
+            </a>
+            {% endfor %}
+        </nav>
+
+        {% if error %}
+        <div class="error-message">오류: {{ error }}</div>
+        {% endif %}
+
+        {% for table_name, rows in db_data.items() %}
+        <div id="{{ table_name }}" class="table-section {% if loop.first %}active{% endif %}">
+            <table>
+                <thead>
+                    <tr>
+                        {% if rows %}
+                            {% for key in rows[0].keys() %}
+                            <th>{{ key }}</th>
+                            {% endfor %}
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if rows %}
+                        {% for row in rows %}
+                        <tr>
+                            {% for key, value in row.items() %}
+                            <td>{{ value if value is not none else '' }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr><td colspan="100%">데이터가 없습니다.</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        function showTable(name) {
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            document.querySelectorAll('.table-section').forEach(section => section.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(name).classList.add('active');
+        }
+    </script>
+</body>
+</html>
+

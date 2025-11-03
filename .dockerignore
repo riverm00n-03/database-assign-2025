@@ -1,0 +1,18 @@
+# Git
+.git/
+.gitignore
+
+# Python virtual environment
+venv/
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Environment variables
+
+# IDE and OS files
+.vscode/
+.idea/
+README.md
