@@ -1,0 +1,141 @@
+/* 관리자 패널 스타일 */
+
+.db-page {
+    align-items: flex-start;
+    padding: 0;
+    background-color: var(--background-color);
+}
+
+.admin-container {
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+    background-color: var(--card-color);
+    min-height: 100vh;
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    gap: 0;
+    background-color: #2c3e50;
+    border-bottom: 2px solid #34495e;
+    padding: 0;
+    overflow-x: auto;
+}
+
+.nav-link {
+    padding: 14px 20px;
+    color: #bdc3c7;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+.nav-link:hover {
+    color: #ffffff;
+    background-color: #34495e;
+}
+
+.nav-link.active {
+    color: #ffffff;
+    background-color: #34495e;
+    border-bottom-color: var(--primary-color);
+}
+
+/* 에러 메시지 */
+.error-message {
+    padding: 12px 20px;
+    background-color: #fee;
+    color: #c33;
+    font-size: 14px;
+    border-bottom: 1px solid #fcc;
+}
+
+/* 테이블 섹션 */
+.table-section {
+    display: none;
+    padding: 16px;
+}
+
+.table-section.active {
+    display: block;
+}
+
+/* 테이블 */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background-color: var(--card-color);
+}
+
+thead {
+    background-color: #f8f9fa;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+th {
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-color);
+    font-size: 12px;
+    border-bottom: 2px solid #dee2e6;
+    border-right: 1px solid #dee2e6;
+    white-space: nowrap;
+    background-color: #f8f9fa;
+}
+
+th:last-child {
+    border-right: none;
+}
+
+td {
+    padding: 8px 12px;
+    color: var(--text-color);
+    border-bottom: 1px solid #e9ecef;
+    border-right: 1px solid #e9ecef;
+    word-break: break-word;
+}
+
+td:last-child {
+    border-right: none;
+}
+
+tbody tr {
+    transition: background-color 0.1s;
+}
+
+tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #fdfdfd;
+}
+
+tbody tr:nth-child(even):hover {
+    background-color: #f8f9fa;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .table-section {
+        padding: 12px;
+    }
+
+    table {
+        font-size: 12px;
+    }
+
+    th, td {
+        padding: 8px 10px;
+    }
+}

@@ -6,7 +6,6 @@ CREATE DATABASE IF NOT EXISTS wcheck
 
 -- 2. 생성한 데이터베이스 사용
 USE wcheck;
-
 -- 3. 학생 정보 테이블
 CREATE TABLE IF NOT EXISTS student (
     student_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -58,7 +57,7 @@ CREATE TABLE IF NOT EXISTS subject_schedule (
 ) COMMENT '과목별 시간표 (수업 규칙 템플릿)';
 
 -- 7. 학생-과목 수강 매핑 테이블 (ERD의 'enrollment')
-CREATE TABLE IF NOT EXISTS student_subject (
+CREATE TABLE IF NOT EXISTS enrollment (
     student_id INT UNSIGNED NOT NULL COMMENT '학생 외래키',
     subject_id INT UNSIGNED NOT NULL COMMENT '과목 외래키',
     registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '수강 신청일',
