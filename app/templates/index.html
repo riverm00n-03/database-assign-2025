@@ -11,7 +11,7 @@
     <div class="container">
         <h1>환영합니다, {{ username }}님!</h1>
         <p>성공적으로 로그인되었습니다.</p>
-        <a href="/logout"><button>로그아웃</button></a>
+        <a href="{{ url_for('auth.logout') }}"><button>로그아웃</button></a>
     </div>
 </body>
 </html>

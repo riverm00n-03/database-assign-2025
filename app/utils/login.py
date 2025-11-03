@@ -12,7 +12,7 @@ def login_user(student_number): # 로그인 함수
                 result = cursor.fetchone() # 결과 반환
                 if result:
                     db_student_number = result['student_number']
-                    print(f"로그인 성공 (DB 학번 repr): {repr(db_student_number)}")
+                    print(f"로그인 성공 (DB 학번 repr): {repr(db_student_number)}") 
                 else:
                     print(f"로그인 실패")
                 return result is not None  # 결과가 있으면 True, 없으면 False 반환

@@ -1,14 +1,22 @@
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
 
 :root {
-    --primary-color: #000080; /* Navy accent color */
-    --primary-dark-color: #000066;
-    --background-color: #f0f2f5; /* Light gray background */
-    --surface-color: #ffffff; /* White surface for cards/containers */
-    --text-color: #333333;
-    --border-color: #e0e0e0;
-    --shadow-light: rgba(0, 0, 0, 0.05);
-    --shadow-medium: rgba(0, 0, 0, 0.1);
+    --primary-color: #4360ff;
+    --primary-dark-color: #3147d8;
+    --background-color: #eef1f6;
+    --card-color: #ffffff;
+    --text-color: #1f2740;
+    --text-muted: #6c7a9c;
+    --border-color: #dce1ec;
+    --input-background: #f7f8fc;
+    --focus-ring: rgba(67, 96, 255, 0.18);
+    --shadow-color: rgba(24, 33, 56, 0.14);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
 }
 
 body {
@@ -16,101 +24,151 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(24px, 6vh, 64px) 16px;
     background-color: var(--background-color);
     color: var(--text-color);
     line-height: 1.6;
 }
 
 .container {
-    background-color: var(--surface-color);
-    padding: 30px;
-    border-radius: 15px; /* Softer corners */
-    box-shadow: 0 10px 30px var(--shadow-light), 0 3px 10px var(--shadow-medium); /* iOS-like shadow */
-    width: 100%;
-    max-width: 380px; /* Slightly adjusted for app-like feel */
+    width: min(100%, 320px);
+    padding: clamp(22px, 5vw, 32px) clamp(20px, 6vw, 28px);
+    border-radius: 24px;
+    background-color: var(--card-color);
+    box-shadow: 0 12px 28px var(--shadow-color);
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 24px;
     text-align: center;
 }
 
 h1 {
-    color: var(--primary-color);
-    font-size: 28px;
-    margin-bottom: 10px;
+    color: var(--text-color);
+    font-size: clamp(24px, 4.5vw, 28px);
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.01em;
 }
 
 p {
-    font-size: 16px;
-    color: #555;
+    margin: 0;
+    font-size: clamp(15px, 3.6vw, 17px);
+    color: var(--text-muted);
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    text-align: left;
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
+    gap: 8px;
+    text-align: left;
 }
 
 label {
-    margin-bottom: 8px;
     font-weight: 600;
     color: var(--text-color);
-    font-size: 15px;
+    font-size: 14px;
+    line-height: 1.4;
 }
 
 input[type="text"],
 input[type="password"] {
-    width: calc(100% - 24px); /* Adjust for padding */
-    padding: 12px;
+    width: 100%;
+    padding: 13px 16px;
+    border-radius: 16px;
     border: 1px solid var(--border-color);
-    border-radius: 10px; /* Softer input fields */
-    font-size: 16px;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    -webkit-appearance: none; /* Remove default styles for iOS */
+    background-color: var(--input-background);
+    font-size: 15px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    -webkit-appearance: none;
+}
+
+input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.65;
 }
 
 input[type="text"]:focus,
 input[type="password"]:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(0, 0, 128, 0.2); /* Focus ring with primary color */
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px var(--focus-ring);
     outline: none;
 }
 
 button {
-    background-color: var(--primary-color);
-    color: white;
-    padding: 14px 20px;
-    border: none;
-    border-radius: 10px; /* Softer button corners */
-    cursor: pointer;
-    font-size: 17px;
-    font-weight: 600;
-    transition: background-color 0.2s ease, transform 0.1s ease;
     width: 100%;
-    -webkit-appearance: none; /* Remove default styles for iOS */
+    padding: 14px 18px;
+    border-radius: 18px;
+    border: none;
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    background-color: var(--primary-color);
+    box-shadow: 0 8px 18px rgba(67, 96, 255, 0.18);
+    cursor: pointer;
+    transition: background-color 0.18s ease, transform 0.1s ease, box-shadow 0.18s ease;
+    -webkit-appearance: none;
 }
 
 button:hover {
     background-color: var(--primary-dark-color);
-    transform: translateY(-1px); /* Subtle lift effect */
+    box-shadow: 0 8px 18px rgba(49, 71, 216, 0.2);
 }
 
 button:active {
-    transform: translateY(0); /* Press effect */
+    transform: translateY(1px);
+    box-shadow: 0 4px 10px rgba(49, 71, 216, 0.22);
+}
+
+button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px var(--focus-ring);
 }
 
 a {
-    text-decoration: none;
     color: var(--primary-color);
     font-weight: 600;
+    text-decoration: none;
     transition: color 0.2s ease;
 }
 
 a:hover {
     color: var(--primary-dark-color);
+}
+
+.support-text {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 24px 12px;
+    }
+
+    .container {
+        width: 100%;
+        padding: 24px 20px;
+        border-radius: 20px;
+        box-shadow: 0 14px 32px var(--shadow-color);
+    }
+
+    form {
+        gap: 18px;
+    }
+
+    button {
+        padding: 14px 16px;
+    }
 }

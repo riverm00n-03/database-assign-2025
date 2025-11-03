@@ -17,7 +17,7 @@ DB_CONFIG = {
     'host': get_env_variable('DB_HOST'),
     'user': get_env_variable('DB_USER'),
     'password': get_env_variable('DB_PASSWORD'),
-    'database': get_env_variable('DB_DATABASE')
+    'database': get_env_variable('DB_NAME')
 }
 
 # 여기에 Flask 시크릿 키 등 다른 프로젝트 설정도 추가할 수 있습니다.
