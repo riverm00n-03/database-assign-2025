@@ -1,5 +1,5 @@
 from mysql.connector import connect
-from ..config import DB_CONFIG
+from config import DB_CONFIG
 
 def login_user(student_number): # 로그인 함수
     try: 
