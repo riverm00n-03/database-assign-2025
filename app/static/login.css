@@ -1,0 +1,144 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+
+:root {
+    --primary-color: #4360ff;
+    --primary-dark-color: #3147d8;
+    --background-color: #eef1f6;
+    --card-color: #ffffff;
+    --text-color: #1f2740;
+    --text-muted: #6c7a9c;
+    --border-color: #dce1ec;
+    --input-background: #f7f8fc;
+    --focus-ring: rgba(67, 96, 255, 0.18);
+    --shadow-color: rgba(24, 33, 56, 0.14);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans KR", Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    min-height: 100vh;
+    padding: clamp(24px, 6vh, 64px) 16px;
+}
+
+.container {
+    width: min(100%, 340px);
+    background-color: var(--card-color);
+    border-radius: 24px;
+    box-shadow: 0 12px 28px var(--shadow-color);
+    padding: clamp(24px, 5vw, 32px);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+}
+
+h1 {
+    font-size: clamp(24px, 4.5vw, 28px);
+    margin: 0;
+    color: var(--text-color);
+}
+
+p {
+    color: var(--text-muted);
+    font-size: clamp(15px, 3.6vw, 17px);
+    margin: 0;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    text-align: left;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+label {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-color);
+}
+
+.role-select {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 8px;
+}
+
+.role-select label {
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.role-select input[type="radio"] {
+    accent-color: var(--primary-color);
+    transform: scale(1.1);
+    margin-right: 4px;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 13px 16px;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    background-color: var(--input-background);
+    font-size: 15px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input[type="text"]:focus {
+    border-color: var(--primary-color);
+    background-color: #fff;
+    box-shadow: 0 0 0 4px var(--focus-ring);
+    outline: none;
+}
+
+input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.65;
+}
+
+button {
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: 18px;
+    border: none;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    background-color: var(--primary-color);
+    box-shadow: 0 8px 18px rgba(67, 96, 255, 0.18);
+    cursor: pointer;
+    transition: background-color 0.18s ease, transform 0.1s ease;
+}
+
+button:hover {
+    background-color: var(--primary-dark-color);
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+.error {
+    text-align: center;
+    color: #e74c3c;
+    font-size: 14px;
+    margin-top: 4px;
+}

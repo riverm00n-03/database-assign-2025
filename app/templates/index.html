@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -8,10 +7,51 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+<div class="sidebar">
+    <h2>메뉴</h2>
+    <ul id="menuList"></ul>
+</div>
+
+<div class="main-content">
     <div class="container">
-        <h1>환영합니다, {{ username }}님!</h1> <!-- username 변수는 main_routes.py에서 선언된 변수-->
+        <h1>환영합니다, {{ username }}님!</h1>
         <p>성공적으로 로그인되었습니다.</p>
-        <a href="{{ url_for('auth.logout') }}"><button>로그아웃</button></a>
     </div>
+</div>
+
+<script>
+    const userRole = "{{ role }}";
+    const menuList = document.getElementById("menuList");
+    let menuItems = [];
+
+    // 역할별 메뉴 (이동 기능 없이 표시용)
+    if (userRole === "student") {
+        menuItems = [
+            { name: "시간표", url: "#" },
+            { name: "출석체크", url: "#" },
+            { name: "출석관리", url: "#" },
+            { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
+        ];
+    } else if (userRole === "professor") {
+        menuItems = [
+            { name: "강의 관리", url: "#" },
+            { name: "출석현황", url: "#" },
+            { name: "학생 목록", url: "#" },
+            { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
+        ];
+    } else {
+        menuItems = [
+            { name: "홈", url: "#" },
+            { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
+        ];
+    }
+
+    // 메뉴 렌더링
+    menuItems.forEach(item => {
+        const li = document.createElement("li");
+        li.innerHTML = `<a href="${item.url}">${item.name}</a>`;
+        menuList.appendChild(li);
+    });
+</script>
 </body>
 </html>

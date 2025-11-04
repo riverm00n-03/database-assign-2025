@@ -1,27 +1,46 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>로그인</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}" />
 </head>
 <body>
-    <div class="container">
-        <h1>로그인</h1>
-        <form action="/auth/login" method="post">
-            <div class="form-group">
-                <label for="student_number">학번:</label>
-                <input type="text" id="student_number" name="student_number" required>
-            </div>
-            <button type="submit">로그인</button>
-        </form>
-    </div>
-    {% if error %}
-    <script>
-        alert("{{ error }}");
-    </script>
-    {% endif %}
+<div class="container">
+    <h1>로그인</h1>
+    <p>역할을 선택하고 학번 또는 이메일을 입력하세요.</p>
+
+    <form action="{{ url_for('auth.login') }}" method="POST" id="loginForm">
+        <div class="form-group role-select">
+            <label><input type="radio" name="role" value="student" checked /> 학생</label>
+            <label><input type="radio" name="role" value="professor" /> 교직원 </label>
+        </div>
+
+        <div class="form-group">
+            <label for="user_id">ID</label>
+            <input type="text" id="user_id" name="user_id" placeholder="학번을 입력하세요" required />
+        </div>
+
+        <button type="submit">로그인</button>
+
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+    </form>
+</div>
+
+<script>
+    const radios = document.querySelectorAll('input[name="role"]');
+    const userId = document.getElementById('user_id');
+
+    radios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            userId.placeholder = radio.value === 'student'
+                ? '학번을 입력하세요'
+                : '이메일을 입력하세요';
+        });
+    });
+</script>
 </body>
 </html>

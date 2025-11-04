@@ -20,155 +20,110 @@
 }
 
 body {
-    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans KR", Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui;
     margin: 0;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: clamp(24px, 6vh, 64px) 16px;
     background-color: var(--background-color);
     color: var(--text-color);
-    line-height: 1.6;
-}
-
-.container {
-    width: min(100%, 320px);
-    padding: clamp(22px, 5vw, 32px) clamp(20px, 6vw, 28px);
-    border-radius: 24px;
-    background-color: var(--card-color);
-    box-shadow: 0 12px 28px var(--shadow-color);
+    min-height: 100vh;
     display: flex;
-    flex-direction: column;
-    gap: 24px;
-    text-align: center;
 }
 
-h1 {
-    color: var(--text-color);
-    font-size: clamp(24px, 4.5vw, 28px);
-    font-weight: 700;
-    margin: 0;
-    letter-spacing: -0.01em;
-}
-
-p {
-    margin: 0;
-    font-size: clamp(15px, 3.6vw, 17px);
-    color: var(--text-muted);
-}
-
-form {
+/* 왼쪽 사이드바 */
+.sidebar {
+    width: 220px;
+    background-color: var(--card-color);
+    border-right: 1px solid var(--border-color);
+    padding: 40px 28px;
+    box-shadow: 6px 0 16px rgba(0,0,0,0.04);
     display: flex;
     flex-direction: column;
     gap: 20px;
-    text-align: left;
 }
 
-.form-group {
+.sidebar h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-color);
+    margin: 0;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    text-align: left;
+    gap: 12px;
 }
 
-label {
-    font-weight: 600;
-    color: var(--text-color);
-    font-size: 14px;
-    line-height: 1.4;
-}
-
-input[type="text"],
-input[type="password"] {
-    width: 100%;
-    padding: 13px 16px;
-    border-radius: 16px;
-    border: 1px solid var(--border-color);
-    background-color: var(--input-background);
-    font-size: 15px;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-    -webkit-appearance: none;
-}
-
-input::placeholder {
-    color: var(--text-muted);
-    opacity: 0.65;
-}
-
-input[type="text"]:focus,
-input[type="password"]:focus {
-    border-color: var(--primary-color);
-    background-color: #ffffff;
-    box-shadow: 0 0 0 4px var(--focus-ring);
-    outline: none;
-}
-
-button {
-    width: 100%;
-    padding: 14px 18px;
-    border-radius: 18px;
-    border: none;
-    font-size: 16px;
-    font-weight: 600;
-    color: #ffffff;
-    background-color: var(--primary-color);
-    box-shadow: 0 8px 18px rgba(67, 96, 255, 0.18);
-    cursor: pointer;
-    transition: background-color 0.18s ease, transform 0.1s ease, box-shadow 0.18s ease;
-    -webkit-appearance: none;
-}
-
-button:hover {
-    background-color: var(--primary-dark-color);
-    box-shadow: 0 8px 18px rgba(49, 71, 216, 0.2);
-}
-
-button:active {
-    transform: translateY(1px);
-    box-shadow: 0 4px 10px rgba(49, 71, 216, 0.22);
-}
-
-button:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 4px var(--focus-ring);
-}
-
-a {
-    color: var(--primary-color);
-    font-weight: 600;
+.sidebar ul li a {
     text-decoration: none;
-    transition: color 0.2s ease;
+    color: var(--primary-color);
+    font-weight: 500;
+    font-size: 15px;
+    transition: color 0.15s ease;
 }
 
-a:hover {
+.sidebar ul li a:hover {
     color: var(--primary-dark-color);
 }
 
-.support-text {
-    font-size: 14px;
-    color: var(--text-muted);
+/* 오른쪽 본문 */
+.main-content {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px;
 }
 
-@media (max-width: 480px) {
+.container {
+    background-color: var(--card-color);
+    border-radius: 32px;
+    box-shadow: 0 8px 28px rgba(24,33,56,0.08);
+    padding: 60px 80px;
+    text-align: center;
+    max-width: 520px;
+    width: 100%;
+}
+
+.container h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 12px;
+}
+
+.container p {
+    font-size: 16px;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
     body {
-        padding: 24px 12px;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .sidebar {
+        width: 100%;
+        flex-direction: row;
+        justify-content: center;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        box-shadow: none;
+        gap: 16px;
+        padding: 16px;
+    }
+
+    .main-content {
+        padding: 32px 20px;
     }
 
     .container {
-        width: 100%;
-        padding: 24px 20px;
+        padding: 40px 28px;
         border-radius: 20px;
-        box-shadow: 0 14px 32px var(--shadow-color);
-    }
-
-    form {
-        gap: 18px;
-    }
-
-    button {
-        padding: 14px 16px;
     }
 }

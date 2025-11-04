@@ -1,23 +1,57 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session
-from app.utils.login import login_user
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from mysql.connector import connect, Error
+from config import DB_CONFIG
 
 auth_bp = Blueprint('auth', __name__)
 
-@auth_bp.route('/login', methods=['GET', 'POST']) # /auth/login 라우터
+@auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST': # POST 요청 시
-        student_number = request.form['student_number']
-        print(f"Received form data: {request.form}") # 디버깅을 위한 출력
-        if login_user(student_number): # login_user 함수 호출
-            session['logged_in'] = True
-            session['username'] = student_number # 사용자 이름 설정
-            return redirect(url_for('main.root')) # 메인 앱의 index(혹은 루트)로 리다이렉트
-        else:
-            return render_template('login.html', error='존재하지 않는 학번입니다.') # login.html 템플릿 렌더링
-    return render_template('login.html') # login.html 템플릿 렌더링
+    if request.method == 'POST':
+        role = request.form.get('role')  # 'student' or 'professor'
+        user_id = request.form.get('user_id')
 
-@auth_bp.route('/logout') # /auth/logout 라우터
+        try:
+            with connect(**DB_CONFIG) as connection:
+                with connection.cursor(dictionary=True) as cursor:
+                    # 학생 로그인
+                    if role == 'student':
+                        cursor.execute("""
+                            SELECT student_id AS id, name, 'student' AS role
+                            FROM student
+                            WHERE student_number = %s
+                        """, (user_id,))
+                    # 교수 로그인
+                    elif role == 'professor':
+                        cursor.execute("""
+                            SELECT professor_id AS id, name, 'professor' AS role
+                            FROM professor
+                            WHERE email = %s
+                        """, (user_id,))
+                    else:
+                        return render_template('login.html', error="잘못된 접근입니다.")
+
+                    user = cursor.fetchone()
+
+                    if user:
+                        # 로그인 성공
+                        session['logged_in'] = True
+                        session['username'] = user['name']
+                        session['user_id'] = user['id']
+                        session['role'] = user['role']
+                        return redirect(url_for('main.root'))
+                    else:
+                        # DB에 없음
+                        return render_template('login.html', error="등록되지 않은 사용자입니다.")
+
+        except Error as e:
+            print("DB 연결 오류:", e)
+            return render_template('login.html', error="데이터베이스 연결 오류 발생")
+
+    # GET 요청 시
+    return render_template('login.html')
+
+
+@auth_bp.route('/logout')
 def logout():
-    session.pop('logged_in', None) # 로그인 상태 제거   
-    session.pop('username', None) # 사용자 이름 제거
-    return redirect(url_for('auth.login')) # 로그인 페이지로 리다이렉트
+    session.clear()
+    return redirect(url_for('auth.login'))
