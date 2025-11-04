@@ -30,7 +30,7 @@ def reset_database():
                 cursor.execute("CREATE TABLE checkin (checkin_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, session_id INT UNSIGNED NOT NULL, student_id INT UNSIGNED NOT NULL, check_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP, status ENUM('PRESENT', 'LATE', 'ABSENT') DEFAULT 'PRESENT', UNIQUE KEY (session_id, student_id), FOREIGN KEY (session_id) REFERENCES class_session(session_id) ON DELETE CASCADE, FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE)")
                 # commit
                 print("DB 리셋 완료")
-                print("김강문 최강")
+                print("김강문1234124123")
                 return 0;
     except Exception as e:
         print("DB 리셋 과정 중 오류 발생 : ", e)
