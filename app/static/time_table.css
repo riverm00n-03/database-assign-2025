@@ -1,50 +1,208 @@
-/* 시간표 가독성 향상을 위한 스타일 */
-.timetable {
-    border-collapse: collapse; /* 셀 사이의 간격을 없애고 테두리를 합칩니다. */
+/* ============================
+   Pretendard + 전체 레이아웃
+============================ */
+body {
+    margin: 0;
+    font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+    background-color: #f3f6fa;
+    color: #1e293b;
+    display: flex;
+    flex-direction: row; /* ✅ 가로 정렬 강제 */
+    height: 100vh;
     width: 100%;
-    table-layout: fixed; /* 테이블 레이아웃을 고정하여 열 너비를 일정하게 유지합니다. */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-.timetable th, .timetable td {
-    border: 1px solid #ddd; /* 모든 셀에 옅은 회색 테두리를 추가합니다. */
-    padding: 8px;
-    height: 35px; /* 30분 슬롯의 높이를 조절합니다. */
-    word-break: break-word; /* 내용이 길어지면 단어 단위로 줄바꿈하여 셀 크기를 유지합니다. */
-    vertical-align: middle; /* 기본 수직 정렬을 가운데로 설정 */
-    text-align: center; /* 기본 수평 정렬을 가운데로 설정 */
+    overflow: hidden; /* ✅ 스크롤바가 생기며 밀리는 현상 방지 */
 }
 
-/* 시간 열 (첫 번째 th와 td) 스타일 */
-.timetable th:first-child, .timetable td:first-child {
-    width: 12%; /* '시간' 열의 너비를 12%로 지정합니다. */
+/* ============================
+   왼쪽 사이드바
+============================ */
+.sidebar {
+    width: 220px;
+    background-color: #ffffff;
+    border-right: 1px solid #e2e8f0;
+    padding: 30px 20px;
+    box-sizing: border-box;
+    flex-shrink: 0; /* ✅ 사이드바 크기 줄어들지 않게 */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    height: 100vh; /* ✅ 세로 전체 고정 */
+}
+
+.sidebar-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin-bottom: 25px;
+}
+
+.menu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu-list li {
+    margin: 12px 0;
+}
+
+.menu-list a {
+    text-decoration: none;
+    color: #334155;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.menu-list a:hover {
+    color: #2563eb;
+}
+
+/* ============================
+   오른쪽 메인 영역
+============================ */
+.content-area {
+    flex: 1; /* ✅ 남은 공간 전부 차지 */
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    background-color: #f3f6fa;
+    min-width: 0; /* ✅ flexbox 축소 시 overflow 방지 */
+}
+
+/* ============================
+   상단 타이틀 (Sticky Header)
+============================ */
+.full-title-header {
+    position: sticky;
+    top: 0;
+    background: linear-gradient(180deg, #f4f7fb 0%, #eef3f9 100%);
+    text-align: center;
+    padding: 18px 0 6px; /* 🔹 여백 수정: 글자 위로 올림 */
+    border-bottom: 1px solid #e2e8f0;
+    z-index: 10;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.page-title {
+    color: #1e3a8a;
+    font-size: 26px;
+    font-weight: 800;
+    position: relative;
+    display: inline-block;
+    margin: 0;
+    transform: translateY(-2px);
+}
+
+.page-title::after {
+    content: "";
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 3px;
+    background-color: #2563eb;
+    border-radius: 2px;
+}
+
+/* ============================
+   메인 콘텐츠 (시간표)
+============================ */
+.main-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+/* ============================
+   시간표 컨테이너
+============================ */
+.timetable-container {
+    width: 100%;
+    max-width: 1200px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    padding: 0 20px 20px;
+    box-sizing: border-box;
+    margin: 0 auto;
+    border-top: 1px solid #e2e8f0;
+    transform: translateY(-1px);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+/* ============================
+   시간표 테이블
+============================ */
+.timetable {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.timetable th,
+.timetable td {
+    border: 1px solid #e2e8f0;
+    padding: 8px;
+    height: 35px;
+    text-align: center;
+    vertical-align: middle;
+    word-break: break-word;
+    font-size: 13.5px;
+}
+
+/* 요일 헤더 */
+.timetable th {
+    background-color: #f8fafc;
+    font-weight: 700;
+    font-size: 14px;
+    color: #1e293b;
+}
+
+/* 시간 열 */
+.time-cell {
+    width: 90px;
+    background-color: #f1f5f9;
+    font-weight: 600;
+    color: #334155;
+}
+
+/* 수업 셀 */
+.class-cell {
+    background-color: #e9f5ff;
+    text-align: left;
+    vertical-align: top;
+    padding: 0;
+}
+
+.class-content {
+    padding: 10px;
+    line-height: 1.4;
+}
+
+.subject-name {
     font-weight: 600;
     font-size: 14px;
-}
-.timetable th {
-    background-color: #f8f9fa; /* 헤더 배경색을 지정합니다. */
-    font-weight: 600;
-}
-.timetable .class-cell {
-    background-color: #e9f5ff; /* 수업이 있는 칸의 배경색을 지정합니다. */
-    vertical-align: top; /* 내용을 위쪽부터 정렬합니다. */
-    text-align: left; /* 수업 내용은 왼쪽 정렬합니다. */
-    padding: 0; /* class-content div에서 패딩을 처리하므로 여기서는 0 */
+    color: #1a3b5d;
+    margin-bottom: 4px;
 }
 
-/* 수업 내용 컨테이너 */
-.timetable .class-content {
-    padding: 10px; /* 내용이 너무 붙지 않도록 패딩 조정 */
-    line-height: 1.4; /* 줄 간격을 조정하여 가독성 향상 */
-    overflow: hidden; /* 내용이 넘칠 경우 숨김 */
-    height: 100%; /* 부모 td의 높이를 꽉 채움 */
+.professor-name,
+.location {
+    font-size: 12px;
+    color: #5a6a8a;
 }
-.subject-name {
-    font-weight: 600; /* 과목명은 굵게 표시 */
-    font-size: 14px; /* 과목명 폰트 크기 약간 키움 */
-    color: #1a3b5d; /* 과목명 색상 강조 */
-    margin-bottom: 4px; /* 과목명 아래 여백 */
-}
-.professor-name, .location {
-    font-size: 12px; /* 교수명과 강의실 폰트 크기 약간 키움 */
-    color: #5a6a8a; /* 폰트 색상을 약간 흐리게 */
+
+/* ============================
+   반응형 최소 보정
+============================ */
+@media screen and (max-width: 1400px) {
+    .timetable-container {
+        max-width: 95%;
+    }
 }

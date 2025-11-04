@@ -4,27 +4,37 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>시간표</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> {# 공통 레이아웃 #}
-    <link rel="stylesheet" href="{{ url_for('static', filename='db.css') }}"> {# 공통 테이블 스타일 #}
-    <link rel="stylesheet" href="{{ url_for('static', filename='time_table.css') }}"> {# 시간표 전용 스타일 (db.css를 덮어씀) #}
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='db.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='time_table.css') }}">
+    <link rel="stylesheet" as="style" crossorigin
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
 </head>
 <body>
+
+<!-- ✅ 왼쪽 사이드바 -->
 <div class="sidebar">
-    <h2>메뉴</h2>
-    <ul id="menuList"></ul>
+    <h2 class="sidebar-title">메뉴</h2>
+    <ul id="menuList" class="menu-list"></ul>
 </div>
 
-<div class="main-content">
-    <div class="container">
-        <h1>{{ username }}님 시간표</h1>
+<!-- ✅ 오른쪽 메인 콘텐츠 -->
+<div class="content-area">
+    <header class="full-title-header">
+        <h1 class="page-title">{{ username }}님 시간표</h1>
+    </header>
+
+    <main class="main-content">
         {% if error %}
             <div class="error-message">
                 <p>{{ error }}</p>
             </div>
         {% endif %}
+
         <div class="timetable-container">
-        <table class="timetable">
-            <thead>
+            <table class="timetable">
+                <thead>
                 <tr>
                     <th>시간</th>
                     <th>월</th>
@@ -33,60 +43,59 @@
                     <th>목</th>
                     <th>금</th>
                 </tr>
-            </thead>
-            <tbody>
-                {% for hour in range(9, 22) %} {# 9시부터 21시까지 #}
-                    {% for minute in [0, 30] %} {# 0분, 30분 슬롯 #}
-                    <tr>
-                        {% if minute == 0 %}
-                            {# 정각에만 시간 표시, 2칸 병합 #}
-                            <td rowspan="2">{{ "%02d"|format(hour) }}</td>
-                        {% endif %}
-
-                        {% for day in days %}
-                            {% set cell_data = timetable.get((hour, minute), {}).get(day) %}
-                            {% if cell_data and cell_data != 'skip' %}
-                                <td class="class-cell" rowspan="{{ cell_data.rowspan }}">
-                                    <div class="class-content">
-                                        <div class="subject-name">{{ cell_data.subject_name }}</div>
-                                        <div class="professor-name">{{ cell_data.professor_name }}</div>
-                                        <div class="location">{{ cell_data.location }}</div>
-                                    </div>
+                </thead>
+                <tbody>
+                {% for hour in range(9, 22) %}
+                    {% for minute in [0, 30] %}
+                        <tr>
+                            {% if minute == 0 %}
+                                <td class="time-cell" rowspan="2">
+                                    {{ "%02d"|format(hour) }}:00
                                 </td>
-                            {% elif cell_data == 'skip' %}
-                                {# rowspan으로 인해 병합된 셀이므로 아무것도 렌더링하지 않음 #}
-                            {% else %}
-                                <td></td> {# 수업이 없는 빈 칸 #}
                             {% endif %}
-                        {% endfor %}
-                    </tr>
+                            {% for day in days %}
+                                {% set cell_data = timetable.get((hour, minute), {}).get(day) %}
+                                {% if cell_data and cell_data != 'skip' %}
+                                    <td class="class-cell" rowspan="{{ cell_data.rowspan }}">
+                                        <div class="class-content">
+                                            <div class="subject-name">{{ cell_data.subject_name }}</div>
+                                            <div class="professor-name">{{ cell_data.professor_name }}</div>
+                                            <div class="location">{{ cell_data.location }}</div>
+                                        </div>
+                                    </td>
+                                {% elif cell_data == 'skip' %}
+                                    {# 병합된 셀 생략 #}
+                                {% else %}
+                                    <td></td>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
                     {% endfor %}
                 {% endfor %}
-            </tbody>
-        </table>
+                </tbody>
+            </table>
         </div>
-    </div>
+    </main>
 </div>
 
 <script>
-    // index.html의 메뉴 생성 스크립트를 가져와 현재 페이지에 맞게 수정합니다.
     const userRole = "{{ role }}";
     const menuList = document.getElementById("menuList");
     let menuItems = [];
 
     if (userRole === "student") {
         menuItems = [
-            { name: "시간표", url: "#" }, // 현재 페이지이므로 링크를 #으로 설정
+            { name: "시간표", url: "#" },
             { name: "출석체크", url: "#" },
             { name: "출석관리", url: "#" },
             { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
-        ]; // 필요하다면 'professor' 역할에 대한 메뉴도 추가할 수 있습니다.
+        ];
     } else if (userRole === "professor") {
         menuItems = [
-            // 교수용 메뉴 아이템들
+            { name: "출석관리", url: "#" },
             { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
-        ]
-    } // 필요하다면 'professor' 역할에 대한 메뉴도 추가할 수 있습니다.
+        ];
+    }
 
     menuItems.forEach(item => {
         const li = document.createElement("li");
@@ -94,5 +103,6 @@
         menuList.appendChild(li);
     });
 </script>
+
 </body>
 </html>
