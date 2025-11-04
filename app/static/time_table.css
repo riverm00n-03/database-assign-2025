@@ -1,0 +1,50 @@
+/* 시간표 가독성 향상을 위한 스타일 */
+.timetable {
+    border-collapse: collapse; /* 셀 사이의 간격을 없애고 테두리를 합칩니다. */
+    width: 100%;
+    table-layout: fixed; /* 테이블 레이아웃을 고정하여 열 너비를 일정하게 유지합니다. */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.timetable th, .timetable td {
+    border: 1px solid #ddd; /* 모든 셀에 옅은 회색 테두리를 추가합니다. */
+    padding: 8px;
+    height: 35px; /* 30분 슬롯의 높이를 조절합니다. */
+    word-break: break-word; /* 내용이 길어지면 단어 단위로 줄바꿈하여 셀 크기를 유지합니다. */
+    vertical-align: middle; /* 기본 수직 정렬을 가운데로 설정 */
+    text-align: center; /* 기본 수평 정렬을 가운데로 설정 */
+}
+
+/* 시간 열 (첫 번째 th와 td) 스타일 */
+.timetable th:first-child, .timetable td:first-child {
+    width: 12%; /* '시간' 열의 너비를 12%로 지정합니다. */
+    font-weight: 600;
+    font-size: 14px;
+}
+.timetable th {
+    background-color: #f8f9fa; /* 헤더 배경색을 지정합니다. */
+    font-weight: 600;
+}
+.timetable .class-cell {
+    background-color: #e9f5ff; /* 수업이 있는 칸의 배경색을 지정합니다. */
+    vertical-align: top; /* 내용을 위쪽부터 정렬합니다. */
+    text-align: left; /* 수업 내용은 왼쪽 정렬합니다. */
+    padding: 0; /* class-content div에서 패딩을 처리하므로 여기서는 0 */
+}
+
+/* 수업 내용 컨테이너 */
+.timetable .class-content {
+    padding: 10px; /* 내용이 너무 붙지 않도록 패딩 조정 */
+    line-height: 1.4; /* 줄 간격을 조정하여 가독성 향상 */
+    overflow: hidden; /* 내용이 넘칠 경우 숨김 */
+    height: 100%; /* 부모 td의 높이를 꽉 채움 */
+}
+.subject-name {
+    font-weight: 600; /* 과목명은 굵게 표시 */
+    font-size: 14px; /* 과목명 폰트 크기 약간 키움 */
+    color: #1a3b5d; /* 과목명 색상 강조 */
+    margin-bottom: 4px; /* 과목명 아래 여백 */
+}
+.professor-name, .location {
+    font-size: 12px; /* 교수명과 강의실 폰트 크기 약간 키움 */
+    color: #5a6a8a; /* 폰트 색상을 약간 흐리게 */
+}

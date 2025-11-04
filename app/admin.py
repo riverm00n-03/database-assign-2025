@@ -52,11 +52,11 @@ def test_database():
                 # 교수 3명 추가
                 print("교수 데이터 삽입 중...")
                 cursor.execute("INSERT INTO professor (name, major, email, office_location) VALUES (%s, %s, %s, %s)", 
-                              ("김교수", "컴퓨터공학", "kim@university.ac.kr", "공대 301호"))
+                              ("김교수", "컴퓨터공학", "kim@university.ac.kr", "301호"))
                 cursor.execute("INSERT INTO professor (name, major, email, office_location) VALUES (%s, %s, %s, %s)", 
-                              ("이교수", "전자공학", "lee@university.ac.kr", "공대 402호"))
+                              ("이교수", "전자공학", "lee@university.ac.kr", "402호"))
                 cursor.execute("INSERT INTO professor (name, major, email, office_location) VALUES (%s, %s, %s, %s)", 
-                              ("박교수", "정보통신공학", "park@university.ac.kr", "공대 203호"))
+                              ("박교수", "정보통신공학", "park@university.ac.kr", "203호"))
                 
                 # 학생 10명 추가
                 print("학생 데이터 삽입 중...")
@@ -95,21 +95,21 @@ def test_database():
                 # 과목 스케줄 추가
                 print("과목 스케줄 데이터 삽입 중...")
                 cursor.execute("INSERT INTO subject_schedule (subject_id, day_of_week, start_time, end_time, location) VALUES (%s, %s, %s, %s, %s)", 
-                              (1, "MON", "09:00:00", "10:30:00", "공대 101호"))
+                              (1, "MON", "09:00:00", "10:30:00", "101호"))
                 cursor.execute("INSERT INTO subject_schedule (subject_id, day_of_week, start_time, end_time, location) VALUES (%s, %s, %s, %s, %s)", 
-                              (1, "WED", "09:00:00", "10:30:00", "공대 101호"))
+                              (1, "WED", "09:00:00", "10:30:00", "101호"))
                 cursor.execute("INSERT INTO subject_schedule (subject_id, day_of_week, start_time, end_time, location) VALUES (%s, %s, %s, %s, %s)", 
-                              (2, "TUE", "10:30:00", "12:00:00", "공대 102호"))
+                              (2, "TUE", "10:30:00", "12:00:00", "102호"))
                 cursor.execute("INSERT INTO subject_schedule (subject_id, day_of_week, start_time, end_time, location) VALUES (%s, %s, %s, %s, %s)", 
-                              (2, "THU", "10:30:00", "12:00:00", "공대 102호"))
+                              (2, "THU", "10:30:00", "12:00:00", "102호"))
                 cursor.execute("INSERT INTO subject_schedule (subject_id, day_of_week, start_time, end_time, location) VALUES (%s, %s, %s, %s, %s)", 
-                              (3, "MON", "13:00:00", "14:30:00", "공대 201호"))
+                              (3, "MON", "13:00:00", "14:30:00", "201호"))
                 cursor.execute("INSERT INTO subject_schedule (subject_id, day_of_week, start_time, end_time, location) VALUES (%s, %s, %s, %s, %s)", 
-                              (3, "WED", "13:00:00", "14:30:00", "공대 201호"))
+                              (3, "WED", "13:00:00", "14:30:00", "201호"))
                 cursor.execute("INSERT INTO subject_schedule (subject_id, day_of_week, start_time, end_time, location) VALUES (%s, %s, %s, %s, %s)", 
-                              (4, "TUE", "14:30:00", "16:00:00", "공대 202호"))
+                              (4, "TUE", "14:30:00", "16:00:00", "202호"))
                 cursor.execute("INSERT INTO subject_schedule (subject_id, day_of_week, start_time, end_time, location) VALUES (%s, %s, %s, %s, %s)", 
-                              (4, "THU", "14:30:00", "16:00:00", "공대 202호"))
+                              (4, "THU", "14:30:00", "16:00:00", "202호"))
                 
                 # 수강 등록 추가
                 print("수강 등록 데이터 삽입 중...")
