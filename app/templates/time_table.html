@@ -86,7 +86,7 @@
     if (userRole === "student") {
         menuItems = [
             { name: "시간표", url: "#" },
-            { name: "출석체크", url: "#" },
+            { name: "출석체크", url: "{{ url_for('attendance.show_attendance') }}" },
             { name: "출석관리", url: "#" },
             { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
         ];
@@ -97,10 +97,23 @@
         ];
     }
 
+    // 기존 구조 유지 + "시간표" 클릭 시 alert 추가
     menuItems.forEach(item => {
         const li = document.createElement("li");
         li.innerHTML = `<a href="${item.url}">${item.name}</a>`;
         menuList.appendChild(li);
+
+        // "시간표" 항목 클릭 시 알림 추가
+        if (item.name === "시간표") {
+            const link = li.querySelector("a");
+            link.addEventListener("click", (e) => {
+                e.preventDefault();
+                alert("이미 시간표 페이지입니다.");
+            });
+            // 현재 메뉴 강조 스타일
+            link.style.color = "#2563eb";
+            link.style.fontWeight = "700";
+        }
     });
 </script>
 

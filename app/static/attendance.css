@@ -1,0 +1,179 @@
+/* 레이아웃은 기존 스타일 유지(시간표 페이지와 톤 맞춤) */
+body{
+    margin:0;
+    font-family:'Pretendard','Noto Sans KR',sans-serif;
+    background:#f3f6fa;
+    color:#1e293b;
+    display:flex;
+    height:100vh;
+}
+
+/* 사이드바: 기존과 동일 무드 */
+.sidebar{
+    width:220px;
+    background:#fff;
+    border-right:1px solid #e2e8f0;
+    padding:30px 20px;
+    box-sizing:border-box;
+    flex-shrink:0;
+}
+.sidebar-title{font-size:18px;font-weight:700;color:#1e3a8a;margin-bottom:25px;}
+.menu-list{list-style:none;margin:0;padding:0;}
+.menu-list li{margin:12px 0;}
+.menu-list a{color:#334155;text-decoration:none;font-weight:500;transition:color .2s;}
+.menu-list a:hover{color:#2563eb;}
+
+/* 오른쪽 영역 */
+.content-area{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    overflow-x:hidden;
+    background:#f3f6fa;
+}
+
+/* 상단 타이틀 + 서버시간 */
+.full-title-header{
+    position:sticky; top:0;
+    background:linear-gradient(180deg,#f4f7fb 0%,#eef3f9 100%);
+    border-bottom:1px solid #e2e8f0;
+    box-shadow:0 1px 4px rgba(0,0,0,.04);
+    z-index:10;
+}
+.title-wrap{
+    max-width:1200px;
+    height:72px;
+    margin:0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 20px;
+    box-sizing:border-box;
+}
+.page-title{
+    font-size:22px;
+    font-weight:800;
+    color:#1e3a8a;
+    margin:0;
+}
+.server-time{
+    font-size:14px;
+    color:#475569;
+}
+
+/* 메인 */
+.main-content{
+    flex:1;
+    overflow-y:auto;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+}
+
+/* 카드 컨테이너 */
+.attendance-container{
+    width:100%;
+    max-width:1200px;
+    background:#fff;
+    border-radius:12px;
+    box-shadow:0 2px 6px rgba(0,0,0,.1);
+    padding:20px;
+    box-sizing:border-box;
+    margin:18px auto;
+}
+
+/* 상단 안내 */
+.hint{
+    background:#f8fafc;
+    border:1px solid #e2e8f0;
+    color:#334155;
+    border-radius:10px;
+    padding:10px 12px;
+    font-size:14px;
+    margin-bottom:14px;
+}
+
+/* 출석 테이블 */
+.att-table{
+    border-collapse:collapse;
+    width:100%;
+    table-layout:fixed;
+    border-radius:10px;
+    overflow:hidden;
+}
+.att-table th,
+.att-table td{
+    border:1px solid #e2e8f0;
+    padding:12px 10px;
+    text-align:center;
+    vertical-align:middle;
+    font-size:14px;
+    background:#fff;
+}
+.att-table thead th{
+    background:#f8fafc;
+    font-weight:700;
+    color:#1e293b;
+}
+.att-row .sbj .subject-name{
+    font-weight:700;
+    color:#1a3b5d;
+    text-align:left;
+}
+.time-badge{
+    font-weight:600;
+    color:#0f172a;
+}
+.window-range{
+    margin-top:4px;
+    font-size:12px;
+    color:#64748b;
+}
+
+/* 상태 / 버튼 */
+.status-badge{
+    display:inline-block;
+    min-width:72px;
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid #cbd5e1;
+    background:#f8fafc;
+    color:#334155;
+    font-size:12px;
+    margin-bottom:8px;
+}
+.status-badge.done{
+    background:#ecfdf5;
+    border-color:#a7f3d0;
+    color:#065f46;
+}
+
+.att-form{margin:0;}
+.btn-attend{
+    width:100%;
+    max-width:120px;
+    height:36px;
+    border:1px solid #2563eb;
+    background:#2563eb;
+    color:#fff;
+    border-radius:8px;
+    font-weight:700;
+    cursor:pointer;
+    transition:transform .08s ease, box-shadow .12s ease, background .12s ease;
+}
+.btn-attend:hover{box-shadow:0 6px 14px rgba(37,99,235,.18); background:#2b6ce6;}
+.btn-attend:active{transform:translateY(1px);}
+.btn-attend:disabled{
+    background:#e2e8f0;
+    border-color:#e2e8f0;
+    color:#94a3b8;
+    cursor:not-allowed;
+    box-shadow:none;
+}
+
+/* 빈 행 */
+.empty{
+    padding:28px 10px;
+    color:#64748b;
+    background:#fafbff;
+}

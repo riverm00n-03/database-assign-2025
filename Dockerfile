@@ -19,3 +19,8 @@ ENV FLASK_APP=main:app
 # 컨테이너가 시작될 때 Flask 애플리케이션을 실행합니다.
 # 호스트 0.0.0.0으로 설정하여 외부 접속을 허용합니다.
 CMD ["flask", "run", "--host=0.0.0.0"]
+
+
+# 표준 시간 정의
+ENV TZ=Asia/Seoul
+RUN apt-get update && apt-get install -y tzdata
