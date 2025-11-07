@@ -15,7 +15,3 @@ app.register_blueprint(auth_bp, url_prefix='/auth')
 app.register_blueprint(timetable_bp)
 app.register_blueprint(db_bp, url_prefix='/db')
 app.register_blueprint(attendance_bp)  # 중복 prefix 제거
-
-if __name__ == '__main__':
-    # ✅ 디버그모드 켜기 + 모든 호스트에서 접근 허용
-    app.run(debug=True, host='0.0.0.0', port=5000)
