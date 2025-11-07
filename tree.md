@@ -9,11 +9,14 @@
 │   │   ├── auth_routes.py (로그인·세션 처리 API)
 │   │   ├── database_routes.py (DB 테스트/점검용 엔드포인트)
 │   │   └── main_routes.py (메인 페이지 렌더링)
-│   ├── static/
-│   │   └── style.css (기본 스타일 시트)
+│   ├── static/ (정적 파일)
+│   │   ├── db.css (공통 테이블 스타일)
+│   │   ├── style.css (기본 레이아웃 스타일 시트)
+│   │   └── time_table.css (시간표 전용 스타일)
 │   ├── templates/
 │   │   ├── index.html (메인 화면 템플릿)
-│   │   └── login.html (로그인 폼 템플릿)
+│   │   ├── login.html (로그인 폼 템플릿)
+│   │   └── time_table.html (시간표 템플릿)
 │   ├── utils/
 │   │   └── login.py (세션 검증 헬퍼)
 │   ├── services/ (추가 예정: 비즈니스 로직 계층)
@@ -45,4 +48,3 @@
     │   └── (python.exe, pip.exe 등 실행 파일)
     └── pyvenv.cfg
 ```
-
