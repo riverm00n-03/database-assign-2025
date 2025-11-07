@@ -24,3 +24,9 @@ CMD ["flask", "run", "--host=0.0.0.0"]
 # 표준 시간 정의
 ENV TZ=Asia/Seoul
 RUN apt-get update && apt-get install -y tzdata
+
+#테스트용
+ENV FLASK_ENV=development
+ENV FLASK_DEBUG=1
+
+CMD ["python", "-u", "main.py"]

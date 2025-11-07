@@ -18,36 +18,35 @@
 </head>
 <body>
 
-<!-- 사이드바 -->
+<!-- ✅ 사이드바 -->
 <div class="sidebar">
     <h2 class="sidebar-title">메뉴</h2>
     <ul id="menuList" class="menu-list"></ul>
 </div>
 
-<!-- 오른쪽 영역 -->
+<!-- ✅ 오른쪽 영역 -->
 <div class="content-area">
-    <!-- 상단 타이틀/서버시간 -->
+    <!-- 상단 타이틀 + 서버시간 -->
     <header class="full-title-header">
         <div class="title-wrap">
             <h1 class="page-title">{{ username }}님 출석 체크</h1>
             <div class="server-time">
-                서버 시간:
+                현재 시간:
                 <span id="serverNow" data-server-iso="{{ server_now_iso }}">
-            {{ server_now_fmt }}
-          </span>
+                    {{ server_now_fmt }}
+                </span>
+                <span id="serverWeekday" class="weekday-badge"></span>
             </div>
         </div>
     </header>
 
-    <!-- 메인 -->
+    <!-- ✅ 메인 -->
     <main class="main-content">
         <div class="attendance-container">
-            <!-- 안내 -->
             <div class="hint">
                 수업 시작 <b>10분 전 ~ 10분 후</b>에만 출석이 가능합니다.
             </div>
 
-            <!-- 오늘 수업 리스트 -->
             <table class="att-table">
                 <thead>
                 <tr>
@@ -59,28 +58,11 @@
                 </tr>
                 </thead>
                 <tbody>
-                {# backend에서 today_classes 리스트 제공 가정 #}
-                {# today_classes 원소 스키마 예시:
-               {
-                 'schedule_id': 12,
-                 'subject_name': '데이터베이스',
-                 'professor_name': '김교수',
-                 'location': 'A-302',
-                 'start_time_str': '09:00',
-                 'end_time_str': '10:30',
-                 'window_from_str': '08:50',
-                 'window_to_str': '09:10',
-                 'window_open': True/False,
-                 'status': '미출석' | '출석완료' | '지각' 등
-               }
-            #}
                 {% if today_classes %}
                     {% for cls in today_classes %}
-                        <tr
-                                class="att-row"
-                                data-schedule-id="{{ cls.schedule_id }}"
-                                data-window-open="{{ '1' if cls.window_open else '0' }}"
-                        >
+                        <tr class="att-row"
+                            data-schedule-id="{{ cls.schedule_id }}"
+                            data-window-open="{{ '1' if cls.window_open else '0' }}">
                             <td class="sbj">
                                 <div class="subject-name">{{ cls.subject_name }}</div>
                             </td>
@@ -100,7 +82,7 @@
                                 </div>
 
                                 {% if cls.window_open and cls.status != '출석완료' %}
-                                    <form class="att-form" method="POST" action="{{ url_for('attendance.check') }}">
+                                    <form class="att-form" method="POST" action="{{ url_for('attendance.check_attendance') }}">
                                         <input type="hidden" name="schedule_id" value="{{ cls.schedule_id }}">
                                         <button type="submit" class="btn-attend">출석하기</button>
                                     </form>
@@ -121,7 +103,7 @@
     </main>
 </div>
 
-<!-- 사이드바 스크립트 -->
+<!-- ✅ 사이드바 메뉴 생성 -->
 <script>
     const userRole = "{{ role }}";
     const menuList = document.getElementById("menuList");
@@ -159,46 +141,50 @@
     });
 </script>
 
-<!-- (선택) 버튼 더블클릭 방지 정도만 -->
+<!-- ✅ 시간 + 요일 자동 갱신 -->
 <script>
-    document.querySelectorAll('.att-form').forEach(f => {
-        f.addEventListener('submit', () => {
-            const btn = f.querySelector('.btn-attend');
-            if (btn) {
-                btn.disabled = true;
-                btn.textContent = '처리중...';
-            }
-        });
-    });
     document.addEventListener('DOMContentLoaded', () => {
-        const serverSpan = document.getElementById('serverNow');
-        const serverIso = serverSpan.dataset.serverIso;
+        const timeSpan = document.getElementById('serverNow');
+        const weekSpan = document.getElementById('serverWeekday');
+        const iso = timeSpan.dataset.serverIso;
+        let now = iso ? new Date(iso) : new Date();
 
-        // 새로고침 시 Flask가 전달한 서버 시간 기준으로 동기화
-        let serverTime = new Date(serverIso);
+        const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+        const pad2 = n => String(n).padStart(2, '0');
 
-        // 시간 포맷 함수
-        const formatTime = (date) => {
-            const yyyy = date.getFullYear();
-            const mm = String(date.getMonth() + 1).padStart(2, '0');
-            const dd = String(date.getDate()).padStart(2, '0');
-            const hh = String(date.getHours()).padStart(2, '0');
-            const mi = String(date.getMinutes()).padStart(2, '0');
-            const ss = String(date.getSeconds()).padStart(2, '0');
+        const formatTime = (d) => {
+            const yyyy = d.getFullYear();
+            const mm = pad2(d.getMonth() + 1);
+            const dd = pad2(d.getDate());
+            const hh = pad2(d.getHours());
+            const mi = pad2(d.getMinutes());
+            const ss = pad2(d.getSeconds());
             return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
         };
 
-        // 1초마다 서버 시간 +1초
-        function updateServerClock() {
-            serverTime.setSeconds(serverTime.getSeconds() + 1);
-            serverSpan.textContent = formatTime(serverTime);
+        function render() {
+            timeSpan.textContent = formatTime(now);
+            weekSpan.textContent = `(${weekdays[now.getDay()]})`;
         }
 
-        // 즉시 1회 갱신
-        serverSpan.textContent = formatTime(serverTime);
+        render();
+        setInterval(() => {
+            now.setSeconds(now.getSeconds() + 1);
+            render();
+        }, 1000);
 
-        // 1초마다 증가
-        setInterval(updateServerClock, 1000);
+        // 10분마다 서버 동기화
+        setInterval(async () => {
+            try {
+                const res = await fetch("/api/server_time");
+                if (!res.ok) return;
+                const data = await res.json();
+                now = new Date(data.server_time_iso);
+                render();
+            } catch (err) {
+                console.warn("서버 시간 동기화 실패:", err);
+            }
+        }, 600000);
     });
 </script>
 </body>
