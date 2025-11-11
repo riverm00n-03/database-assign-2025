@@ -25,14 +25,14 @@
     let menuItems = [];
 
     // 역할별 메뉴 (이동 기능 없이 표시용)
-    if (userRole === "student") {
+    if (userRole === "student") { // 학생 역할인 경우
         menuItems = [
             { name: "시간표", url: "{{ url_for('timetable.timetable') }}" },
             { name: "출석체크", url: "{{ url_for('attendance.show_attendance') }}" },
             { name: "출석관리", url: "#" },
-            { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
+            { name: "로그아웃", url: "{{ url_for('auth.logout') }}" } 
         ];
-    } else if (userRole === "professor") {
+    } else if (userRole === "professor") { // 교직원 역할인 경우
         menuItems = [
             { name: "강의 관리", url: "#" },
             { name: "출석현황", url: "#" },
@@ -40,7 +40,7 @@
             { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
         ];
     } else {
-        menuItems = [
+        menuItems = [ // 기타 역할인 경우. 이런 경우는 사실상 없을 것이지만, Fail-Safe를 위해 추가함.
             { name: "홈", url: "#" },
             { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
         ];

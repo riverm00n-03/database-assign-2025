@@ -9,9 +9,12 @@ from app.routes.attendance_routes import attendance_bp
 app = Flask(__name__, template_folder='app/templates', static_folder='app/static')
 app.secret_key = 'your_secret_key'
 
-# ✅ Blueprint 등록
+# Blueprint 등록
 app.register_blueprint(main_bp)
 app.register_blueprint(auth_bp, url_prefix='/auth')
 app.register_blueprint(timetable_bp)
 app.register_blueprint(db_bp, url_prefix='/db')
 app.register_blueprint(attendance_bp)  # 중복 prefix 제거
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)

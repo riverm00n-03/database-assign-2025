@@ -1,6 +1,10 @@
 # 부모 이미지로 공식 Python 런타임을 사용합니다.
 FROM python:3.14-slim
 
+# 표준 시간 정의
+ENV TZ=Asia/Seoul
+RUN apt-get update && apt-get install -y tzdata && rm -rf /var/lib/apt/lists/*
+
 # 컨테이너 내 작업 디렉토리를 설정합니다.
 WORKDIR /app
 
@@ -15,18 +19,9 @@ EXPOSE 5000
 
 # Flask 애플리케이션의 진입점을 환경 변수로 정의합니다.
 ENV FLASK_APP=main:app
-
-# 컨테이너가 시작될 때 Flask 애플리케이션을 실행합니다.
-# 호스트 0.0.0.0으로 설정하여 외부 접속을 허용합니다.
-CMD ["flask", "run", "--host=0.0.0.0"]
-
-
-# 표준 시간 정의
-ENV TZ=Asia/Seoul
-RUN apt-get update && apt-get install -y tzdata
-
-#테스트용
 ENV FLASK_ENV=development
 ENV FLASK_DEBUG=1
 
+# 컨테이너가 시작될 때 Flask 애플리케이션을 실행합니다.
+# 호스트 0.0.0.0으로 설정하여 외부 접속을 허용합니다.
 CMD ["python", "-u", "main.py"]

@@ -53,10 +53,10 @@
 
     <script>
         function showTable(name) {
-            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-            document.querySelectorAll('.table-section').forEach(section => section.classList.remove('active'));
-            event.target.classList.add('active');
-            document.getElementById(name).classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active')); // 모든 네비게이션 링크에서 active 클래스 제거
+            document.querySelectorAll('.table-section').forEach(section => section.classList.remove('active')); // 모든 테이블 섹션에서 active 클래스 제거
+            event.target.classList.add('active'); // 현재 클릭된 네비게이션 링크에 active 클래스 추가
+            document.getElementById(name).classList.add('active'); // 현재 클릭된 테이블 섹션에 active 클래스 추가
         }
     </script>
 </body>
