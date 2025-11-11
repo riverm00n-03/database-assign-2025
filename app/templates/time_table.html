@@ -59,7 +59,9 @@
                                     <td class="class-cell" rowspan="{{ cell_data.rowspan }}">
                                         <div class="class-content">
                                             <div class="subject-name">{{ cell_data.subject_name }}</div>
-                                            <div class="professor-name">{{ cell_data.professor_name }}</div>
+                                            {% if role == 'student' %}
+                                                <div class="professor-name">{{ cell_data.professor_name }}</div>
+                                            {% endif %}
                                             <div class="location">{{ cell_data.location }}</div>
                                         </div>
                                     </td>
@@ -92,7 +94,7 @@
         ];
     } else if (userRole === "professor") {
         menuItems = [
-            { name: "출석관리", url: "#" },
+            { name: "돌아가기", url: "{{ url_for('main.root') }}" },
             { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
         ];
     }

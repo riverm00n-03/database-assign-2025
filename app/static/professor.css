@@ -1,0 +1,46 @@
+.class-list {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.class-card {
+    background-color: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.class-card h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+.class-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    color: #4b5563;
+}
+
+.class-info span {
+    display: flex;
+    align-items: center;
+}
+
+.class-info span::before {
+    content: '•';
+    margin-right: 0.5rem;
+    color: #9ca3af;
+}
+
+.empty-message {
+    text-align: center;
+    color: #6b7280;
+    padding: 3rem;
+    background-color: #f9fafb;
+    border-radius: 8px;
+}

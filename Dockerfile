@@ -1,5 +1,5 @@
 # 부모 이미지로 공식 Python 런타임을 사용합니다.
-FROM python:3.14-slim
+FROM python:3.12-slim
 
 # 표준 시간 정의
 ENV TZ=Asia/Seoul
@@ -18,10 +18,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 5000
 
 # Flask 애플리케이션의 진입점을 환경 변수로 정의합니다.
-ENV FLASK_APP=main:app
+ENV FLASK_APP=main.py
 ENV FLASK_ENV=development
 ENV FLASK_DEBUG=1
 
 # 컨테이너가 시작될 때 Flask 애플리케이션을 실행합니다.
 # 호스트 0.0.0.0으로 설정하여 외부 접속을 허용합니다.
-CMD ["python", "-u", "main.py"]
+CMD ["flask", "run", "--host=0.0.0.0"]

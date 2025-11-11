@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, session
 from app.utils.auth import login_required
 from mysql.connector import connect, Error
 from config import DB_CONFIG
-from datetime import timedelta
+from datetime import timedelta, time
 
 timetable_bp = Blueprint('timetable', __name__, url_prefix='/timetable')
 
@@ -16,24 +16,45 @@ def timetable():
     error = None
 
     try:
+        # ✅ TIME 컬럼이 timedelta로 읽히는 경우를 위한 헬퍼 함수
+        def to_time_obj(value):
+            if isinstance(value, timedelta):
+                total_seconds = int(value.total_seconds())
+                hours = total_seconds // 3600
+                minutes = (total_seconds % 3600) // 60
+                return time(hours, minutes)
+            return value
+
         with connect(**DB_CONFIG) as connection:
             with connection.cursor(dictionary=True) as cursor:
-                # 학생이 수강하는 과목의 스케줄 정보를 가져오기
-                query = """
-                    SELECT 
-                        s.name AS subject_name,
-                        p.name AS professor_name,
-                        ss.day_of_week,
-                        ss.start_time,
-                        ss.end_time,
-                        ss.location
-                    FROM enrollment e
-                    JOIN subject s ON e.subject_id = s.subject_id
-                    JOIN subject_schedule ss ON s.subject_id = ss.subject_id
-                    LEFT JOIN professor p ON s.professor_id = p.professor_id
-                    WHERE e.student_id = %s
-                """
-                cursor.execute(query, (user_id,))
+                query = ""
+                params = (user_id,)
+
+                if role == 'student':
+                    # 학생이 수강하는 과목의 스케줄 정보를 가져오기
+                    query = """
+                        SELECT s.name AS subject_name, p.name AS professor_name, ss.day_of_week,
+                               ss.start_time, ss.end_time, ss.location
+                        FROM enrollment e
+                        JOIN subject s ON e.subject_id = s.subject_id
+                        JOIN subject_schedule ss ON s.subject_id = ss.subject_id
+                        LEFT JOIN professor p ON s.professor_id = p.professor_id
+                        WHERE e.student_id = %s
+                    """
+                elif role == 'professor':
+                    # 교수가 담당하는 과목의 스케줄 정보를 가져오기
+                    query = """
+                        SELECT s.name AS subject_name, p.name AS professor_name, ss.day_of_week,
+                               ss.start_time, ss.end_time, ss.location
+                        FROM subject s
+                        JOIN subject_schedule ss ON s.subject_id = ss.subject_id
+                        JOIN professor p ON s.professor_id = p.professor_id
+                        WHERE p.professor_id = %s
+                    """
+
+                if query:
+                    cursor.execute(query, params)
+                
                 schedules = cursor.fetchall()
 
                 # ✅ 30분 단위 슬롯 (9:00~21:30)
