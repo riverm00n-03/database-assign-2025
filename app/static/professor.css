@@ -1,17 +1,27 @@
 .class-list {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 1.5rem;
     margin-top: 2rem;
+    width: 100%;
+    max-width: 900px; /* 카드의 최대 너비 설정 */
+    padding: 0 20px;
+    box-sizing: border-box;
 }
 
 .class-card {
     background-color: #fff;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
-    padding: 1.5rem;
+    padding: 1.5rem 2rem; /* 내부 여백 증가 */
     box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
+.class-details {}
+ 
 .class-card h3 {
     font-size: 1.25rem;
     font-weight: 600;
@@ -43,4 +53,26 @@
     padding: 3rem;
     background-color: #f9fafb;
     border-radius: 8px;
+}
+
+.class-actions {}
+
+.btn-manage {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: #fff;
+    background-color: #4360ff; /* login.css의 primary-color와 동일 */
+    border-radius: 8px;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-manage:hover {
+    background-color: #3147d8; /* login.css의 primary-dark-color와 동일 */
+}
+
+.btn-manage:active {
+    transform: translateY(1px);
 }
