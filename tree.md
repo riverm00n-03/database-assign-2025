@@ -18,7 +18,8 @@
 │   │   ├── login.html (로그인 폼 템플릿)
 │   │   └── time_table.html (시간표 템플릿)
 │   ├── utils/
-│   │   └── login.py (세션 검증 헬퍼)
+│   │   ├── login.py (세션 검증 헬퍼)
+|   |   └── auth.py(로그인 조건 데코레이터)
 │   ├── services/ (추가 예정: 비즈니스 로직 계층)
 │   │   └── (attendance_service.py – 출석 생성/검증 로직)
 │   ├── repositories/ (추가 예정: DB 접근 추상화)

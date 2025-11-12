@@ -1,0 +1,144 @@
+/* ============================
+   상단 헤더
+============================ */
+.manage-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background-color: #fff;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.header-info .course-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin: 0 0 4px;
+}
+
+.header-info .course-date {
+    font-size: 15px;
+    color: #475569;
+}
+
+.btn-back {
+    padding: 10px 20px;
+    text-decoration: none;
+    font-weight: 600;
+    color: #334155;
+    background-color: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+
+.btn-back:hover {
+    background-color: #e2e8f0;
+}
+
+/* ============================
+   메인 콘텐츠 (학생 목록)
+============================ */
+.main-content {
+    justify-content: flex-start; /* 콘텐츠를 위에서부터 정렬 */
+    padding: 20px 40px;
+}
+
+.student-list-container {
+    width: 100%;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+
+.student-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.student-table th,
+.student-table td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+
+.student-table th {
+    background-color: #f8fafc;
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.student-table td {
+    font-size: 15px;
+    color: #1e293b;
+}
+
+.student-table .col-name { width: 20%; }
+.student-table .col-id { width: 20%; }
+.student-table .col-major { width: 30%; }
+.student-table .col-status { width: 30%; text-align: center; }
+
+.no-student {
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
+}
+
+/* ============================
+   출결 상태 선택 라디오 버튼
+============================ */
+.status-selector .radio-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.status-selector input[type="radio"] {
+    display: none; /* 실제 라디오 버튼 숨기기 */
+}
+
+.status-selector label {
+    padding: 8px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+/* 선택됐을 때 스타일 */
+.status-selector input[value="PRESENT"]:checked + label { background-color: #dbeafe; border-color: #93c5fd; color: #1e40af; }
+.status-selector input[value="LATE"]:checked + label { background-color: #fef3c7; border-color: #fde68a; color: #92400e; }
+.status-selector input[value="ABSENT"]:checked + label { background-color: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+
+/* ============================
+   저장 버튼
+============================ */
+.form-actions {
+    padding: 20px;
+    text-align: right;
+    background-color: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}
+
+.btn-save {
+    padding: 12px 28px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    background-color: #4360ff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-save:hover {
+    background-color: #3147d8;
+}

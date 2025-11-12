@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>출석 관리</title>
+    <!-- 공통 레이아웃 CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='time_table.css') }}">
+    <!-- 출석 관리 전용 CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='manage_attendance.css') }}">
+    <!-- Pretendard 폰트 -->
+    <link rel="stylesheet" as="style" crossorigin
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+</head>
+<body>
+<!-- 왼쪽 사이드바 -->
+<div class="sidebar">
+    <h2 class="sidebar-title">메뉴</h2>
+    <ul id="menuList" class="menu-list"></ul>
+</div>
+
+<!-- 오른쪽 메인 콘텐츠 -->
+<div class="content-area">
+    <header class="manage-header">
+        <div class="header-info">
+            <!-- 백엔드에서 전달될 과목명과 날짜 -->
+            <h1 class="course-title">{{ subject_name or '과목 정보 없음' }}</h1>
+            <span class="course-date">{{ class_date or '날짜 정보 없음' }}</span>
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('professor.todays_classes') }}" class="btn-back">목록으로</a>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="student-list-container">
+            <!-- 출결 상태 업데이트를 위한 form -->
+            <form method="POST" action="{{ url_for('professor.update_attendance', session_id=session_id) }}">
+                <table class="student-table">
+                    <thead>
+                        <tr>
+                            <th class="col-name">이름</th>
+                            <th class="col-id">학번</th>
+                            <th class="col-major">전공</th>
+                            <th class="col-status">출결 상태</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 백엔드에서 학생 목록(students)을 전달받아 반복 처리 -->
+                        {% for student in students %}
+                        <tr>
+                            <td>{{ student.name }}</td>
+                            <td>{{ student.student_number }}</td>
+                            <td>{{ student.student_major }}</td>
+                            <td class="status-selector">
+                                <div class="radio-group">
+                                    <input type="radio" id="present_{{ student.student_id }}" name="status_{{ student.student_id }}" value="PRESENT" {% if student.status == 'PRESENT' %}checked{% endif %}>
+                                    <label for="present_{{ student.student_id }}">출석</label>
+
+                                    <input type="radio" id="late_{{ student.student_id }}" name="status_{{ student.student_id }}" value="LATE" {% if student.status == 'LATE' %}checked{% endif %}>
+                                    <label for="late_{{ student.student_id }}">지각</label>
+
+                                    <input type="radio" id="absent_{{ student.student_id }}" name="status_{{ student.student_id }}" value="ABSENT" {% if student.status == 'ABSENT' or not student.status %}checked{% endif %}>
+                                    <label for="absent_{{ student.student_id }}">결석</label>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="no-student">수강하는 학생이 없습니다.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="form-actions">
+                    <button type="submit" class="btn-save">변경사항 저장</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+<!-- 사이드바 메뉴 생성 스크립트 -->
+<script>
+    const userRole = "{{ role }}";
+    const menuList = document.getElementById("menuList");
+    let menuItems = [];
+
+    if (userRole === "professor") {
+        menuItems = [
+            { name: "오늘의 강의", url: "{{ url_for('professor.todays_classes') }}" },
+            { name: "시간표", url: "{{ url_for('timetable.timetable') }}" },
+            { name: "휴강 등록", url: "#" },
+            { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
+        ];
+    }
+
+    menuItems.forEach(item => {
+        const li = document.createElement("li");
+        const link = document.createElement("a");
+        link.href = item.url;
+        link.textContent = item.name;
+        li.appendChild(link);
+        menuList.appendChild(li);
+    });
+</script>
+</body>
+</html>
