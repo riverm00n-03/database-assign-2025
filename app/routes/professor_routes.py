@@ -55,30 +55,70 @@ def todays_classes():
 @professor_bp.route('/create_session_and_redirect/<int:schedule_id>')
 @login_required
 def create_session_and_redirect(schedule_id):
-    # 오늘 날짜의 class_session을 생성하거나 찾아서 session_id를 가져온 후, manage_attendance로 리디렉션
-    query_find_or_create = """
-        INSERT INTO class_session (schedule_id, class_date)
-        VALUES (%s, CURDATE())
-        ON DUPLICATE KEY UPDATE session_id=LAST_INSERT_ID(session_id);
     """
-    select_query = "SELECT LAST_INSERT_ID();"
+    오늘 날짜의 수업 세션(class_session)을 찾거나 생성한 후,
+    해당 세션 ID를 가지고 출석 관리 페이지로 리디렉션합니다.
+    """
     try:
         with connect(**DB_CONFIG) as connection:
             with connection.cursor() as cursor:
-                cursor.execute(query_find_or_create, (schedule_id,))
-                cursor.execute(select_query)
-                session_id = cursor.fetchone()[0]
+                # 1. 오늘 날짜로 이미 생성된 세션이 있는지 확인
+                query_select = "SELECT session_id FROM class_session WHERE schedule_id = %s AND class_date = CURDATE()"
+                cursor.execute(query_select, (schedule_id,))
+                result = cursor.fetchone()
+
+                if result:
+                    # 2a. 세션이 이미 존재하면 해당 ID 사용
+                    session_id = result[0]
+                else:
+                    # 2b. 세션이 없으면 새로 생성
+                    query_insert = "INSERT INTO class_session (schedule_id, class_date) VALUES (%s, CURDATE())"
+                    cursor.execute(query_insert, (schedule_id,))
+                    connection.commit()  # INSERT 실행 후에는 commit 필수
+                    session_id = cursor.lastrowid # 방금 삽입된 행의 ID 가져오기
+
+                if not session_id:
+                    raise Exception("세션 ID를 가져오지 못했습니다.")
+
                 return redirect(url_for('professor.manage_attendance', session_id=session_id))
     except Exception as e:
         flash(f"수업 세션 생성 중 오류 발생: {e}")
         return redirect(url_for('professor.todays_classes'))
 
-@professor_bp.route('/manage_attendance/<int:session_id>', methods=['GET'])
+@professor_bp.route('/manage_attendance/<int:session_id>', methods=['GET', 'POST'])
 @login_required
 def manage_attendance(session_id):
     if session.get('role') != 'professor':
         flash("접근 권한이 없습니다.")
         return redirect(url_for('timetable.timetable'))
+
+    if request.method == 'POST':
+        try:
+            with connect(**DB_CONFIG) as connection:
+                with connection.cursor() as cursor:
+                    # 폼에서 전송된 모든 학생의 상태 데이터를 가져옵니다.
+                    for key, new_status in request.form.items():
+                        if key.startswith('status_'):
+                            student_id = key.split('_')[1]
+                            
+                            # 출결 정보를 삽입하거나, 이미 존재하면 업데이트합니다.
+                            upsert_query = """
+                                INSERT INTO checkin (session_id, student_id, status)
+                                VALUES (%s, %s, %s)
+                                ON DUPLICATE KEY UPDATE status = VALUES(status);
+                            """
+                            cursor.execute(upsert_query, (session_id, student_id, new_status))
+                    
+                    connection.commit()
+                    flash("출결 상태가 성공적으로 저장되었습니다.")
+
+        except Exception as e:
+            flash(f"출결 정보 저장 중 오류가 발생했습니다: {e}")
+
+        # 저장 후, 같은 페이지로 다시 리디렉션하여 변경된 내용을 보여줍니다.
+        return redirect(url_for('professor.manage_attendance', session_id=session_id))
+
+    # --- 이하 GET 요청 처리 로직 ---
 
     # 쿼리: 특정 수업(session)의 수강생 목록과 각 학생의 현재 출결 상태를 조회
     student_query = """
@@ -119,6 +159,11 @@ def manage_attendance(session_id):
                 # 과목 정보 조회
                 cursor.execute(subject_query, (session_id,))
                 subject_info = cursor.fetchone()
+
+                # subject_info가 None일 경우 (잘못된 session_id 등) 처리
+                if not subject_info:
+                    flash("해당 수업 정보를 찾을 수 없습니다.")
+                    return redirect(url_for('professor.todays_classes'))
 
     except Exception as e:
         flash(f"출석 정보를 불러오는 중 오류가 발생했습니다: {e}")

@@ -20,7 +20,6 @@
     align-items: center;
 }
 
-.class-details {}
  
 .class-card h3 {
     font-size: 1.25rem;
@@ -55,7 +54,6 @@
     border-radius: 8px;
 }
 
-.class-actions {}
 
 .btn-manage {
     display: inline-block;
