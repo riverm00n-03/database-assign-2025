@@ -36,7 +36,7 @@
         ];
     } else if (userRole === "professor") { // 교직원 역할인 경우
         menuItems = [
-            { name: "오늘의 강의", url: "{{ url_for('professor.todays_classes') }}" },
+            { name: "출석 관리", url: "{{ url_for('professor.manage_subjects') }}" },
             { name: "시간표", url: "{{ url_for('timetable.timetable') }}" },
             { name: "휴강 등록", url: "#" },
             { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }

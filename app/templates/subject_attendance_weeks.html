@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주차별 출석 관리</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='time_table.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='manage_attendance.css') }}">
+    <link rel="stylesheet" as="style" crossorigin
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+</head>
+<body>
+<div class="sidebar">
+    <h2 class="sidebar-title">메뉴</h2>
+    <ul id="menuList" class="menu-list"></ul>
+</div>
+
+<div class="content-area">
+    <header class="manage-header">
+        <div class="header-info">
+            <h1 class="course-title">{{ subject_name }}</h1>
+            <span class="course-date">주차별 출석 관리</span>
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('professor.manage_subjects') }}" class="btn-back">과목 목록으로</a>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="week-list-container">
+            {% for week in weeks_data | reverse %}
+                <div class="week-card {% if week.week_number == current_week %}current-week{% endif %}" id="week-{{ week.week_number }}">
+                    <h3 class="week-title">{{ week.week_number }}주차</h3>
+                    <div class="class-sessions">
+                        {% for class_session in week.classes %}
+                            <div class="session-item">
+                                <span class="session-date">{{ class_session.class_date_formatted }}</span>
+                                <div class="session-actions">
+                                    <a href="{{ url_for('professor.create_session_and_redirect', schedule_id=class_session.schedule_id, class_date_str=class_session.class_date) }}" class="btn-manage">출석 관리</a>
+                                    <button class="btn-cancel-class">휴강 처리</button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </main>
+</div>
+
+<script>
+    // 현재 주차로 스크롤 이동
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentWeekElement = document.getElementById('week-{{ current_week }}');
+        if (currentWeekElement) {
+            currentWeekElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+
+    // 사이드바 메뉴 생성
+    const userRole = "{{ role }}";
+    const menuList = document.getElementById("menuList");
+    let menuItems = [
+        { name: "출석 관리", url: "{{ url_for('professor.manage_subjects') }}", current: true },
+        { name: "시간표", url: "{{ url_for('timetable.timetable') }}" },
+        { name: "휴강 등록", url: "#" },
+        { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
+    ];
+
+    menuItems.forEach(item => {
+        const li = document.createElement("li");
+        const link = document.createElement("a");
+        link.href = item.url;
+        link.textContent = item.name;
+        if (item.current) link.classList.add('current');
+        li.appendChild(link);
+        menuList.appendChild(li);
+    });
+</script>
+</body>
+</html>

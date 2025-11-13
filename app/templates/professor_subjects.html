@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>담당 과목 목록</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='time_table.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='manage_attendance.css') }}">
+    <link rel="stylesheet" as="style" crossorigin
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+</head>
+<body>
+<div class="sidebar">
+    <h2 class="sidebar-title">메뉴</h2>
+    <ul id="menuList" class="menu-list"></ul>
+</div>
+
+<div class="content-area">
+    <header class="manage-header">
+        <div class="header-info">
+            <h1 class="course-title">담당 과목 목록</h1>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="subject-list-container">
+            {% if subjects %}
+                <ul class="subject-list">
+                    {% for subject in subjects %}
+                        <li>
+                            <a href="{{ url_for('professor.subject_attendance_weeks', subject_id=subject.subject_id) }}">
+                                {{ subject.name }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="no-data-message">담당하고 있는 과목이 없습니다.</p>
+            {% endif %}
+        </div>
+    </main>
+</div>
+
+<script>
+    const userRole = "{{ role }}";
+    const menuList = document.getElementById("menuList");
+    let menuItems = [
+        { name: "출석 관리", url: "{{ url_for('professor.manage_subjects') }}", current: true },
+        { name: "시간표", url: "{{ url_for('timetable.timetable') }}" },
+        { name: "휴강 등록", url: "#" },
+        { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
+    ];
+
+    menuItems.forEach(item => {
+        const li = document.createElement("li");
+        const link = document.createElement("a");
+        link.href = item.url;
+        link.textContent = item.name;
+        if (item.current) link.classList.add('current');
+        li.appendChild(link);
+        menuList.appendChild(li);
+    });
+</script>
+</body>
+</html>
