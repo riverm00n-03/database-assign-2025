@@ -28,8 +28,7 @@
             <span class="course-date">{{ class_date or '날짜 정보 없음' }}</span>
         </div>
         <div class="header-actions">
-            <!-- 이전 페이지(주차별 목록)로 돌아가기 -->
-            <a href="{{ request.referrer or url_for('professor.manage_subjects') }}" class="btn-back">목록으로</a>
+            <a href="{{ url_for('professor.todays_classes') }}" class="btn-back">목록으로</a>
         </div>
     </header>
 
@@ -89,19 +88,18 @@
 
     if (userRole === "professor") {
         menuItems = [
-            { name: "출석 관리", url: "{{ url_for('professor.manage_subjects') }}", current: true },
+            { name: "오늘의 강의", url: "{{ url_for('professor.todays_classes') }}" },
             { name: "시간표", url: "{{ url_for('timetable.timetable') }}" },
             { name: "휴강 등록", url: "#" },
             { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
         ];
     }
- 
+
     menuItems.forEach(item => {
         const li = document.createElement("li");
         const link = document.createElement("a");
         link.href = item.url;
         link.textContent = item.name;
-        if (item.current) link.classList.add('current');
         li.appendChild(link);
         menuList.appendChild(li);
     });
