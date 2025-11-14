@@ -24,17 +24,17 @@
 
 .btn-back {
     padding: 10px 20px;
+    padding: 8px 16px;
     text-decoration: none;
     font-weight: 600;
-    color: #334155;
-    background-color: #f1f5f9;
-    border: 1px solid #e2e8f0;
+    color: white;
+    background-color: #6b7280;
     border-radius: 8px;
     transition: background-color 0.2s;
 }
 
 .btn-back:hover {
-    background-color: #e2e8f0;
+    background-color: #4b5563;
 }
 
 /* ============================

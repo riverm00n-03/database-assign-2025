@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ subject_name }} - 수업 목록</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='time_table.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='professor.css') }}">
+    <link rel="stylesheet" as="style" crossorigin
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+</head>
+<body>
+<div class="sidebar">
+    <h2 class="sidebar-title">메뉴</h2>
+    <ul id="menuList" class="menu-list"></ul>
+</div>
+
+<div class="content-area">
+    <header class="full-title-header">
+        <div class="header-content">
+            <h1 class="page-title">{{ subject_name }} - 수업 목록</h1>
+            <a href="{{ url_for('professor.lecture_list') }}" class="btn-back">담당 과목 목록으로</a>
+        </div>
+    </header>
+    <main class="main-content">
+        <div class="session-list-container">
+            <table class="session-table">
+                <thead>
+                    <tr>
+                        <th>날짜</th>
+                        <th>요일</th>
+                        <th>시간</th>
+                        <th style="width: 25%; text-align: center;">출결/휴강</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in sessions_info %}
+                    {# '다음 수업'에 is_next_class 클래스 추가 #}
+                    <tr class="{{ 'is_next_class' if session.is_next_class else '' }}" id="{{ 'next-class-anchor' if session.is_next_class else '' }}">
+                        <td>{{ session.class_date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ session.day_of_week }}</td>
+                        <td>{{ session.start_time }} ~ {{ session.end_time }}</td>
+                        <td class="session-actions">
+                            {% if session.is_cancelled %}
+                                <span class="status-cancelled">휴강</span>
+                                {# 미래의 휴강된 수업만 취소 가능 #}
+                                {% if session.class_date >= today %}
+                                    <a href="{{ url_for('professor.uncancel_session', session_id=session.session_id) }}"
+                                       class="btn-uncancel"
+                                       onclick="return confirm('휴강 처리를 취소하시겠습니까?');">휴강 취소</a>
+                                {% endif %}
+                            {% else %}
+                                {% if session.session_id %}
+                                    <a href="{{ url_for('professor.manage_attendance', session_id=session.session_id) }}" class="btn-view-att">출석부 확인</a>
+                                {% else %}
+                                    <!-- 아직 생성되지 않은 미래 수업 -->
+                                    <a href="#" class="btn-view-att disabled" aria-disabled="true" onclick="event.preventDefault(); alert('아직 진행되지 않은 수업입니다.');">출석부 확인</a>
+                                {% endif %}
+                                {# 미래의 수업만 휴강 가능 #}
+                                {% if session.class_date >= today %}
+                                    <a href="{{ url_for('professor.cancel_session', schedule_id=session.schedule_id, class_date=session.class_date.strftime('%Y-%m-%d')) }}"
+                                       class="btn-cancel"
+                                       onclick="return confirm('정말로 이 수업을 휴강 처리하시겠습니까?');">휴강 처리</a>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="no-data">수업 정보가 없습니다.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+<script>
+    const userRole = "{{ role }}";
+    const menuList = document.getElementById("menuList");
+    let menuItems = [
+        { name: "출석 관리", url: "{{ url_for('professor.lecture_list') }}" },
+        { name: "시간표", url: "{{ url_for('timetable.timetable') }}" },
+        { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
+    ];
+
+    menuItems.forEach(item => {
+        const li = document.createElement("li");
+        const link = document.createElement("a");
+        link.href = item.url;
+        link.textContent = item.name;
+
+        // '출석 관리' 메뉴를 항상 활성화된 것처럼 보이게 함
+        if (item.name === "출석 관리") {
+            link.style.color = "#2563eb";
+            link.style.fontWeight = "700";
+        }
+        li.appendChild(link);
+        menuList.appendChild(li);
+    });
+
+    // 페이지 로드 시 '다음 수업' 위치로 스크롤
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const nextClassAnchor = document.getElementById('next-class-anchor');
+        if (nextClassAnchor) {
+            nextClassAnchor.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+</script>
+</body>
+</html>

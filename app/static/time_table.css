@@ -66,6 +66,7 @@ body {
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
+    gap: 16px;
     background-color: #f3f6fa;
     min-width: 0; /* ✅ flexbox 축소 시 overflow 방지 */
 }
@@ -112,13 +113,13 @@ body {
 .main-content {
     flex-grow: 1;
     overflow-y: auto;
-    padding: 0;
+    padding-bottom: 32px;
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    flex-direction: column; /* 자식 요소들을 수직으로 쌓음 */
+    align-items: center;   /* 자식 요소들을 수평 중앙에 배치 */
 }
 
-/* ============================
+/* ============================ㅉㅌ`
    시간표 컨테이너
 ============================ */
 .timetable-container {
