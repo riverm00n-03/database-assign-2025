@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8" />
-    <title>출석 관리</title>
+    <title>{{ subject_name }} 출석 상세</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- 공통 스타일 -->
@@ -26,7 +26,7 @@
     <!-- 상단 타이틀 -->
     <header class="full-title-header">
         <div class="title-wrap">
-            <h1 class="page-title">{{ username }}님 출석 관리</h1>
+            <h1 class="page-title">{{ subject_name }} 출석 상세</h1>
         </div>
     </header>
 
@@ -34,41 +34,44 @@
     <main class="main-content">
         <div class="attendance-container">
             <div class="hint">
-                과목별 출석 현황을 확인하고, 상세 내역을 보려면 과목을 클릭하세요.
+                과목의 주차별 출석 현황입니다.
             </div>
 
             <table class="att-table">
                 <thead>
                 <tr>
-                    <th style="width:40%;">과목명</th>
-                    <th style="width:25%;">교수명</th>
-                    <th style="width:20%;">출석률</th>
-                    <th style="width:15%;">상태</th>
+                    <th style="width:10%;">주차</th>
+                    <th style="width:20%;">날짜</th>
+                    <th style="width:12%;">요일</th>
+                    <th style="width:23%;">시간</th>
+                    <th style="width:35%;">출석 여부</th>
                 </tr>
                 </thead>
                 <tbody>
-                {% if enrolled_subjects %}
-                    {% for subject in enrolled_subjects %}
-                        <tr class="att-row clickable-row" data-subject-id="{{ subject.subject_id }}">
-                            <td class="sbj">
-                                <div class="subject-name">{{ subject.subject_name }}</div>
-                            </td>
-                            <td>{{ subject.professor_name or '-' }}</td>
-                            <td>{{ subject.attendance_percentage }}%</td>
+                {% if attendance_records %}
+                    {% for record in attendance_records %}
+                        <tr class="att-row">
+                            <td>{{ record.week }}주차</td>
+                            <td>{{ record.class_date }}</td>
+                            <td>{{ record.day_of_week }}</td>
+                            <td>{{ record.start_time }} ~ {{ record.end_time }}</td>
                             <td>
-                                <span class="status-badge status-{{ subject.status_color }}">
-                                    {{ subject.status_text }}
+                                <span class="status-badge status-{{ record.status_class }}">
+                                    {{ record.status }}
                                 </span>
                             </td>
                         </tr>
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="4" class="empty">수강 중인 과목이 없습니다.</td>
+                        <td colspan="5" class="empty">해당 과목의 출석 기록이 없습니다.</td>
                     </tr>
                 {% endif %}
                 </tbody>
             </table>
+            <div class="back-button-container">
+                <button class="btn-back" onclick="history.back()">뒤로 가기</button>
+            </div>
         </div>
     </main>
 </div>
@@ -83,7 +86,7 @@
         menuItems = [
             { name: "시간표", url: "{{ url_for('timetable.timetable') }}" },
             { name: "출석체크", url: "{{ url_for('attendance.show_attendance') }}" },
-            { name: "출석관리", url: "#", current: true },
+            { name: "출석관리", url: "{{ url_for('attendance.manage_attendance') }}" },
             { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
         ];
     } else if (userRole === "professor") {
@@ -108,14 +111,6 @@
         }
 
         menuList.appendChild(li);
-    });
-
-    // 클릭 가능한 행에 클릭 이벤트 리스너를 추가한다.
-    document.querySelectorAll('.clickable-row').forEach(row => {
-        row.addEventListener('click', () => {
-            const subjectId = row.dataset.subjectId;
-            window.location.href = `/attendance/detail/${subjectId}`;
-        });
     });
 </script>
 </body>
