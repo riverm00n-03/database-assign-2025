@@ -94,7 +94,7 @@ def test_database():
                 # 과목 스케줄 추가
                 print("과목 스케줄 데이터 삽입 중...")
                 cursor.execute("INSERT INTO subject_schedule (subject_id, day_of_week, start_time, end_time, location) VALUES (%s, %s, %s, %s, %s)", 
-                              (1, "FRI", "09:00:00", "10:30:00", "101호"))
+                              (1, "MON", "09:00:00", "10:30:00", "101호"))
                 cursor.execute("INSERT INTO subject_schedule (subject_id, day_of_week, start_time, end_time, location) VALUES (%s, %s, %s, %s, %s)", 
                               (1, "WED", "09:00:00", "10:30:00", "101호"))
                 cursor.execute("INSERT INTO subject_schedule (subject_id, day_of_week, start_time, end_time, location) VALUES (%s, %s, %s, %s, %s)", 

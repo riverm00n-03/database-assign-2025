@@ -46,9 +46,6 @@ def lecture_list():
 @login_required
 def list_subject_sessions(subject_id):
     """특정 과목의 학기 전체 수업 목록을 보여줌 (단순화된 버전)"""
-    if session.get('role') != 'professor':
-        flash("접근 권한이 없습니다.")
-        return redirect(url_for('timetable.timetable'))
 
     # --- 1. 기본 정보 설정 ---
     SEMESTER_START = datetime(2025, 3, 1).date()
@@ -93,26 +90,24 @@ def list_subject_sessions(subject_id):
                     for schedule in schedules:
                         # 오늘 날짜의 요일과 스케줄의 요일이 일치하는지 확인
                         if current_date.weekday() == day_map.get(schedule['day_of_week'].upper()):
+                            session_info = {}
                             session_key = (current_date, schedule['schedule_id'])
                             if session_key in db_sessions_map:
                                 # DB에 기록이 있으면 그 정보를 사용
-                                session_info = db_sessions_map[session_key]
-                                session_info['start_time'] = (datetime.min + schedule['start_time']).strftime('%H:%M')
-                                session_info['end_time'] = (datetime.min + schedule['end_time']).strftime('%H:%M')
-                                session_info['day_of_week'] = schedule['day_of_week']
-                                all_sessions.append(session_info)
+                                session_info.update(db_sessions_map[session_key])
                             else:
                                 # DB에 기록이 없으면 '예정된' 수업으로 간주하고 새로 만듦
-                                virtual_session = {
+                                session_info.update({
                                     'session_id': None,
                                     'class_date': current_date,
                                     'is_cancelled': False,
                                     'schedule_id': schedule['schedule_id'],
-                                    'day_of_week': schedule['day_of_week'],
-                                    'start_time': (datetime.min + schedule['start_time']).strftime('%H:%M'),
-                                    'end_time': (datetime.min + schedule['end_time']).strftime('%H:%M'),
-                                }
-                                all_sessions.append(virtual_session)
+                                })
+                            # 공통 정보 추가
+                            session_info['day_of_week'] = schedule['day_of_week']
+                            session_info['start_time'] = (datetime.min + schedule['start_time']).strftime('%H:%M')
+                            session_info['end_time'] = (datetime.min + schedule['end_time']).strftime('%H:%M')
+                            all_sessions.append(session_info)
                     current_date += timedelta(days=1)
 
                 # --- 4. '다음 수업' 찾아서 표시하기 ---
@@ -230,17 +225,18 @@ def manage_attendance(session_id):
 
     student_query = """
         SELECT
-            st.student_id,
-            st.name,
-            st.student_number,
-            st.student_major,
-            chk.status
-        FROM enrollment AS en
-        JOIN student AS st ON en.student_id = st.student_id
-        JOIN class_session AS cs ON en.subject_id = (SELECT subject_id FROM subject_schedule WHERE schedule_id = cs.schedule_id)
-        LEFT JOIN checkin AS chk ON cs.session_id = chk.session_id AND en.student_id = chk.student_id
-        WHERE cs.session_id = %s
-        ORDER BY st.student_number ASC;
+            st.student_id, st.name, st.student_number, st.student_major,
+            COALESCE(chk.status, '미처리') AS status
+        FROM
+            enrollment en
+            JOIN student st ON en.student_id = st.student_id
+            JOIN subject_schedule ss ON en.subject_id = ss.subject_id
+            JOIN class_session cs ON ss.schedule_id = cs.schedule_id
+            LEFT JOIN checkin chk ON cs.session_id = chk.session_id AND st.student_id = chk.student_id
+        WHERE
+            cs.session_id = %s
+        GROUP BY st.student_id, st.name, st.student_number, st.student_major, chk.status
+        ORDER BY st.student_number;
     """
 
     subject_query = """

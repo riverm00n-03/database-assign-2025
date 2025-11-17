@@ -8,6 +8,13 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='professor.css') }}">
     <link rel="stylesheet" as="style" crossorigin
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+    <style>
+        .session-list-container {
+            max-height: 70vh; /* 화면 높이의 70%를 최대 높이로 설정 */
+            overflow-y: auto; /* 내용이 넘칠 경우 세로 스크롤바 표시 */
+            border: 1px solid #e5e7eb;
+        }
+    </style>
 </head>
 <body>
 <div class="sidebar">
@@ -95,6 +102,11 @@
         if (item.name === "출석 관리") {
             link.style.color = "#2563eb";
             link.style.fontWeight = "700";
+            // 현재 페이지와 관련된 기능이므로, 클릭 시 알림을 띄우고 이동을 막습니다.
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                alert('이미 출석 관리 기능 페이지입니다.');
+            });
         }
         li.appendChild(link);
         menuList.appendChild(li);
