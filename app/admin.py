@@ -83,13 +83,13 @@ def test_database():
                 # 과목 4개 추가
                 print("과목 데이터 삽입 중...")
                 cursor.execute("INSERT INTO subject (name, subject_year, subject_semester, professor_id) VALUES (%s, %s, %s, %s)", 
-                              ("데이터베이스", 2025, 1, 1))
+                              ("데이터베이스", 2025, 2, 1))
                 cursor.execute("INSERT INTO subject (name, subject_year, subject_semester, professor_id) VALUES (%s, %s, %s, %s)", 
-                              ("운영체제", 2025, 1, 1))
+                              ("운영체제", 2025, 2, 1))
                 cursor.execute("INSERT INTO subject (name, subject_year, subject_semester, professor_id) VALUES (%s, %s, %s, %s)", 
-                              ("디지털회로", 2025, 1, 2))
+                              ("디지털회로", 2025, 2, 2))
                 cursor.execute("INSERT INTO subject (name, subject_year, subject_semester, professor_id) VALUES (%s, %s, %s, %s)", 
-                              ("네트워크프로그래밍", 2025, 1, 3))
+                              ("네트워크프로그래밍", 2025, 2, 3))
                 
                 # 과목 스케줄 추가
                 print("과목 스케줄 데이터 삽입 중...")
@@ -125,20 +125,20 @@ def test_database():
                 for student_id in range(5, 11):
                     cursor.execute("INSERT INTO enrollment (student_id, subject_id) VALUES (%s, %s)", (student_id, 4))
                 
-                # 수업 세션 추가 (2025년 3월 첫 주 수업들)
+                # 수업 세션 추가 (2025년 9월 첫 주 수업들 - 2학기)
                 print("수업 세션 데이터 삽입 중...")
-                # 과목 1 (월요일, 수요일) - 3월 3일(월), 3월 5일(수)
-                cursor.execute("INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, %s)", (1, "2025-03-03", False))
-                cursor.execute("INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, %s)", (2, "2025-03-05", False))
-                # 과목 2 (화요일, 목요일) - 3월 4일(화), 3월 6일(목)
-                cursor.execute("INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, %s)", (3, "2025-03-04", False))
-                cursor.execute("INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, %s)", (4, "2025-03-06", False))
-                # 과목 3 (월요일, 수요일) - 3월 3일(월), 3월 5일(수)
-                cursor.execute("INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, %s)", (5, "2025-03-03", False))
-                cursor.execute("INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, %s)", (6, "2025-03-05", False))
-                # 과목 4 (화요일, 목요일) - 3월 4일(화), 3월 6일(목)
-                cursor.execute("INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, %s)", (7, "2025-03-04", False))
-                cursor.execute("INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, %s)", (8, "2025-03-06", False))
+                # 과목 1 (월요일, 수요일) - 9월 1일(월), 9월 3일(수)
+                cursor.execute("INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, %s)", (1, "2025-09-01", False))
+                cursor.execute("INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, %s)", (2, "2025-09-03", False))
+                # 과목 2 (화요일, 목요일) - 9월 2일(화), 9월 4일(목)
+                cursor.execute("INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, %s)", (3, "2025-09-02", False))
+                cursor.execute("INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, %s)", (4, "2025-09-04", False))
+                # 과목 3 (월요일, 수요일) - 9월 1일(월), 9월 3일(수)
+                cursor.execute("INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, %s)", (5, "2025-09-01", False))
+                cursor.execute("INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, %s)", (6, "2025-09-03", False))
+                # 과목 4 (화요일, 목요일) - 9월 2일(화), 9월 4일(목)
+                cursor.execute("INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, %s)", (7, "2025-09-02", False))
+                cursor.execute("INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, %s)", (8, "2025-09-04", False))
                 
                 # 출석 정보 추가
                 print("출석 데이터 삽입 중...")
