@@ -291,7 +291,7 @@ def calculate_attendance_status(total_sessions, present_count, late_count, absen
 
 @attendance_bp.route('/manage')
 @login_required
-def manage_attendance():
+def manage_attendance_students():
     """
     학생의 출석 관리 페이지를 표시합니다.
     수강 중인 모든 과목의 출석 현황을 보여줍니다.
@@ -392,7 +392,7 @@ def manage_attendance():
             print(f"Error in manage_attendance: {e}")
 
     return render_template(
-        'manage_attendance.html',
+        'manage_attendance_students.html',
         username=username,
         role=role,
         enrolled_subjects=enrolled_subjects_data

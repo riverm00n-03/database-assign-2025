@@ -87,7 +87,7 @@
         menuItems = [
             { name: "시간표", url: "#" },
             { name: "출석체크", url: "{{ url_for('attendance.show_attendance') }}" },
-            { name: "출석관리", url: "{{ url_for('attendance.manage_attendance') }}" },
+            { name: "출석관리", url: "{{ url_for('attendance.manage_attendance_students') }}" },
             { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
         ];
     } else if (userRole === "professor") {

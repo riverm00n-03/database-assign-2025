@@ -26,7 +26,7 @@ def lecture_list():
     try:
         with connect(**DB_CONFIG) as connection:
             with connection.cursor(dictionary=True) as cursor:
-                # 교수가 담당하는 과목 목록을 가져오는 단순한 쿼리
+                # 교수가 담당하는 과목 목록을 가져오는 쿼리
                 query = """
                     SELECT subject_id, name
                     FROM subject
@@ -45,11 +45,11 @@ def lecture_list():
 @professor_bp.route('/subject/<int:subject_id>/sessions')
 @login_required
 def list_subject_sessions(subject_id):
-    """특정 과목의 학기 전체 수업 목록을 보여줌 (단순화된 버전)"""
+    """특정 과목의 학기 전체 수업 목록을 보여줌"""
 
     # --- 1. 기본 정보 설정 ---
-    SEMESTER_START = datetime(2025, 3, 1).date()
-    SEMESTER_END = datetime(2025, 6, 20).date()
+    SEMESTER_START = datetime(2025, 9, 1).date()
+    SEMESTER_END = datetime(2025, 12, 22).date()
     today = datetime.now().date()
     subject_name = ""
     all_sessions = []
@@ -93,12 +93,21 @@ def list_subject_sessions(subject_id):
                             session_info = {}
                             session_key = (current_date, schedule['schedule_id'])
                             if session_key in db_sessions_map:
-                                # DB에 기록이 있으면 그 정보를 사용
+                                # DB에 기록이 있으면 그 정보를 사용 (session_id 존재)
                                 session_info.update(db_sessions_map[session_key])
                             else:
-                                # DB에 기록이 없으면 '예정된' 수업으로 간주하고 새로 만듦
+                                # DB에 기록이 없으면 '예정된' 수업으로 간주하고,
+                                # 출석부 관리를 위해 class_session을 즉시 생성합니다.
+                                cursor.execute(
+                                    "INSERT INTO class_session (schedule_id, class_date) VALUES (%s, %s)",
+                                    (schedule['schedule_id'], current_date)
+                                )
+                                new_session_id = cursor.lastrowid
+                                connection.commit() # 변경사항을 즉시 커밋합니다.
+
                                 session_info.update({
-                                    'session_id': None,
+                                    # 새로 생성된 session_id를 사용합니다.
+                                    'session_id': new_session_id,
                                     'class_date': current_date,
                                     'is_cancelled': False,
                                     'schedule_id': schedule['schedule_id'],
@@ -141,22 +150,45 @@ def cancel_session(schedule_id, class_date):
     try:
         with connect(**DB_CONFIG) as connection:
             with connection.cursor(dictionary=True) as cursor:
-                # subject_id를 먼저 조회 (리디렉션을 위해)
+                # 1. subject_id 조회 (리디렉션 및 학생 목록 조회를 위해)
                 cursor.execute("SELECT subject_id FROM subject_schedule WHERE schedule_id = %s", (schedule_id,))
                 result = cursor.fetchone()
                 if result:
                     subject_id = result['subject_id']
+                else:
+                    flash("과목 정보를 찾을 수 없습니다.")
+                    return redirect(url_for('professor.lecture_list'))
 
+                # 2. class_session ID 가져오기 (없으면 생성)
                 cursor.execute("SELECT session_id FROM class_session WHERE schedule_id = %s AND class_date = %s", (schedule_id, class_date_obj))
                 session_result = cursor.fetchone()
 
                 if session_result:
-                    cursor.execute("UPDATE class_session SET is_cancelled = TRUE WHERE session_id = %s", (session_result['session_id'],))
+                    session_id = session_result['session_id']
+                    cursor.execute("UPDATE class_session SET is_cancelled = TRUE WHERE session_id = %s", (session_id,))
                 else:
                     cursor.execute("INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, TRUE)", (schedule_id, class_date_obj))
-                
+                    session_id = cursor.lastrowid
+
+                # 3. 해당 과목의 모든 수강생 목록 조회
+                cursor.execute("SELECT student_id FROM enrollment WHERE subject_id = %s", (subject_id,))
+                students = cursor.fetchall()
+
+                # 4. 모든 수강생을 '출석'으로 처리 (UPSERT)
+                if students:
+                    upsert_query = """
+                        INSERT INTO checkin (session_id, student_id, status)
+                        VALUES (%s, %s, 'PRESENT')
+                        ON DUPLICATE KEY UPDATE status = 'PRESENT';
+                    """
+                    # 각 학생에 대해 쿼리 실행
+                    for student in students:
+                        cursor.execute(upsert_query, (session_id, student['student_id']))
+
+                # 5. 모든 변경사항 커밋
                 connection.commit()
-                flash(f"{class_date} 수업이 휴강 처리되었습니다.")
+                flash(f"{class_date} 수업이 휴강 처리되었으며, 모든 학생이 출석 처리되었습니다.")
+
     except Error as e:
         flash(f"휴강 처리 중 오류가 발생했습니다: {e}")
 
@@ -195,7 +227,7 @@ def uncancel_session(session_id):
 
 @professor_bp.route('/manage_attendance/<int:session_id>', methods=['GET', 'POST'])
 @login_required
-def manage_attendance(session_id):
+def manage_attendance_professor(session_id):
     """출결 관리 페이지"""
     if session.get('role') != 'professor':
         flash("접근 권한이 없습니다.")
@@ -223,10 +255,11 @@ def manage_attendance(session_id):
 
         return redirect(url_for('professor.manage_attendance', session_id=session_id))
 
+    # 특정 수업 세션(session_id)에 등록된 모든 학생의 목록과 각 학생의 출결 상태를 조회합니다. 출결 기록이 없는 학생은 '결석(ABSENT)'으로 처리합니다.
     student_query = """
         SELECT
             st.student_id, st.name, st.student_number, st.student_major,
-            COALESCE(chk.status, '미처리') AS status
+            COALESCE(chk.status, 'ABSENT') AS status
         FROM
             enrollment en
             JOIN student st ON en.student_id = st.student_id
@@ -235,10 +268,11 @@ def manage_attendance(session_id):
             LEFT JOIN checkin chk ON cs.session_id = chk.session_id AND st.student_id = chk.student_id
         WHERE
             cs.session_id = %s
-        GROUP BY st.student_id, st.name, st.student_number, st.student_major, status
+        GROUP BY st.student_id, st.name, st.student_number, st.student_major, chk.status
         ORDER BY st.student_number;
     """
 
+    # 특정 수업 세션(session_id)에 해당하는 과목의 ID, 이름, 그리고 수업 날짜를 조회합니다.
     subject_query = """
         SELECT
             s.subject_id,
@@ -271,7 +305,7 @@ def manage_attendance(session_id):
         return redirect(url_for('professor.lecture_list'))
 
     return render_template(
-        'professor/manage_attendance.html',
+        'professor/manage_attendance_professor.html',
         role=session.get('role'),
         session_id=session_id,
         students=students,

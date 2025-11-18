@@ -57,11 +57,12 @@
                                        onclick="return confirm('휴강 처리를 취소하시겠습니까?');">휴강 취소</a>
                                 {% endif %}
                             {% else %}
-                                {% if session.session_id %}
-                                    <a href="{{ url_for('professor.manage_attendance', session_id=session.session_id) }}" class="btn-view-att">출석부 확인</a>
+                                {# 과거와 현재 수업만 출석부 확인 가능 #}
+                                {% if session.class_date <= today %}
+                                    <a href="{{ url_for('professor.manage_attendance_professor', session_id=session.session_id) }}" class="btn-view-att">출석부 확인</a>
                                 {% else %}
-                                    <!-- 아직 생성되지 않은 미래 수업 -->
-                                    <a href="#" class="btn-view-att disabled" aria-disabled="true" onclick="event.preventDefault(); alert('아직 진행되지 않은 수업입니다.');">출석부 확인</a>
+                                    {# 미래 수업은 비활성화 #}
+                                    <a href="#" class="btn-view-att disabled" aria-disabled="true" onclick="event.preventDefault(); alert('아직 진행되지 않은 수업의 출석부는 확인할 수 없습니다.');">출석부 확인</a>
                                 {% endif %}
                                 {# 미래의 수업만 휴강 가능 #}
                                 {% if session.class_date >= today %}
