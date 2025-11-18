@@ -514,6 +514,7 @@ def attendance_detail(subject_id):
                 # 주차별 출석 기록 리스트 초기화
                 attendance_records = []
                 current_date = semester_start
+                today = datetime.now().date()
                 
                 # 각 스케줄의 첫 번째 수업 날짜 계산
                 first_week_dates = {}
@@ -560,14 +561,18 @@ def attendance_detail(subject_id):
                             if session_info['is_cancelled']:
                                 status = '휴강'
                                 status_class = 'cancelled'
-                            # 정상 수업인 경우 출석 기록 확인
+                            # 아직 날짜가 도래하지 않은 미래의 수업인 경우
+                            elif week_date > today:
+                                status = '기간 아님'
+                                status_class = 'not-period'
+                            # 오늘 또는 과거의 정상 수업인 경우 출석 기록 확인
                             else:
                                 cursor.execute(
                                     "SELECT status FROM checkin WHERE session_id = %s AND student_id = %s",
                                     (session_id, student_id)
                                 )
                                 checkin_result = cursor.fetchone()
-                                # 출석 기록이 있으면 상태 표시
+                                # 출결 기록이 있으면 해당 상태로 표시
                                 if checkin_result:
                                     status = {
                                         'PRESENT': '출석',
@@ -575,7 +580,9 @@ def attendance_detail(subject_id):
                                         'ABSENT': '결석'
                                     }.get(checkin_result['status'], '알 수 없음')
                                     status_class = checkin_result['status'].lower()
-                                # 출석 기록이 없으면 미출석
+                                # 출결 기록이 없으면 '미출석'으로 처리
+                                # (위에서 미래 수업은 이미 '기간 아님'으로 처리했으므로,
+                                # 이 경우는 과거 수업에 출결 기록이 없는 경우임)
                                 else:
                                     status = '미출석'
                                     status_class = 'absent'
