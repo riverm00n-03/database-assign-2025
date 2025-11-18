@@ -4,9 +4,6 @@ from config import DB_CONFIG
 from app.utils.auth import login_required
 from datetime import datetime, timedelta, time
 
-# defaultdict와 같은 복잡한 라이브러리 대신 기본 자료구조 사용
-# from collections import defaultdict
-
 professor_bp = Blueprint('professor', __name__, url_prefix='/professor')
 
 

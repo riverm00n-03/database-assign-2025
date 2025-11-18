@@ -121,7 +121,7 @@ def show_attendance():
             print(f"Error in show_attendance: {e}")
 
     return render_template(
-        'attendance_check.html',
+        'students/attendance_check.html',
         username=username,
         role=role,
         server_now_iso=server_now.isoformat(),
@@ -392,7 +392,7 @@ def manage_attendance_students():
             print(f"Error in manage_attendance: {e}")
 
     return render_template(
-        'manage_attendance_students.html',
+        'students/manage_attendance_students.html',
         username=username,
         role=role,
         enrolled_subjects=enrolled_subjects_data
@@ -636,7 +636,7 @@ def attendance_detail(subject_id):
             print(f"Error in attendance_detail: {e}")
 
     return render_template(
-        'attendance_detail.html',
+        'students/attendance_detail.html',
         username=username,
         role=role,
         subject_name=subject_name,
