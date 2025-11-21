@@ -2,6 +2,7 @@
 출석 관련 유틸리티 함수들
 """
 from datetime import datetime, timedelta
+from app.utils.attendance_test import now
 from app.utils.constants import (
     ATTENDANCE_WINDOW_MINUTES,
     ATTENDANCE_STATUS_DISPLAY,

@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, session, flash, redirect, url_for, request
 from app.utils.auth import login_required
 from app.utils.db_helpers import get_db_connection, to_time, format_time_to_str, get_student_id_by_number
+from app.utils.attendance_test import now #테스트 추가
 from app.utils.constants import (
     ATTENDANCE_WINDOW_MINUTES,
     ATTENDANCE_STATUS_DISPLAY,
@@ -30,14 +31,14 @@ def show_attendance():
     role = session.get('role', 'student')
     student_number = session.get('student_number')
 
-    server_now = datetime.now()
+    server_now = datetime.now() # 테스트 원래 datetime.now()
     # 오늘 요일 인덱스 가져오기 (0: 월요일, 6: 일요일)
     today_index = server_now.weekday()
 
     # 주말일 경우 수업이 없으므로 빈 페이지 반환
     if today_index > 4:
         return render_template(
-            'attendance_check.html',
+            'students/attendance_check.html',
             username=username,
             role=role,
             server_now_iso=server_now.isoformat(),
@@ -70,9 +71,12 @@ def show_attendance():
                     FROM subject_schedule ss
                     JOIN subject s ON ss.subject_id = s.subject_id
                     LEFT JOIN professor p ON s.professor_id = p.professor_id
+                    JOIN enrollment e ON e.subject_id = s.subject_id   -- ★ 필수
                     WHERE UPPER(ss.day_of_week) = %s
+                      AND e.student_id = %s                            -- ★ 필수
                     ORDER BY ss.start_time
-                """, (today_weekday.upper(),))
+
+                """, (today_weekday.upper(),student_id))
                 rows = cursor.fetchall()
 
                 # 각 수업에 대해 출석 정보 처리
