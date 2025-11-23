@@ -250,7 +250,7 @@ def manage_attendance_professor(session_id):
         except Error as e:
             flash(f"출결 정보 저장 중 오류가 발생했습니다: {e}")
 
-        return redirect(url_for('professor.manage_attendance', session_id=session_id))
+        return redirect(url_for('professor.manage_attendance_professor', session_id=session_id))
 
     # 특정 수업 세션(session_id)에 등록된 모든 학생의 목록과 각 학생의 출결 상태를 조회합니다. 출결 기록이 없는 학생은 '결석(ABSENT)'으로 처리합니다.
     student_query = """
