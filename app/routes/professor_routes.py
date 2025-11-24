@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, session, redirect, url_for, reques
 from mysql.connector import connect, Error
 from config import DB_CONFIG
 from app.utils.auth import login_required
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta
 
 professor_bp = Blueprint('professor', __name__, url_prefix='/professor')
 
@@ -269,7 +269,6 @@ def manage_attendance_professor(session_id):
             LEFT JOIN checkin chk ON cs.session_id = chk.session_id AND st.student_id = chk.student_id
         WHERE
             cs.session_id = %s
-        GROUP BY st.student_id, st.name, st.student_number, st.student_major, chk.status
         ORDER BY st.student_number;
     """
 
