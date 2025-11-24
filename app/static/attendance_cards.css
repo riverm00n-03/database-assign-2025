@@ -186,10 +186,13 @@
     .attendance-cards-container {
         grid-template-columns: 1fr;
         gap: var(--spacing-md);
+        width: 85vw;
+        margin: 0 auto;
     }
 
     .attendance-card {
-        padding: var(--spacing-md);
+        padding: calc(var(--spacing-md) * 0.8);
+        width: 100%;
     }
 
     .card-subject-name {

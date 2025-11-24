@@ -162,6 +162,14 @@
     transition: all var(--transition-base);
 }
 
+@media (max-width: 768px) {
+    .card {
+        width: 85vw;
+        margin: 0 auto;
+        padding: calc(var(--spacing-lg) * 0.8);
+    }
+}
+
 .card:hover {
     box-shadow: var(--shadow-lg);
 }
@@ -206,6 +214,13 @@
     .table {
         min-width: 400px;
         font-size: 12px;
+    }
+}
+
+@media (max-width: 400px) {
+    .table {
+        min-width: 360px;
+        font-size: 11px;
     }
 }
 

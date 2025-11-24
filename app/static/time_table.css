@@ -25,7 +25,7 @@
     border-collapse: collapse;
     width: 100%;
     table-layout: fixed;
-    min-width: 500px;
+    min-width: 400px;
 }
 
 .timetable th,

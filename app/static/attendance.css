@@ -41,7 +41,7 @@
     table-layout:fixed;
     border-radius:10px;
     overflow:hidden;
-    min-width: 500px;
+    min-width: 400px;
 }
 .att-table th,
 .att-table td{
