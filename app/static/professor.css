@@ -266,21 +266,6 @@
 /* subject_sessions.html의 '다음 수업' 강조 스타일 */
 .is_next_class {
     background-color: #eff6ff !important; /* 연한 파란색 배경 */
-    border-left: 4px solid var(--info-color, #3b82f6);
-    position: relative;
-}
-
-.is_next_class::before {
-    content: "다음 수업";
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--info-color, #3b82f6);
-    background: rgba(59, 130, 246, 0.1);
-    padding: 2px 6px;
-    border-radius: var(--radius-sm, 4px);
 }
 
 .is_next_class td {
