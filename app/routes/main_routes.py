@@ -16,4 +16,4 @@ def root():
     username = session.get('username', '사용자')
     role = session.get('role', 'student')
 
-    return render_template('index.html', username=username, role=role)
+    return render_template('index.html', username=username, role=role, current_page='')

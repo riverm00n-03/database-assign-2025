@@ -1,39 +1,26 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>시간표</title>
+{% extends "base.html" %}
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+{% block title %}시간표 - WCheck{% endblock %}
+
+{% block styles %}
     <link rel="stylesheet" href="{{ url_for('static', filename='time_table.css') }}">
-    <link rel="stylesheet" as="style" crossorigin
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
-    <script src="{{ url_for('static', filename='menu-icons.js') }}"></script>
-</head>
-<body>
+{% endblock %}
 
-<!-- ✅ 왼쪽 사이드바 -->
-<div class="sidebar">
-    <h2 class="sidebar-title">메뉴</h2>
-    <ul id="menuList" class="menu-list"></ul>
-</div>
-
-<!-- ✅ 오른쪽 메인 콘텐츠 -->
-<div class="content-area">
+{% block header %}
     <header class="full-title-header">
         <h1 class="page-title">{{ username }}님 시간표</h1>
     </header>
+{% endblock %}
 
-    <main class="main-content">
+{% block content %}
         {% if error %}
             <div class="error-message">
                 <p>{{ error }}</p>
             </div>
         {% endif %}
 
-        <div class="timetable-container">
-            <table class="timetable">
+        <div class="timetable-container card fade-in" style="max-width: 1200px; margin: 0 auto; padding: var(--spacing-lg); margin-top: 0;">
+            <table class="timetable table">
                 <thead>
                 <tr>
                     <th>시간</th>
@@ -77,45 +64,4 @@
                 </tbody>
             </table>
         </div>
-    </main>
-</div>
-
-<script>
-    const userRole = "{{ role }}";
-    const menuList = document.getElementById("menuList");
-    let menuItems = [];
-
-    if (userRole === "student") {
-        menuItems = [
-            { name: "시간표", url: "#" },
-            { name: "출석체크", url: "{{ url_for('attendance.show_attendance') }}" },
-            { name: "출석관리", url: "{{ url_for('attendance.manage_attendance_students') }}" },
-            { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
-        ];
-    } else if (userRole === "professor") {
-         menuItems = [
-            { name: "출석 관리", url: "{{ url_for('professor.lecture_list') }}" },
-            { name: "시간표", url: "{{ url_for('timetable.timetable') }}" },
-            { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
-        ];
-    }
-
-    // 기존 구조 유지 + "시간표" 클릭 시 alert 추가
-    menuItems.forEach(item => {
-        const isCurrent = item.name === "시간표";
-        const li = renderMenuItem(item, isCurrent);
-        
-        if (isCurrent) {
-            const link = li.querySelector("a");
-            link.addEventListener("click", (e) => {
-                e.preventDefault();
-                alert("이미 시간표 페이지입니다.");
-            });
-        }
-        
-        menuList.appendChild(li);
-    });
-</script>
-
-</body>
-</html>
+{% endblock %}

@@ -50,9 +50,31 @@
     background-color: #fff;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    overflow: hidden;
     overflow-x: auto;
+    overflow-y: auto;
     min-width: 0;
+    max-height: calc(100vh - 250px);
+    position: relative;
+}
+
+/* 스크롤바 스타일 */
+.student-list-container::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.student-list-container::-webkit-scrollbar-track {
+    background: var(--bg-tertiary, #f8fafc);
+    border-radius: 5px;
+}
+
+.student-list-container::-webkit-scrollbar-thumb {
+    background: var(--border-dark, #cbd5e1);
+    border-radius: 5px;
+}
+
+.student-list-container::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted, #64748b);
 }
 
 .student-table {

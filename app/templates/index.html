@@ -1,58 +1,30 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>환영합니다</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="stylesheet" as="style" crossorigin
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
-    <script src="{{ url_for('static', filename='menu-icons.js') }}"></script>
-</head>
-<body>
-<div class="sidebar">
-    <h2 class="sidebar-title">메뉴</h2>
-    <ul id="menuList" class="menu-list"></ul>
-</div>
+{% extends "base.html" %}
 
-<div class="main-content">
-    <div class="container">
-        <h1>환영합니다, {{ username }}님!</h1>
-        <p>성공적으로 로그인되었습니다.</p>
+{% block title %}환영합니다 - WCheck{% endblock %}
+
+{% block content %}
+    <div class="container fade-in" style="width: 100%; max-width: 600px; margin: 0 auto; padding-top: 0;">
+        <div class="card" style="text-align: center;">
+            <div class="card-header">
+                <h1 class="card-title" style="font-size: 32px; margin-bottom: var(--spacing-md);">
+                    환영합니다, {{ username }}님! 👋
+                </h1>
+            </div>
+            <div class="card-body">
+                <p style="font-size: 18px; color: var(--text-secondary); margin-bottom: var(--spacing-lg);">
+                    성공적으로 로그인되었습니다.
+                </p>
+                <div style="display: flex; gap: var(--spacing-md); justify-content: center; flex-wrap: wrap;">
+                    <a href="{{ url_for('timetable.timetable') }}" class="btn btn-primary">
+                        시간표 보기
+                    </a>
+                    {% if role == 'student' %}
+                    <a href="{{ url_for('attendance.show_attendance') }}" class="btn btn-success">
+                        출석 체크
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
-</div>
-
-<script>
-    const userRole = "{{ role }}";
-    const menuList = document.getElementById("menuList");
-    let menuItems = [];
-
-    // 역할별 메뉴 (이동 기능 없이 표시용)
-    if (userRole === "student") { // 학생 역할인 경우
-        menuItems = [
-            { name: "시간표", url: "{{ url_for('timetable.timetable') }}" },
-            { name: "출석체크", url: "{{ url_for('attendance.show_attendance') }}" },
-            { name: "출석관리", url: "{{ url_for('attendance.manage_attendance_students') }}" },
-            { name: "로그아웃", url: "{{ url_for('auth.logout') }}" } 
-        ];
-    } else if (userRole === "professor") { // 교직원 역할인 경우
-        menuItems = [
-            { name: "출석 관리", url: "{{ url_for('professor.lecture_list') }}" },
-            { name: "시간표", url: "{{ url_for('timetable.timetable') }}" },
-            { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
-        ];
-    } else {
-        menuItems = [ // 기타 역할인 경우. 이런 경우는 사실상 없을 것이지만, Fail-Safe를 위해 추가함.
-            { name: "홈", url: "#" },
-            { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
-        ];
-    }
-
-    // 메뉴 렌더링
-    menuItems.forEach(item => {
-        const li = renderMenuItem(item);
-        menuList.appendChild(li);
-    });
-</script>
-</body>
-</html>
+{% endblock %}

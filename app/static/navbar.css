@@ -1,0 +1,223 @@
+/* ============================
+   상단 Navbar (PC 환경)
+============================ */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.navbar-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+}
+
+.navbar-brand {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.navbar-menu {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: var(--spacing-xs);
+    align-items: center;
+}
+
+.navbar-menu li {
+    margin: 0;
+}
+
+.navbar-menu a {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: 8px 16px;
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 14px;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-base);
+    position: relative;
+}
+
+.navbar-menu a:hover {
+    background-color: var(--bg-hover);
+    color: var(--primary-color);
+}
+
+.navbar-menu a.active {
+    background-color: rgba(67, 96, 255, 0.1);
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.navbar-menu a.active::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 2px;
+    background-color: var(--primary-color);
+    border-radius: var(--radius-full);
+}
+
+.navbar-menu a .menu-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+/* 모바일 햄버거 메뉴 */
+.navbar-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: var(--radius-sm);
+    transition: background-color var(--transition-fast);
+}
+
+.navbar-toggle:hover {
+    background-color: var(--bg-hover);
+}
+
+.navbar-toggle span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background-color: var(--text-primary);
+    border-radius: var(--radius-full);
+    transition: all var(--transition-base);
+}
+
+.navbar-toggle.active span:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px);
+}
+
+.navbar-toggle.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.navbar-toggle.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* 모바일 메뉴 */
+.mobile-menu {
+    display: none;
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    max-height: calc(100vh - 64px);
+    overflow-y: auto;
+    z-index: 999;
+}
+
+.mobile-menu.active {
+    display: block;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+.mobile-menu-list {
+    list-style: none;
+    margin: 0;
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.mobile-menu-list li {
+    margin: 0;
+}
+
+.mobile-menu-list a {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: 12px 16px;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 500;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.mobile-menu-list a:hover,
+.mobile-menu-list a.active {
+    background-color: var(--bg-hover);
+    color: var(--primary-color);
+}
+
+.mobile-menu-list a .menu-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .navbar-toggle {
+        display: flex;
+    }
+
+    .navbar-menu {
+        display: none;
+    }
+
+    .navbar-container {
+        padding: 0 var(--spacing-md);
+    }
+}
+
+@media (min-width: 769px) {
+    .mobile-menu {
+        display: none !important;
+    }
+}
+

@@ -1,82 +1,40 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>담당 과목</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+{% extends "base.html" %}
+
+{% block title %}담당 과목 - WCheck{% endblock %}
+
+{% block styles %}
     <link rel="stylesheet" href="{{ url_for('static', filename='time_table.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='professor.css') }}">
-    <link rel="stylesheet" as="style" crossorigin
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
-    <script src="{{ url_for('static', filename='menu-icons.js') }}"></script>
-</head>
-<body>
-<div class="sidebar">
-    <h2 class="sidebar-title">메뉴</h2>
-    <ul id="menuList" class="menu-list"></ul>
-</div>
+{% endblock %}
 
-<div class="content-area">
+{% block header %}
     <header class="full-title-header">
         <h1 class="page-title">담당 과목</h1>
     </header>
-    <main class="main-content">
+{% endblock %}
+
+{% block content %}
         {% if error %}
             <p class="error">{{ error }}</p>
         {% endif %}
-        <div class="class-list">
+        <div class="class-list fade-in">
             {% if subjects %}
                 {% for subject in subjects %}
-                <div class="class-card">
-                    <div class="card-header">
-                        <h3>{{ subject.name }}</h3>
+                <div class="class-card card" style="transition: transform var(--transition-base);">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-lg); border-bottom: 1px solid var(--border-light);">
+                        <h3 class="card-title" style="margin: 0; font-size: 20px;">{{ subject.name }}</h3>
                     </div>
-                    <div class="card-actions">
-                        <a href="{{ url_for('professor.list_subject_sessions', subject_id=subject.subject_id) }}" class="btn-manage">출석 관리</a>
+                    <div class="card-actions" style="padding: var(--spacing-lg); text-align: right; background: var(--bg-tertiary);">
+                        <a href="{{ url_for('professor.list_subject_sessions', subject_id=subject.subject_id) }}" class="btn btn-primary">
+                            출석 관리 →
+                        </a>
                     </div>
                 </div>
                 {% endfor %}
             {% else %}
-                <p>담당하고 있는 과목이 없습니다.</p>
+                <div class="card" style="text-align: center; padding: var(--spacing-xl);">
+                    <p style="color: var(--text-muted); font-size: 16px;">담당하고 있는 과목이 없습니다.</p>
+                </div>
             {% endif %}
         </div>
-    </main>
-</div>
-
-<script>
-    const userRole = "{{ role }}";
-    const menuList = document.getElementById("menuList");
-    let menuItems = [];
-
-    if (userRole === "professor") {
-        menuItems = [
-            { name: "출석 관리", url: "#" },
-            { name: "시간표", url: "{{ url_for('timetable.timetable') }}" },
-            { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
-        ];
-    }
-
-    const uniqueMenuItems = menuItems.filter((item, index, self) =>
-        index === self.findIndex((t) => (
-            t.name === item.name
-        ))
-    );
-
-    uniqueMenuItems.forEach(item => {
-        const isCurrent = item.name === "출석 관리";
-        const li = renderMenuItem(item, isCurrent);
-        const link = li.querySelector('a');
-
-        if (isCurrent) {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                alert('이미 현재 페이지입니다.');
-            });
-        }
-        
-        menuList.appendChild(li);
-    });
-</script>
-</body>
-</html>
+{% endblock %}

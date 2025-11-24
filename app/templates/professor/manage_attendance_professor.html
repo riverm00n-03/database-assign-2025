@@ -1,42 +1,29 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>출석 관리</title>
-    <!-- 공통 레이아웃 CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+{% extends "base.html" %}
+
+{% block title %}출석 관리 - WCheck{% endblock %}
+
+{% block styles %}
     <link rel="stylesheet" href="{{ url_for('static', filename='time_table.css') }}">
-    <!-- 출석 관리 전용 CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='manage_attendance.css') }}">
-    <!-- Pretendard 폰트 -->
-    <link rel="stylesheet" as="style" crossorigin
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
-    <script src="{{ url_for('static', filename='menu-icons.js') }}"></script>
-</head>
-<body>
-<!-- 왼쪽 사이드바 -->
-<div class="sidebar">
-    <h2 class="sidebar-title">메뉴</h2>
-    <ul id="menuList" class="menu-list"></ul>
-</div>
+{% endblock %}
 
-<!-- 오른쪽 메인 콘텐츠 -->
-<div class="content-area">
-    <header class="manage-header">
-        <div class="header-info">
-            <!-- 백엔드에서 전달될 과목명과 날짜 -->
-            <h1 class="course-title">{{ subject_name or '과목 정보 없음' }}</h1>
-            <span class="course-date">{{ class_date or '날짜 정보 없음' }}</span>
+{% block header %}
+    <header class="full-title-header">
+        <div class="title-wrap" style="flex-wrap: wrap; gap: var(--spacing-sm);">
+            <div style="flex: 1; min-width: 0;">
+                <h1 class="page-title" style="font-size: 20px; margin-bottom: var(--spacing-xs);">{{ subject_name or '과목 정보 없음' }}</h1>
+                <span style="font-size: 14px; color: var(--text-muted);">{{ class_date or '날짜 정보 없음' }}</span>
+            </div>
+            <a href="{{ url_for('professor.list_subject_sessions', subject_id=subject_id) }}" class="btn btn-secondary btn-sm" style="white-space: nowrap;">← 수업 목록으로</a>
         </div>
-        <a href="{{ url_for('professor.list_subject_sessions', subject_id=subject_id) }}" class="btn-back">수업 목록으로</a>
     </header>
+{% endblock %}
 
-    <main class="main-content">
-        <div class="student-list-container">
+{% block content %}
+        <div class="student-list-container card fade-in" style="max-width: 1200px; margin: 0 auto; padding: 0;">
             <!-- 출결 상태 업데이트를 위한 form -->
             <form method="POST" action="{{ url_for('professor.manage_attendance_professor', session_id=session_id) }}" onsubmit="alert('변경사항이 저장되었습니다.');">
-                <table class="student-table">
+                <table class="student-table table">
                     <thead>
                         <tr>
                             <th class="col-name">이름</th>
@@ -48,10 +35,10 @@
                     <tbody>
                         <!-- 백엔드에서 학생 목록(students)을 전달받아 반복 처리 -->
                         {% for student in students %}
-                        <tr>
-                            <td>{{ student.name }}</td>
-                            <td>{{ student.student_number }}</td>
-                            <td>{{ student.student_major }}</td>
+                        <tr style="transition: background-color var(--transition-fast);">
+                            <td style="font-weight: 500; color: var(--text-primary);">{{ student.name }}</td>
+                            <td style="font-family: 'Courier New', monospace; color: var(--text-secondary);">{{ student.student_number }}</td>
+                            <td style="color: var(--text-secondary);">{{ student.student_major }}</td>
                             <td class="status-selector">
                                 <div class="radio-group">
                                     <input type="radio" id="present_{{ student.student_id }}" name="status_{{ student.student_id }}" value="PRESENT" {% if student.status == 'PRESENT' %}checked{% endif %}>
@@ -72,32 +59,9 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                <div class="form-actions">
-                    <button type="submit" class="btn-save">변경사항 저장</button>
+                <div class="form-actions" style="padding: var(--spacing-lg); text-align: right; background: var(--bg-tertiary); border-top: 1px solid var(--border-color);">
+                    <button type="submit" class="btn btn-primary btn-lg">💾 변경사항 저장</button>
                 </div>
             </form>
         </div>
-    </main>
-</div>
-
-<!-- 사이드바 메뉴 생성 스크립트 -->
-<script>
-    const userRole = "{{ role }}";
-    const menuList = document.getElementById("menuList");
-    let menuItems = [];
-
-    if (userRole === "professor") {
-        menuItems = [
-            { name: "출석 관리", url: "{{ url_for('professor.lecture_list') }}" },
-            { name: "시간표", url: "{{ url_for('timetable.timetable') }}" },
-            { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
-        ];
-    }
-
-    menuItems.forEach(item => {
-        const li = renderMenuItem(item);
-        menuList.appendChild(li);
-    });
-</script>
-</body>
-</html>
+{% endblock %}

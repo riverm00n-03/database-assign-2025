@@ -37,33 +37,61 @@ body {
     background-color: #f3f6fa;
     color: #1e293b;
     display: flex;
-    flex-direction: row; /* ✅ 가로 정렬 강제 */
-    height: 100vh;
+    flex-direction: column; /* ✅ 세로 정렬 (Navbar 위쪽) */
+    min-height: 100vh;
     width: 100%;
-    overflow: hidden; /* ✅ 스크롤바가 생기며 밀리는 현상 방지 */
+}
+
+/* PC 환경: Navbar 사용 */
+@media (min-width: 769px) {
+    body {
+        flex-direction: column;
+    }
+}
+
+/* 모바일 환경: 기존 레이아웃 유지 */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+        padding-bottom: 80px; /* 하단 네비게이션 공간 */
+    }
 }
 
 /* ============================
-   왼쪽 사이드바
+   왼쪽 사이드바 (모바일 전용)
 ============================ */
 .sidebar {
-    width: 140px;
-    background: linear-gradient(140deg, rgba(255, 255, 255, 0.78) 0%, rgba(233, 240, 255, 0.46) 100%);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.38);
-    border-right: none;
-    padding: 18px 10px;
-    margin: 12px;
-    border-radius: 28px;
-    box-sizing: border-box;
-    flex-shrink: 0; /* ✅ 사이드바 크기 줄어들지 않게 */
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    justify-content: flex-start;
-    height: calc(100vh - 24px); /* ✅ 사이드바 총 높이에서 외곽 여백 반영 */
-    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 -1px 0 rgba(148, 163, 184, 0.16);
+    display: none; /* PC에서는 숨김 */
+}
+
+/* 모바일에서만 사이드바 표시 */
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        background: linear-gradient(150deg, rgba(255, 255, 255, 0.95) 0%, rgba(232, 240, 255, 0.95) 100%);
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
+        border: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.4);
+        padding: 8px 12px;
+        margin: 0;
+        border-radius: 0;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+        height: auto;
+        min-height: auto;
+        box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.1);
+        z-index: 1000;
+        flex-shrink: 0;
+        gap: 4px;
+    }
 }
 
 .sidebar-title {
@@ -152,13 +180,48 @@ body {
     color: rgba(51, 65, 85, 0.85);
 }
 
-/* 오른쪽 본문 */
-.main-content {
+/* 메인 콘텐츠 영역 */
+.content-area {
     flex: 1;
     display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    min-height: calc(100vh - 64px);
+    margin-top: 64px; /* Navbar 높이만큼 여백 */
+    background-color: #f3f6fa;
+}
+
+.main-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: var(--spacing-lg);
+    padding-top: calc(var(--spacing-md) + 72px); /* 헤더 높이(72px) + 여백 - 기본값 */
+    display: flex;
     justify-content: center;
-    align-items: center;
-    padding: 60px;
+    align-items: flex-start;
+    min-height: 0;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .content-area {
+        min-height: calc(100vh - 64px - 60px); /* Navbar + 하단 메뉴 높이 */
+        padding-bottom: 60px; /* 하단 메뉴 공간 */
+    }
+    
+    .main-content {
+        padding: var(--spacing-sm) var(--spacing-xs);
+        padding-top: calc(var(--spacing-sm) + 100px); /* 헤더 높이(동적) + 여백 */
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content {
+        padding: var(--spacing-xs);
+    }
 }
 
 .container {
@@ -184,45 +247,8 @@ body {
     margin: 0;
 }
 
-/* 반응형 */
+/* 모바일 반응형 */
 @media (max-width: 768px) {
-    body {
-        flex-direction: column;
-        align-items: stretch;
-        height: auto;
-        min-height: 100vh;
-        overflow-y: auto;
-        overflow-x: hidden;
-        padding-bottom: 56px; /* 플로팅 독 공간 확보 */
-    }
-
-    .sidebar {
-        position: fixed;
-        bottom: 12px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: calc(100% - 24px);
-        max-width: 340px;
-        height: auto;
-        min-height: auto;
-        background: linear-gradient(150deg, rgba(255, 255, 255, 0.74) 0%, rgba(232, 240, 255, 0.26) 100%);
-        border: 1px solid rgba(255, 255, 255, 0.4);
-        border-radius: 22px;
-        padding: 6px 10px;
-        flex-direction: row;
-        justify-content: space-around;
-        align-items: center;
-        box-shadow:
-            0 18px 32px rgba(15, 23, 42, 0.16),
-            inset 0 1px 0 rgba(255, 255, 255, 0.58),
-            inset 0 -1px 0 rgba(148, 163, 184, 0.22);
-        backdrop-filter: blur(22px);
-        -webkit-backdrop-filter: blur(22px);
-        z-index: 1000;
-        flex-shrink: 0;
-        gap: 4px;
-    }
-
     .sidebar-title {
         display: none; /* 모바일에서 제목 숨기기 */
     }
@@ -282,14 +308,6 @@ body {
             inset 3px 3px 6px rgba(0, 0, 0, 0.08),
             inset -3px -3px 6px rgba(255, 255, 255, 0.9);
         transform: translateY(-1px);
-    }
-
-    .main-content {
-        flex: 1;
-        min-height: 0;
-        padding: 32px 20px;
-        overflow-y: auto;
-        width: 100%;
     }
 
     .container {

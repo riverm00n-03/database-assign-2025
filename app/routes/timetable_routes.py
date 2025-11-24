@@ -127,6 +127,7 @@ def timetable():
         'time_table.html',
         username=username,
         role=role,
+        current_page='시간표',
         timetable=timetable_grid,
         error=error,
         days=['MON', 'TUE', 'WED', 'THU', 'FRI']

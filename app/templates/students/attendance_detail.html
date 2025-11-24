@@ -1,44 +1,27 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8" />
-    <title>{{ subject_name }} 출석 상세</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+{% extends "base.html" %}
 
-    <!-- 공통 스타일 -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <!-- 출석 전용 스타일 -->
+{% block title %}{{ subject_name }} 출석 상세 - WCheck{% endblock %}
+
+{% block styles %}
     <link rel="stylesheet" href="{{ url_for('static', filename='attendance.css') }}">
-    <!-- Pretendard -->
-    <link rel="stylesheet" as="style" crossorigin
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
-    <script src="{{ url_for('static', filename='menu-icons.js') }}"></script>
-</head>
-<body>
+{% endblock %}
 
-<!-- ✅ 사이드바 -->
-<div class="sidebar">
-    <h2 class="sidebar-title">메뉴</h2>
-    <ul id="menuList" class="menu-list"></ul>
-</div>
-
-<!-- ✅ 오른쪽 영역 -->
-<div class="content-area">
-    <!-- 상단 타이틀 -->
+{% block header %}
     <header class="full-title-header">
         <div class="title-wrap">
             <h1 class="page-title">{{ subject_name }} 출석 상세</h1>
         </div>
     </header>
+{% endblock %}
 
-    <!-- ✅ 메인 -->
-    <main class="main-content">
+{% block content %}
         <div class="attendance-container">
-            <div class="hint">
-                과목의 주차별 출석 현황입니다.
+            <div class="hint alert alert-info" style="margin-bottom: var(--spacing-md); display: flex; align-items: center; gap: var(--spacing-sm);">
+                <span>📊</span>
+                <span>과목의 주차별 출석 현황입니다.</span>
             </div>
 
-            <table class="att-table">
+            <table class="att-table table fade-in">
                 <thead>
                 <tr>
                     <th style="width:10%;">주차</th>
@@ -51,13 +34,13 @@
                 <tbody>
                 {% if attendance_records %}
                     {% for record in attendance_records %}
-                        <tr class="att-row">
-                            <td>{{ record.week }}주차</td>
-                            <td>{{ record.class_date }}</td>
+                        <tr class="att-row" style="transition: background-color var(--transition-fast);">
+                            <td style="font-weight: 600; color: var(--text-primary);">{{ record.week }}주차</td>
+                            <td style="font-family: 'Courier New', monospace;">{{ record.class_date }}</td>
                             <td>{{ record.day_of_week }}</td>
-                            <td>{{ record.start_time }} ~ {{ record.end_time }}</td>
+                            <td style="font-size: 13px; color: var(--text-secondary);">{{ record.start_time }} ~ {{ record.end_time }}</td>
                             <td>
-                                <span class="status-badge status-{{ record.status_class }}">
+                                <span class="badge {% if record.status_class == 'present' %}badge-success{% elif record.status_class == 'late' %}badge-warning{% elif record.status_class == 'absent' %}badge-danger{% elif record.status_class == 'cancelled' %}badge-info{% elif record.status_class == 'none' %}badge-neutral{% else %}badge-neutral{% endif %}">
                                     {{ record.status }}
                                 </span>
                             </td>
@@ -70,47 +53,8 @@
                 {% endif %}
                 </tbody>
             </table>
-            <div class="back-button-container">
-                <button class="btn-back" onclick="history.back()">뒤로 가기</button>
+            <div class="back-button-container" style="margin-top: var(--spacing-lg); text-align: center;">
+                <button class="btn btn-secondary" onclick="history.back()">← 뒤로 가기</button>
             </div>
         </div>
-    </main>
-</div>
-
-<!-- ✅ 사이드바 메뉴 생성 -->
-<script>
-    const userRole = "{{ role }}";
-    const menuList = document.getElementById("menuList");
-    let menuItems = [];
-
-    if (userRole === "student") {
-        menuItems = [
-            { name: "시간표", url: "{{ url_for('timetable.timetable') }}" },
-            { name: "출석체크", url: "{{ url_for('attendance.show_attendance') }}" },
-            { name: "출석관리", url: "{{ url_for('attendance.manage_attendance_students') }}" },
-            { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
-        ];
-    } else if (userRole === "professor") {
-        menuItems = [
-            { name: "출석관리", url: "#" },
-            { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
-        ];
-    }
-
-    menuItems.forEach(item => {
-        const isCurrent = item.current || false;
-        const li = renderMenuItem(item, isCurrent);
-        const link = li.querySelector('a');
-
-        if (isCurrent) {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                alert('이미 출석관리 페이지입니다.');
-            });
-        }
-
-        menuList.appendChild(li);
-    });
-</script>
-</body>
-</html>
+{% endblock %}

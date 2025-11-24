@@ -37,7 +37,10 @@ def lecture_list():
         flash(f"과목 목록을 불러오는 중 오류가 발생했습니다: {e}")
         return redirect(url_for('auth.login'))
 
-    return render_template('professor/lecture_list.html', subjects=subjects, role=session.get('role'))
+    return render_template('professor/lecture_list.html', 
+                         subjects=subjects, 
+                         role=session.get('role'),
+                         current_page='출석 관리')
 
 @professor_bp.route('/subject/<int:subject_id>/sessions')
 @login_required
@@ -136,6 +139,7 @@ def list_subject_sessions(subject_id):
                            subject_name=subject_name,
                            subject_id=subject_id,
                            role=session.get('role'),
+                           current_page='출석 관리',
                            today=today)
 
 @professor_bp.route('/cancel_session/<int:schedule_id>/<class_date>')
@@ -304,6 +308,7 @@ def manage_attendance_professor(session_id):
     return render_template(
         'professor/manage_attendance_professor.html',
         role=session.get('role'),
+        current_page='출석 관리',
         session_id=session_id,
         students=students,
         subject_name=subject_info.get('subject_name'),

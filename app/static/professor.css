@@ -137,11 +137,33 @@
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    width: 100%; /* 부모 요소의 너비를 채움 */
-    max-width: 900px; /* 최대 너비를 900px로 제한 */
-    padding: 0; /* 내부 여백 제거 (테이블이 꽉 차도록) */
-    overflow: hidden; /* border-radius가 테이블에도 적용되도록 */
+    width: 100%;
+    max-width: 1200px;
+    padding: 0;
     overflow-x: auto;
+    overflow-y: auto;
+    max-height: calc(100vh - 200px);
+    position: relative;
+}
+
+/* 스크롤바 스타일 */
+.session-list-container::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.session-list-container::-webkit-scrollbar-track {
+    background: var(--bg-tertiary, #f8fafc);
+    border-radius: 5px;
+}
+
+.session-list-container::-webkit-scrollbar-thumb {
+    background: var(--border-dark, #cbd5e1);
+    border-radius: 5px;
+}
+
+.session-list-container::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted, #64748b);
 }
 
 .session-table {
@@ -243,7 +265,22 @@
 
 /* subject_sessions.html의 '다음 수업' 강조 스타일 */
 .is_next_class {
-    background-color: #eff6ff; /* 연한 파란색 배경 */
+    background-color: #eff6ff !important; /* 연한 파란색 배경 */
+    border-left: 4px solid var(--info-color, #3b82f6);
+    position: relative;
+}
+
+.is_next_class::before {
+    content: "다음 수업";
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--info-color, #3b82f6);
+    background: rgba(59, 130, 246, 0.1);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm, 4px);
 }
 
 .is_next_class td {

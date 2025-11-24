@@ -5,29 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>로그인</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='common.css') }}" />
+    <link rel="stylesheet" as="style" crossorigin
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
 </head>
 <body>
-<div class="container">
-    <h1>로그인</h1>
-    <p>역할을 선택하고 학번 또는 이메일을 입력하세요.</p>
-
-    <form action="{{ url_for('auth.login') }}" method="POST" id="loginForm">
-        <div class="form-group role-select">
-            <label><input type="radio" name="role" value="student" checked /> 학생</label>
-            <label><input type="radio" name="role" value="professor" /> 교직원 </label>
+<div class="container fade-in">
+    <div class="card" style="max-width: 400px; margin: 0 auto;">
+        <div class="card-header" style="text-align: center; border-bottom: none; padding-bottom: 0;">
+            <h1 style="font-size: 28px; margin-bottom: var(--spacing-sm);">로그인</h1>
+            <p style="color: var(--text-muted); font-size: 14px;">역할을 선택하고 학번 또는 이메일을 입력하세요.</p>
         </div>
+        <div class="card-body" style="padding-top: var(--spacing-lg);">
+            <form action="{{ url_for('auth.login') }}" method="POST" id="loginForm" style="display: flex; flex-direction: column; gap: var(--spacing-lg);">
+                <div class="form-group role-select" style="display: flex; justify-content: center; gap: var(--spacing-lg); padding: var(--spacing-md); background: var(--bg-tertiary); border-radius: var(--radius-md);">
+                    <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer; font-weight: 500;">
+                        <input type="radio" name="role" value="student" checked style="accent-color: var(--primary-color);" />
+                        학생
+                    </label>
+                    <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer; font-weight: 500;">
+                        <input type="radio" name="role" value="professor" style="accent-color: var(--primary-color);" />
+                        교직원
+                    </label>
+                </div>
 
-        <div class="form-group">
-            <label for="user_id">ID</label>
-            <input type="text" id="user_id" name="user_id" placeholder="학번을 입력하세요" required />
+                <div class="form-group" style="display: flex; flex-direction: column; gap: var(--spacing-sm);">
+                    <label for="user_id" style="font-weight: 600; color: var(--text-primary);">ID</label>
+                    <input type="text" id="user_id" name="user_id" class="input" placeholder="학번을 입력하세요" required />
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: var(--spacing-sm);">
+                    로그인
+                </button>
+
+                {% if error %}
+                    <div class="alert alert-danger" style="margin-top: var(--spacing-sm);">
+                        {{ error }}
+                    </div>
+                {% endif %}
+            </form>
         </div>
-
-        <button type="submit">로그인</button>
-
-        {% if error %}
-            <p class="error">{{ error }}</p>
-        {% endif %}
-    </form>
+    </div>
 </div>
 
 <script>

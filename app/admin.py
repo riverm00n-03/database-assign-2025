@@ -3,6 +3,7 @@
 
 import sys
 from pathlib import Path
+from datetime import datetime, timedelta
 
 # 프로젝트 루트 디렉토리를 sys.path에 추가
 project_root = Path(__file__).parent.parent
@@ -125,53 +126,361 @@ def test_database():
                 for student_id in range(5, 11):
                     cursor.execute("INSERT INTO enrollment (student_id, subject_id) VALUES (%s, %s)", (student_id, 4))
                 
-                # 수업 세션 추가 (2025년 9월 첫 주 수업들 - 2학기)
+                # 수업 세션 추가 (2025년 2학기: 9월 1일 ~ 11월 24일까지)
                 print("수업 세션 데이터 삽입 중...")
-                # 과목 1 (월요일, 수요일) - 9월 1일(월), 9월 3일(수)
-                cursor.execute("INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, %s)", (1, "2025-09-01", False))
-                cursor.execute("INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, %s)", (2, "2025-09-03", False))
-                # 과목 2 (화요일, 목요일) - 9월 2일(화), 9월 4일(목)
-                cursor.execute("INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, %s)", (3, "2025-09-02", False))
-                cursor.execute("INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, %s)", (4, "2025-09-04", False))
-                # 과목 3 (월요일, 수요일) - 9월 1일(월), 9월 3일(수)
-                cursor.execute("INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, %s)", (5, "2025-09-01", False))
-                cursor.execute("INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, %s)", (6, "2025-09-03", False))
-                # 과목 4 (화요일, 목요일) - 9월 2일(화), 9월 4일(목)
-                cursor.execute("INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, %s)", (7, "2025-09-02", False))
-                cursor.execute("INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, %s)", (8, "2025-09-04", False))
                 
-                # 출석 정보 추가
+                # 기준 날짜: 2025년 11월 25일
+                reference_date = datetime(2025, 11, 25).date()
+                semester_start = datetime(2025, 9, 1).date()
+                semester_end = datetime(2025, 11, 24).date()  # 11월 24일까지
+                
+                # 스케줄별 요일 매핑
+                schedule_weekdays = {
+                    1: 0,  # 월요일 (MON)
+                    2: 2,  # 수요일 (WED)
+                    3: 1,  # 화요일 (TUE)
+                    4: 3,  # 목요일 (THU)
+                    5: 0,  # 월요일 (MON)
+                    6: 2,  # 수요일 (WED)
+                    7: 1,  # 화요일 (TUE)
+                    8: 3,  # 목요일 (THU)
+                }
+                
+                session_id_counter = 1
+                all_sessions = []  # (schedule_id, class_date, is_cancelled) 튜플 리스트
+                
+                # 각 스케줄에 대해 9월 1일부터 11월 24일까지의 모든 수업 날짜 생성
+                for schedule_id in range(1, 9):
+                    weekday = schedule_weekdays[schedule_id]
+                    current_date = semester_start
+                    
+                    # 첫 번째 해당 요일 찾기
+                    days_ahead = weekday - current_date.weekday()
+                    if days_ahead < 0:
+                        days_ahead += 7
+                    first_class_date = current_date + timedelta(days=days_ahead)
+                    
+                    # 11월 24일까지 매주 해당 요일에 수업 세션 생성
+                    class_date = first_class_date
+                    while class_date <= semester_end:
+                        # 휴강 처리: 각 과목별로 특정 날짜 휴강
+                        is_cancelled = False
+                        if schedule_id in [1, 2] and class_date == datetime(2025, 10, 6).date():  # 과목 1: 10월 6일 휴강
+                            is_cancelled = True
+                        elif schedule_id in [3, 4] and class_date == datetime(2025, 10, 7).date():  # 과목 2: 10월 7일 휴강
+                            is_cancelled = True
+                        elif schedule_id in [5, 6] and class_date == datetime(2025, 10, 13).date():  # 과목 3: 10월 13일 휴강
+                            is_cancelled = True
+                        
+                        cursor.execute(
+                            "INSERT INTO class_session (schedule_id, class_date, is_cancelled) VALUES (%s, %s, %s)",
+                            (schedule_id, class_date, is_cancelled)
+                        )
+                        session_id = cursor.lastrowid
+                        all_sessions.append((session_id, schedule_id, class_date, is_cancelled))
+                        session_id_counter += 1
+                        
+                        class_date += timedelta(days=7)  # 다음 주 같은 요일
+                
+                print(f"총 {len(all_sessions)}개의 수업 세션이 생성되었습니다.")
+                
+                # 출석 정보 추가 (11월 24일까지의 모든 수업에 대해)
                 print("출석 데이터 삽입 중...")
-                # 세션 1 (과목 1, 월요일) - 학생 1-5명 출석
-                for student_id in range(1, 6):
-                    cursor.execute("INSERT INTO checkin (session_id, student_id, status) VALUES (%s, %s, %s)", (1, student_id, "PRESENT"))
-                # 세션 2 (과목 1, 수요일) - 학생 1-4명 출석, 학생 5명 지각
-                for student_id in range(1, 5):
-                    cursor.execute("INSERT INTO checkin (session_id, student_id, status) VALUES (%s, %s, %s)", (2, student_id, "PRESENT"))
-                cursor.execute("INSERT INTO checkin (session_id, student_id, status) VALUES (%s, %s, %s)", (2, 5, "LATE"))
-                # 세션 3 (과목 2, 화요일) - 학생 3-6명 출석, 학생 7명 결석
-                for student_id in range(3, 7):
-                    cursor.execute("INSERT INTO checkin (session_id, student_id, status) VALUES (%s, %s, %s)", (3, student_id, "PRESENT"))
-                cursor.execute("INSERT INTO checkin (session_id, student_id, status) VALUES (%s, %s, %s)", (3, 7, "ABSENT"))
-                # 세션 4 (과목 2, 목요일) - 학생 3-7명 모두 출석
-                for student_id in range(3, 8):
-                    cursor.execute("INSERT INTO checkin (session_id, student_id, status) VALUES (%s, %s, %s)", (4, student_id, "PRESENT"))
-                # 세션 5 (과목 3, 월요일) - 학생 1-3, 9명 출석, 학생 4, 10명 지각
-                for student_id in [1, 2, 3, 9]:
-                    cursor.execute("INSERT INTO checkin (session_id, student_id, status) VALUES (%s, %s, %s)", (5, student_id, "PRESENT"))
-                for student_id in [4, 10]:
-                    cursor.execute("INSERT INTO checkin (session_id, student_id, status) VALUES (%s, %s, %s)", (5, student_id, "LATE"))
-                # 세션 6 (과목 3, 수요일) - 학생 1-4, 9-10명 모두 출석
-                for student_id in [1, 2, 3, 4, 9, 10]:
-                    cursor.execute("INSERT INTO checkin (session_id, student_id, status) VALUES (%s, %s, %s)", (6, student_id, "PRESENT"))
-                # 세션 7 (과목 4, 화요일) - 학생 5-8명 출석, 학생 9-10명 결석
-                for student_id in range(5, 9):
-                    cursor.execute("INSERT INTO checkin (session_id, student_id, status) VALUES (%s, %s, %s)", (7, student_id, "PRESENT"))
-                for student_id in [9, 10]:
-                    cursor.execute("INSERT INTO checkin (session_id, student_id, status) VALUES (%s, %s, %s)", (7, student_id, "ABSENT"))
-                # 세션 8 (과목 4, 목요일) - 학생 5-10명 모두 출석
-                for student_id in range(5, 11):
-                    cursor.execute("INSERT INTO checkin (session_id, student_id, status) VALUES (%s, %s, %s)", (8, student_id, "PRESENT"))
+                
+                # 수강생 정보: 각 과목별 수강생 리스트
+                enrolled_students = {
+                    1: list(range(1, 6)),      # 과목 1: 학생 1-5
+                    2: list(range(3, 8)),      # 과목 2: 학생 3-7
+                    3: [1, 2, 3, 4, 9, 10],   # 과목 3: 학생 1-4, 9-10
+                    4: list(range(5, 11)),     # 과목 4: 학생 5-10
+                }
+                
+                # 스케줄 ID -> 과목 ID 매핑
+                schedule_to_subject = {
+                    1: 1, 2: 1,  # 과목 1
+                    3: 2, 4: 2,  # 과목 2
+                    5: 3, 6: 3,  # 과목 3
+                    7: 4, 8: 4,  # 과목 4
+                }
+                
+                checkin_count = 0
+                
+                # 각 세션에 대해 출석 데이터 생성
+                for session_id, schedule_id, class_date, is_cancelled in all_sessions:
+                    subject_id = schedule_to_subject[schedule_id]
+                    students = enrolled_students[subject_id]
+                    
+                    # 휴강인 경우 모든 학생을 출석 처리 (휴강은 출석으로 간주)
+                    if is_cancelled:
+                        for student_id in students:
+                            cursor.execute(
+                                "INSERT INTO checkin (session_id, student_id, status) VALUES (%s, %s, %s)",
+                                (session_id, student_id, "PRESENT")
+                            )
+                            checkin_count += 1
+                    else:
+                        # 일반 수업: 다양한 출석 패턴 적용
+                        week_number = (class_date - semester_start).days // 7 + 1
+                        day_of_week = class_date.weekday()  # 0=월요일, 1=화요일, 2=수요일, 3=목요일
+                        is_monday_or_wednesday = (day_of_week == 0 or day_of_week == 2)  # 월요일 또는 수요일
+                        
+                        # 과목별, 주차별, 요일별로 다른 출석 패턴 적용
+                        if subject_id == 1:  # 데이터베이스 (월/수)
+                            for idx, student_id in enumerate(students):
+                                status = "PRESENT"
+                                
+                                # 월요일 패턴
+                                if day_of_week == 0:  # 월요일
+                                    if week_number == 1 and idx == 0:
+                                        status = "LATE"
+                                    elif week_number == 2 and idx == len(students) - 1:
+                                        status = "ABSENT"
+                                    elif week_number == 3 and idx == len(students) // 2:
+                                        status = "LATE"
+                                    elif week_number == 4 and (idx == 0 or idx == len(students) - 1):
+                                        status = "LATE"
+                                    elif week_number == 5 and idx == 1:
+                                        status = "ABSENT"
+                                    elif week_number == 6 and idx == len(students) - 2:
+                                        status = "LATE"
+                                    elif week_number == 7 and idx == 0:
+                                        status = "ABSENT"
+                                    elif week_number == 8:
+                                        if idx == len(students) // 2:
+                                            status = "ABSENT"
+                                        elif idx == len(students) - 1:
+                                            status = "LATE"
+                                    elif week_number == 9 and (idx == 0 or idx == 2):
+                                        status = "LATE"
+                                    elif week_number == 10 and idx == len(students) - 1:
+                                        status = "ABSENT"
+                                    elif week_number == 11 and (idx == 1 or idx == len(students) - 2):
+                                        status = "LATE"
+                                    elif week_number == 12 and idx == len(students) // 2:
+                                        status = "ABSENT"
+                                # 수요일 패턴 (다른 패턴)
+                                elif day_of_week == 2:  # 수요일
+                                    if week_number == 1 and idx == 1:
+                                        status = "LATE"
+                                    elif week_number == 2 and idx == 0:
+                                        status = "ABSENT"
+                                    elif week_number == 3 and (idx == 1 or idx == len(students) - 1):
+                                        status = "LATE"
+                                    elif week_number == 4 and idx == len(students) - 2:
+                                        status = "ABSENT"
+                                    elif week_number == 5 and (idx == 0 or idx == len(students) - 1):
+                                        status = "LATE"
+                                    elif week_number == 6 and idx == 2:
+                                        status = "ABSENT"
+                                    elif week_number == 7 and idx == len(students) - 1:
+                                        status = "LATE"
+                                    elif week_number == 8 and idx == 1:
+                                        status = "ABSENT"
+                                    elif week_number == 9 and idx == len(students) // 2:
+                                        status = "LATE"
+                                    elif week_number == 10 and (idx == 0 or idx == len(students) - 2):
+                                        status = "ABSENT"
+                                    elif week_number == 11 and idx == len(students) - 1:
+                                        status = "LATE"
+                                    elif week_number == 12 and (idx == 1 or idx == 2):
+                                        status = "ABSENT"
+                                
+                                cursor.execute(
+                                    "INSERT INTO checkin (session_id, student_id, status) VALUES (%s, %s, %s)",
+                                    (session_id, student_id, status)
+                                )
+                                checkin_count += 1
+                        
+                        elif subject_id == 2:  # 운영체제 (화/목)
+                            for idx, student_id in enumerate(students):
+                                status = "PRESENT"
+                                
+                                # 화요일 패턴
+                                if day_of_week == 1:  # 화요일
+                                    if week_number == 1 and idx == len(students) - 1:
+                                        status = "LATE"
+                                    elif week_number == 2 and idx == 0:
+                                        status = "ABSENT"
+                                    elif week_number == 3 and idx == len(students) - 2:
+                                        status = "LATE"
+                                    elif week_number == 4 and idx == 1:
+                                        status = "ABSENT"
+                                    elif week_number == 5 and (idx == 0 or idx == len(students) - 1):
+                                        status = "LATE"
+                                    elif week_number == 6 and idx == len(students) // 2:
+                                        status = "ABSENT"
+                                    elif week_number == 7 and idx == 2:
+                                        status = "LATE"
+                                    elif week_number == 8 and idx == len(students) - 1:
+                                        status = "ABSENT"
+                                    elif week_number == 9 and (idx == 1 or idx == len(students) - 2):
+                                        status = "LATE"
+                                    elif week_number == 10 and idx == 0:
+                                        status = "ABSENT"
+                                    elif week_number == 11 and idx == len(students) // 2:
+                                        status = "LATE"
+                                    elif week_number == 12 and idx == len(students) - 1:
+                                        status = "ABSENT"
+                                # 목요일 패턴 (다른 패턴)
+                                elif day_of_week == 3:  # 목요일
+                                    if week_number == 1 and idx == 0:
+                                        status = "ABSENT"
+                                    elif week_number == 2 and (idx == 1 or idx == len(students) - 1):
+                                        status = "LATE"
+                                    elif week_number == 3 and idx == len(students) // 2:
+                                        status = "ABSENT"
+                                    elif week_number == 4 and idx == 0:
+                                        status = "LATE"
+                                    elif week_number == 5 and idx == len(students) - 2:
+                                        status = "ABSENT"
+                                    elif week_number == 6 and (idx == 0 or idx == len(students) - 1):
+                                        status = "LATE"
+                                    elif week_number == 7 and idx == 1:
+                                        status = "ABSENT"
+                                    elif week_number == 8 and idx == len(students) - 1:
+                                        status = "LATE"
+                                    elif week_number == 9 and idx == 2:
+                                        status = "ABSENT"
+                                    elif week_number == 10 and (idx == 0 or idx == len(students) - 2):
+                                        status = "LATE"
+                                    elif week_number == 11 and idx == len(students) - 1:
+                                        status = "ABSENT"
+                                    elif week_number == 12 and idx == len(students) // 2:
+                                        status = "LATE"
+                                
+                                cursor.execute(
+                                    "INSERT INTO checkin (session_id, student_id, status) VALUES (%s, %s, %s)",
+                                    (session_id, student_id, status)
+                                )
+                                checkin_count += 1
+                        
+                        elif subject_id == 3:  # 디지털회로 (월/수)
+                            for idx, student_id in enumerate(students):
+                                status = "PRESENT"
+                                
+                                # 월요일 패턴
+                                if day_of_week == 0:  # 월요일
+                                    if week_number == 1 and idx == 1:
+                                        status = "LATE"
+                                    elif week_number == 2 and idx == len(students) - 1:
+                                        status = "ABSENT"
+                                    elif week_number == 3 and (idx == 0 or idx == len(students) - 1):
+                                        status = "LATE"
+                                    elif week_number == 4 and idx == len(students) // 2:
+                                        status = "ABSENT"
+                                    elif week_number == 5 and idx == 2:
+                                        status = "LATE"
+                                    elif week_number == 6 and idx == len(students) - 2:
+                                        status = "ABSENT"
+                                    elif week_number == 7 and (idx == 1 or idx == len(students) - 1):
+                                        status = "LATE"
+                                    elif week_number == 8 and idx == 0:
+                                        status = "ABSENT"
+                                    elif week_number == 9 and idx == len(students) // 2:
+                                        status = "LATE"
+                                    elif week_number == 10 and idx == len(students) - 1:
+                                        status = "ABSENT"
+                                    elif week_number == 11 and (idx == 0 or idx == 2):
+                                        status = "LATE"
+                                    elif week_number == 12 and idx == 1:
+                                        status = "ABSENT"
+                                # 수요일 패턴 (다른 패턴)
+                                elif day_of_week == 2:  # 수요일
+                                    if week_number == 1 and idx == 0:
+                                        status = "ABSENT"
+                                    elif week_number == 2 and idx == 1:
+                                        status = "LATE"
+                                    elif week_number == 3 and idx == len(students) - 2:
+                                        status = "ABSENT"
+                                    elif week_number == 4 and (idx == 0 or idx == len(students) - 1):
+                                        status = "LATE"
+                                    elif week_number == 5 and idx == len(students) // 2:
+                                        status = "ABSENT"
+                                    elif week_number == 6 and idx == 0:
+                                        status = "LATE"
+                                    elif week_number == 7 and idx == len(students) - 1:
+                                        status = "ABSENT"
+                                    elif week_number == 8 and (idx == 1 or idx == len(students) - 2):
+                                        status = "LATE"
+                                    elif week_number == 9 and idx == 0:
+                                        status = "ABSENT"
+                                    elif week_number == 10 and idx == 2:
+                                        status = "LATE"
+                                    elif week_number == 11 and idx == len(students) - 1:
+                                        status = "ABSENT"
+                                    elif week_number == 12 and (idx == 0 or idx == len(students) - 2):
+                                        status = "LATE"
+                                
+                                cursor.execute(
+                                    "INSERT INTO checkin (session_id, student_id, status) VALUES (%s, %s, %s)",
+                                    (session_id, student_id, status)
+                                )
+                                checkin_count += 1
+                        
+                        elif subject_id == 4:  # 네트워크프로그래밍 (화/목)
+                            for idx, student_id in enumerate(students):
+                                status = "PRESENT"
+                                
+                                # 화요일 패턴
+                                if day_of_week == 1:  # 화요일
+                                    if week_number == 1 and idx == len(students) - 1:
+                                        status = "ABSENT"
+                                    elif week_number == 2 and idx == 0:
+                                        status = "LATE"
+                                    elif week_number == 3 and idx == len(students) - 2:
+                                        status = "ABSENT"
+                                    elif week_number == 4 and (idx == 0 or idx == len(students) - 1):
+                                        status = "LATE"
+                                    elif week_number == 5 and idx == len(students) // 2:
+                                        status = "ABSENT"
+                                    elif week_number == 6 and idx == 1:
+                                        status = "LATE"
+                                    elif week_number == 7 and idx == len(students) - 1:
+                                        status = "ABSENT"
+                                    elif week_number == 8 and (idx == 0 or idx == len(students) - 2):
+                                        status = "LATE"
+                                    elif week_number == 9 and idx == 2:
+                                        status = "ABSENT"
+                                    elif week_number == 10 and idx == len(students) - 1:
+                                        status = "LATE"
+                                    elif week_number == 11 and idx == len(students) // 2:
+                                        status = "ABSENT"
+                                    elif week_number == 12 and (idx == 1 or idx == len(students) - 1):
+                                        status = "LATE"
+                                # 목요일 패턴 (다른 패턴)
+                                elif day_of_week == 3:  # 목요일
+                                    if week_number == 1 and idx == 0:
+                                        status = "LATE"
+                                    elif week_number == 2 and idx == len(students) - 1:
+                                        status = "ABSENT"
+                                    elif week_number == 3 and (idx == 0 or idx == 1):
+                                        status = "LATE"
+                                    elif week_number == 4 and idx == len(students) // 2:
+                                        status = "ABSENT"
+                                    elif week_number == 5 and idx == len(students) - 2:
+                                        status = "LATE"
+                                    elif week_number == 6 and (idx == 0 or idx == len(students) - 1):
+                                        status = "ABSENT"
+                                    elif week_number == 7 and idx == 1:
+                                        status = "LATE"
+                                    elif week_number == 8 and idx == len(students) - 1:
+                                        status = "ABSENT"
+                                    elif week_number == 9 and (idx == 0 or idx == len(students) - 2):
+                                        status = "LATE"
+                                    elif week_number == 10 and idx == 2:
+                                        status = "ABSENT"
+                                    elif week_number == 11 and idx == len(students) - 1:
+                                        status = "LATE"
+                                    elif week_number == 12 and idx == len(students) // 2:
+                                        status = "ABSENT"
+                                
+                                cursor.execute(
+                                    "INSERT INTO checkin (session_id, student_id, status) VALUES (%s, %s, %s)",
+                                    (session_id, student_id, status)
+                                )
+                                checkin_count += 1
+                
+                print(f"총 {checkin_count}개의 출석 기록이 생성되었습니다.")
                 
                 connection.commit()
                 print("테스트 데이터 삽입 완료")

@@ -1,39 +1,57 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ subject_name }} - 수업 목록</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+{% extends "base.html" %}
+
+{% block title %}{{ subject_name }} - 수업 목록 - WCheck{% endblock %}
+
+{% block styles %}
     <link rel="stylesheet" href="{{ url_for('static', filename='time_table.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='professor.css') }}">
-    <link rel="stylesheet" as="style" crossorigin
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
-    <script src="{{ url_for('static', filename='menu-icons.js') }}"></script>
     <style>
         .session-list-container {
-            max-height: 70vh; /* 화면 높이의 70%를 최대 높이로 설정 */
-            overflow-y: auto; /* 내용이 넘칠 경우 세로 스크롤바 표시 */
-            border: 1px solid #e5e7eb;
+            max-height: calc(100vh - 280px);
+            overflow-y: auto;
+            overflow-x: auto;
+            position: relative;
+        }
+        
+        .session-list-container::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        
+        .session-list-container::-webkit-scrollbar-track {
+            background: var(--bg-tertiary, #f8fafc);
+            border-radius: 5px;
+        }
+        
+        .session-list-container::-webkit-scrollbar-thumb {
+            background: var(--border-dark, #cbd5e1);
+            border-radius: 5px;
+        }
+        
+        .session-list-container::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted, #64748b);
+        }
+        
+        @media (max-width: 768px) {
+            .session-list-container {
+                max-height: calc(100vh - 240px);
+            }
         }
     </style>
-</head>
-<body>
-<div class="sidebar">
-    <h2 class="sidebar-title">메뉴</h2>
-    <ul id="menuList" class="menu-list"></ul>
-</div>
+{% endblock %}
 
-<div class="content-area">
+{% block header %}
     <header class="full-title-header">
-        <div class="header-content">
+        <div class="title-wrap" style="flex-wrap: wrap; gap: var(--spacing-sm);">
             <h1 class="page-title">{{ subject_name }} - 수업 목록</h1>
-            <a href="{{ url_for('professor.lecture_list') }}" class="btn-back">담당 과목 목록으로</a>
+            <a href="{{ url_for('professor.lecture_list') }}" class="btn btn-secondary btn-sm" style="white-space: nowrap;">← 담당 과목 목록으로</a>
         </div>
     </header>
-    <main class="main-content">
-        <div class="session-list-container">
-            <table class="session-table">
+{% endblock %}
+
+{% block content %}
+        <div class="session-list-container card fade-in" style="max-width: 1200px; margin: 0 auto; padding: 0;">
+            <table class="session-table table">
                 <thead>
                     <tr>
                         <th>날짜</th>
@@ -45,34 +63,36 @@
                 <tbody>
                     {% for session in sessions_info %}
                     {# '다음 수업'에 is_next_class 클래스 추가 #}
-                    <tr class="{{ 'is_next_class' if session.is_next_class else '' }}" id="{{ 'next-class-anchor' if session.is_next_class else '' }}">
-                        <td>{{ session.class_date.strftime('%Y-%m-%d') }}</td>
+                    <tr class="{{ 'is_next_class' if session.is_next_class else '' }}" id="{{ 'next-class-anchor' if session.is_next_class else '' }}" style="transition: all var(--transition-fast);">
+                        <td style="font-family: 'Courier New', monospace; font-weight: {% if session.is_next_class %}600{% else %}400{% endif %};">{{ session.class_date.strftime('%Y-%m-%d') }}</td>
                         <td>{{ session.day_of_week }}</td>
-                        <td>{{ session.start_time }} ~ {{ session.end_time }}</td>
+                        <td style="font-size: 13px; color: var(--text-secondary);">{{ session.start_time }} ~ {{ session.end_time }}</td>
                         <td class="session-actions">
+                            <div style="display: flex; gap: var(--spacing-sm); align-items: center; justify-content: center; flex-wrap: wrap;">
                             {% if session.is_cancelled %}
-                                <span class="status-cancelled">휴강</span>
+                                <span class="badge badge-info">휴강</span>
                                 {# 미래의 휴강된 수업만 취소 가능 #}
                                 {% if session.class_date >= today %}
                                     <a href="{{ url_for('professor.uncancel_session', session_id=session.session_id) }}"
-                                       class="btn-uncancel"
+                                       class="btn btn-secondary btn-sm"
                                        onclick="return confirm('휴강 처리를 취소하시겠습니까?');">휴강 취소</a>
                                 {% endif %}
                             {% else %}
                                 {# 과거와 현재 수업만 출석부 확인 가능 #}
                                 {% if session.class_date <= today %}
-                                    <a href="{{ url_for('professor.manage_attendance_professor', session_id=session.session_id) }}" class="btn-view-att">출석부 확인</a>
+                                    <a href="{{ url_for('professor.manage_attendance_professor', session_id=session.session_id) }}" class="btn btn-success btn-sm">출석부 확인</a>
                                 {% else %}
                                     {# 미래 수업은 비활성화 #}
-                                    <a href="#" class="btn-view-att disabled" aria-disabled="true" onclick="event.preventDefault(); alert('아직 진행되지 않은 수업의 출석부는 확인할 수 없습니다.');">출석부 확인</a>
+                                    <a href="#" class="btn btn-sm disabled" aria-disabled="true" onclick="event.preventDefault(); alert('아직 진행되지 않은 수업의 출석부는 확인할 수 없습니다.');">출석부 확인</a>
                                 {% endif %}
                                 {# 미래의 수업만 휴강 가능 #}
                                 {% if session.class_date >= today %}
                                     <a href="{{ url_for('professor.cancel_session', schedule_id=session.schedule_id, class_date=session.class_date.strftime('%Y-%m-%d')) }}"
-                                       class="btn-cancel"
+                                       class="btn btn-danger btn-sm"
                                        onclick="return confirm('정말로 이 수업을 휴강 처리하시겠습니까?');">휴강 처리</a>
                                 {% endif %}
                             {% endif %}
+                            </div>
                         </td>
                     </tr>
                     {% else %}
@@ -83,33 +103,10 @@
                 </tbody>
             </table>
         </div>
-    </main>
-</div>
+{% endblock %}
 
+{% block scripts %}
 <script>
-    const userRole = "{{ role }}";
-    const menuList = document.getElementById("menuList");
-    let menuItems = [
-        { name: "출석 관리", url: "{{ url_for('professor.lecture_list') }}" },
-        { name: "시간표", url: "{{ url_for('timetable.timetable') }}" },
-        { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
-    ];
-
-    menuItems.forEach(item => {
-        const isCurrent = item.name === "출석 관리";
-        const li = renderMenuItem(item, isCurrent);
-        const link = li.querySelector('a');
-
-        if (isCurrent) {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                alert('이미 출석 관리 기능 페이지입니다.');
-            });
-        }
-        
-        menuList.appendChild(li);
-    });
-
     // 페이지 로드 시 '다음 수업' 위치로 스크롤
     document.addEventListener('DOMContentLoaded', (event) => {
         const nextClassAnchor = document.getElementById('next-class-anchor');
@@ -118,5 +115,4 @@
         }
     });
 </script>
-</body>
-</html>
+{% endblock %}

@@ -128,6 +128,7 @@ def show_attendance():
         'students/attendance_check.html',
         username=username,
         role=role,
+        current_page='출석체크',
         server_now_iso=server_now.isoformat(),
         server_now_fmt=server_now.strftime("%Y-%m-%d %H:%M:%S"),
         today_classes=today_classes
@@ -285,10 +286,14 @@ def calculate_attendance_status(total_sessions, present_count, late_count, absen
     if attendance_percentage < 80:
         status_text = '위험'
         status_color = 'red'
-    # 출석률 80% 이상 90% 미만: 주의
-    elif 80 <= attendance_percentage < 90:
+    # 출석률 80% 이상 85% 미만: 주의
+    elif 80 <= attendance_percentage < 85:
         status_text = '주의'
         status_color = 'orange'
+    # 출석률 85% 이상: 안전
+    else:
+        status_text = '안전'
+        status_color = 'green'
     
     return attendance_percentage, status_text, status_color
 
@@ -342,18 +347,22 @@ def manage_attendance_students():
                 for subject in enrolled_subjects:
                     subject_id = subject['subject_id']
                     
-                    # 해당 과목의 총 수업 세션 수 조회 (휴강 제외)
+                    # 해당 과목의 총 수업 세션 수 조회 (휴강 제외, 오늘 이전의 수업만)
+                    from datetime import date
+                    today = date.today()
                     cursor.execute("""
                         SELECT COUNT(DISTINCT cs.session_id) AS total_sessions
                         FROM class_session cs
                         JOIN subject_schedule ss ON cs.schedule_id = ss.schedule_id
-                        WHERE ss.subject_id = %s AND cs.is_cancelled = FALSE
-                    """, (subject_id,))
+                        WHERE ss.subject_id = %s 
+                          AND cs.is_cancelled = FALSE
+                          AND cs.class_date <= %s
+                    """, (subject_id, today))
                     total_sessions_result = cursor.fetchone()
                     # 결과가 없으면 0으로 설정
                     total_sessions = total_sessions_result['total_sessions'] if total_sessions_result else 0
 
-                    # 해당 과목에 대한 학생의 출석 통계 조회
+                    # 해당 과목에 대한 학생의 출석 통계 조회 (오늘 이전의 수업만)
                     cursor.execute("""
                         SELECT
                             SUM(CASE WHEN c.status = 'PRESENT' THEN 1 ELSE 0 END) AS present_count,
@@ -362,14 +371,35 @@ def manage_attendance_students():
                         FROM checkin c
                         JOIN class_session cs ON c.session_id = cs.session_id
                         JOIN subject_schedule ss ON cs.schedule_id = ss.schedule_id
-                        WHERE c.student_id = %s AND ss.subject_id = %s AND cs.is_cancelled = FALSE
-                    """, (student_id, subject_id))
+                        WHERE c.student_id = %s 
+                          AND ss.subject_id = %s 
+                          AND cs.is_cancelled = FALSE
+                          AND cs.class_date <= %s
+                    """, (student_id, subject_id, today))
                     checkin_counts = cursor.fetchone()
 
                     # NULL 값 처리: 결과가 없거나 값이 NULL이면 0으로 설정
                     present_count = checkin_counts['present_count'] if checkin_counts and checkin_counts['present_count'] is not None else 0
                     late_count = checkin_counts['late_count'] if checkin_counts and checkin_counts['late_count'] is not None else 0
                     absent_count = checkin_counts['absent_count'] if checkin_counts and checkin_counts['absent_count'] is not None else 0
+                    
+                    # "기간 아님" (미래 수업)은 출석으로 간주
+                    # 미래 수업 수를 계산하여 present_count에 추가
+                    cursor.execute("""
+                        SELECT COUNT(DISTINCT cs.session_id) AS future_sessions
+                        FROM class_session cs
+                        JOIN subject_schedule ss ON cs.schedule_id = ss.schedule_id
+                        WHERE ss.subject_id = %s 
+                          AND cs.is_cancelled = FALSE
+                          AND cs.class_date > %s
+                    """, (subject_id, today))
+                    future_sessions_result = cursor.fetchone()
+                    future_sessions = future_sessions_result['future_sessions'] if future_sessions_result else 0
+                    
+                    # 미래 수업을 출석으로 간주하여 present_count에 추가
+                    present_count += future_sessions
+                    # 총 세션 수에도 미래 수업 포함
+                    total_sessions += future_sessions
 
                     attendance_percentage, status_text, status_color = calculate_attendance_status(
                         total_sessions, present_count, late_count, absent_count
@@ -399,6 +429,7 @@ def manage_attendance_students():
         'students/manage_attendance_students.html',
         username=username,
         role=role,
+        current_page='출석관리',
         enrolled_subjects=enrolled_subjects_data
     )
 
@@ -464,7 +495,7 @@ def attendance_detail(subject_id):
                     semester_start = datetime(subject_year, 3, 1).date()
                     semester_end = datetime(subject_year, 6, 30).date()
                 elif subject_semester == 2:
-                    # 2학기: 9월 1일 ~ 12월 31일
+                    # 2학기: 9월 1일 ~ 12월 31일 (모든 주차 표시를 위해 학기 종료일까지)
                     semester_start = datetime(subject_year, 9, 1).date()
                     semester_end = datetime(subject_year, 12, 31).date()
                 # 잘못된 학기 값인 경우 에러 처리
@@ -545,30 +576,28 @@ def attendance_detail(subject_id):
                         # 해당 주차의 수업 날짜 계산
                         week_date = first_date + timedelta(weeks=week - 1)
                         
-                        # 학기 종료일을 넘어가면 해당 주차는 건너뜀
-                        if week_date > semester_end:
-                            continue
-                        
                         # 해당 날짜와 스케줄 ID로 세션 정보 조회
                         session_key = (week_date, schedule_id)
                         session_info = session_map.get(session_key)
                         
-                        # 기본 상태는 '기간 아님' (수업이 없는 주차)
-                        status = '기간 아님'
-                        status_class = 'not-period'
-                        
-                        # 세션이 존재하는 경우
-                        if session_info:
+                        # 세션이 존재하지 않는 경우 '정보 없음'으로 처리
+                        if not session_info:
+                            status = '정보 없음'
+                            status_class = 'none'
+                            # 세션이 없는 경우 스케줄 기본 시간 사용
+                            start_time = schedule['start_time']
+                            end_time = schedule['end_time']
+                        else:
                             session_id = session_info['session_id']
                             
                             # 휴강인 경우
                             if session_info['is_cancelled']:
                                 status = '휴강'
                                 status_class = 'cancelled'
-                            # 아직 날짜가 도래하지 않은 미래의 수업인 경우
+                            # 아직 날짜가 도래하지 않은 미래의 수업인 경우 '정보 없음'으로 처리
                             elif week_date > today:
-                                status = '기간 아님'
-                                status_class = 'not-period'
+                                status = '정보 없음'
+                                status_class = 'none'
                             # 오늘 또는 과거의 정상 수업인 경우 출석 기록 확인
                             else:
                                 cursor.execute(
@@ -584,20 +613,14 @@ def attendance_detail(subject_id):
                                         'ABSENT': '결석'
                                     }.get(checkin_result['status'], '알 수 없음')
                                     status_class = checkin_result['status'].lower()
-                                # 출결 기록이 없으면 '미출석'으로 처리
-                                # (위에서 미래 수업은 이미 '기간 아님'으로 처리했으므로,
-                                # 이 경우는 과거 수업에 출결 기록이 없는 경우임)
+                                # 출결 기록이 없으면 '정보 없음'으로 처리
                                 else:
-                                    status = '미출석'
-                                    status_class = 'absent'
+                                    status = '정보 없음'
+                                    status_class = 'none'
                             
                             # 세션 정보에서 시간 가져오기
                             start_time = session_info['start_time']
                             end_time = session_info['end_time']
-                        # 세션이 없는 경우 스케줄 기본 시간 사용
-                        else:
-                            start_time = schedule['start_time']
-                            end_time = schedule['end_time']
                         
                         # 시간 값을 문자열로 변환 (다양한 형식 지원)
                         if isinstance(start_time, timedelta):
@@ -643,6 +666,7 @@ def attendance_detail(subject_id):
         'students/attendance_detail.html',
         username=username,
         role=role,
+        current_page='출석관리',
         subject_name=subject_name,
         attendance_records=attendance_records
     )

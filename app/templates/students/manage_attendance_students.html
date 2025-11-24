@@ -1,121 +1,85 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8" />
-    <title>출석 관리</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+{% extends "base.html" %}
 
-    <!-- 공통 스타일 -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <!-- 출석 전용 스타일 -->
+{% block title %}출석 관리 - WCheck{% endblock %}
+
+{% block styles %}
     <link rel="stylesheet" href="{{ url_for('static', filename='attendance.css') }}">
-    <!-- Pretendard -->
-    <link rel="stylesheet" as="style" crossorigin
-          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
-    <script src="{{ url_for('static', filename='menu-icons.js') }}"></script>
-</head>
-<body>
+    <link rel="stylesheet" href="{{ url_for('static', filename='attendance_cards.css') }}">
+{% endblock %}
 
-<!-- ✅ 사이드바 -->
-<div class="sidebar">
-    <h2 class="sidebar-title">메뉴</h2>
-    <ul id="menuList" class="menu-list"></ul>
-</div>
-
-<!-- ✅ 오른쪽 영역 -->
-<div class="content-area">
-    <!-- 상단 타이틀 -->
+{% block header %}
     <header class="full-title-header">
         <div class="title-wrap">
             <h1 class="page-title">{{ username }}님 출석 관리</h1>
         </div>
     </header>
+{% endblock %}
 
-    <!-- ✅ 메인 -->
-    <main class="main-content">
+{% block content %}
         <div class="attendance-container">
-            <div class="hint">
-                과목별 출석 현황을 확인하고, 상세 내역을 보려면 과목을 클릭하세요.
+            <div class="hint alert alert-info" style="margin-bottom: var(--spacing-lg); display: flex; align-items: center; gap: var(--spacing-sm);">
+                <span>💡</span>
+                <span>과목별 출석 현황을 확인하고, 상세 내역을 보려면 카드를 클릭하세요.</span>
             </div>
 
-            <table class="att-table">
-                <thead>
-                <tr>
-                    <th style="width:40%;">과목명</th>
-                    <th style="width:25%;">교수명</th>
-                    <th style="width:20%;">출석률</th>
-                    <th style="width:15%;">상태</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% if enrolled_subjects %}
+            {% if enrolled_subjects %}
+                <div class="attendance-cards-container fade-in">
                     {% for subject in enrolled_subjects %}
-                        <tr class="att-row clickable-row" data-subject-id="{{ subject.subject_id }}">
-                            <td class="sbj">
-                                <div class="subject-name">{{ subject.subject_name }}</div>
-                            </td>
-                            <td>{{ subject.professor_name or '-' }}</td>
-                            <td>{{ subject.attendance_percentage }}%</td>
-                            <td>
-                                <span class="status-badge status-{{ subject.status_color }}">
-                                    {{ subject.status_text }}
-                                </span>
-                            </td>
-                        </tr>
+                        <div class="attendance-card status-{{ 'safe' if subject.status_color == 'green' else 'warning' if subject.status_color == 'orange' else 'danger' }} clickable-row" 
+                             data-subject-id="{{ subject.subject_id }}">
+                            <div class="card-header">
+                                <h3 class="card-subject-name">{{ subject.subject_name }}</h3>
+                                <p class="card-professor-name">{{ subject.professor_name or '교수 정보 없음' }}</p>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-percentage">
+                                    <span class="card-percentage-value">{{ subject.attendance_percentage }}</span>
+                                    <span class="card-percentage-unit">%</span>
+                                    <span class="card-status-badge">{{ subject.status_text }}</span>
+                                </div>
+                                <div class="card-progress-container">
+                                    <div class="card-progress-bar">
+                                        <div class="card-progress-fill" style="width: {{ subject.attendance_percentage }}%;"></div>
+                                    </div>
+                                    <div class="card-stats">
+                                        <div class="card-stat-item">
+                                            <span class="card-stat-label">출석</span>
+                                            <span class="card-stat-value">{{ subject.present_count }}</span>
+                                        </div>
+                                        <div class="card-stat-item">
+                                            <span class="card-stat-label">지각</span>
+                                            <span class="card-stat-value">{{ subject.late_count }}</span>
+                                        </div>
+                                        <div class="card-stat-item">
+                                            <span class="card-stat-label">결석</span>
+                                            <span class="card-stat-value">{{ subject.absent_count }}</span>
+                                        </div>
+                                        <div class="card-stat-item">
+                                            <span class="card-stat-label">총 수업</span>
+                                            <span class="card-stat-value">{{ subject.total_sessions }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="4" class="empty">수강 중인 과목이 없습니다.</td>
-                    </tr>
-                {% endif %}
-                </tbody>
-            </table>
+                </div>
+            {% else %}
+                <div class="card" style="text-align: center; padding: var(--spacing-xl);">
+                    <p style="color: var(--text-muted); font-size: 16px;">수강 중인 과목이 없습니다.</p>
+                </div>
+            {% endif %}
         </div>
-    </main>
-</div>
+{% endblock %}
 
-<!-- ✅ 사이드바 메뉴 생성 -->
+{% block scripts %}
 <script>
-    const userRole = "{{ role }}";
-    const menuList = document.getElementById("menuList");
-    let menuItems = [];
-
-    if (userRole === "student") {
-        menuItems = [
-            { name: "시간표", url: "{{ url_for('timetable.timetable') }}" },
-            { name: "출석체크", url: "{{ url_for('attendance.show_attendance') }}" },
-            { name: "출석관리", url: "#", current: true },
-            { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
-        ];
-    } else if (userRole === "professor") {
-        menuItems = [
-            { name: "출석관리", url: "#" },
-            { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
-        ];
-    }
-
-    menuItems.forEach(item => {
-        const isCurrent = item.current || false;
-        const li = renderMenuItem(item, isCurrent);
-        const link = li.querySelector('a');
-
-        if (isCurrent) {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                alert('이미 출석관리 페이지입니다.');
-            });
-        }
-
-        menuList.appendChild(li);
-    });
-
-    // 클릭 가능한 행에 클릭 이벤트 리스너를 추가한다.
-    document.querySelectorAll('.clickable-row').forEach(row => {
-        row.addEventListener('click', () => {
-            const subjectId = row.dataset.subjectId;
+    // 카드 클릭 이벤트
+    document.querySelectorAll('.clickable-row').forEach(card => {
+        card.addEventListener('click', () => {
+            const subjectId = card.dataset.subjectId;
             window.location.href = `/attendance/detail/${subjectId}`;
         });
     });
 </script>
-</body>
-</html>
+{% endblock %}

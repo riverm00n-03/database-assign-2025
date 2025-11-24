@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}WCheck{% endblock %}</title>
+    
+    <!-- 공통 스타일 -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='common.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='navbar.css') }}">
+    
+    <!-- 페이지별 추가 스타일 -->
+    {% block styles %}{% endblock %}
+    
+    <!-- Pretendard 폰트 -->
+    <link rel="stylesheet" as="style" crossorigin
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+    
+    <!-- 메뉴 아이콘 스크립트 -->
+    <script src="{{ url_for('static', filename='menu-icons.js') }}"></script>
+</head>
+<body>
+    <!-- 상단 Navbar (PC) -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="{{ url_for('main.root') }}" class="navbar-brand">📚 WCheck</a>
+            <button class="navbar-toggle" id="navbarToggle" aria-label="메뉴">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="navbar-menu" id="navbarMenu"></ul>
+        </div>
+        <div class="mobile-menu" id="mobileMenu">
+            <ul class="mobile-menu-list" id="mobileMenuList"></ul>
+        </div>
+    </nav>
+
+    <!-- 하단 사이드바 (모바일) -->
+    <div class="sidebar">
+        <ul id="menuList" class="menu-list"></ul>
+    </div>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="content-area">
+        {% block header %}{% endblock %}
+        
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- 공통 스크립트 -->
+    <script>
+        // Navbar 메뉴 초기화
+        (function() {
+            const userRole = "{{ role }}";
+            const currentPage = "{{ current_page|default('') }}";
+            const menuList = document.getElementById("menuList");
+            const navbarMenu = document.getElementById("navbarMenu");
+            const mobileMenuList = document.getElementById("mobileMenuList");
+            const navbarToggle = document.getElementById("navbarToggle");
+            const mobileMenu = document.getElementById("mobileMenu");
+            
+            let menuItems = [];
+
+            if (userRole === "student") {
+                menuItems = [
+                    { name: "시간표", url: "{{ url_for('timetable.timetable') }}" },
+                    { name: "출석체크", url: "{{ url_for('attendance.show_attendance') }}" },
+                    { name: "출석관리", url: "{{ url_for('attendance.manage_attendance_students') }}" },
+                    { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
+                ];
+            } else if (userRole === "professor") {
+                menuItems = [
+                    { name: "출석 관리", url: "{{ url_for('professor.lecture_list') }}" },
+                    { name: "시간표", url: "{{ url_for('timetable.timetable') }}" },
+                    { name: "로그아웃", url: "{{ url_for('auth.logout') }}" }
+                ];
+            }
+
+            // 현재 페이지 표시
+            menuItems.forEach(item => {
+                if (currentPage && item.name === currentPage) {
+                    item.current = true;
+                }
+            });
+
+            // PC Navbar 메뉴 생성
+            function createNavbarMenuItem(item) {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                const isCurrent = item.current || false;
+                
+                if (isCurrent) {
+                    a.classList.add('active');
+                    a.href = '#';
+                    a.addEventListener('click', (e) => {
+                        e.preventDefault();
+                    });
+                } else {
+                    a.href = item.url;
+                }
+                
+                a.textContent = item.name;
+                li.appendChild(a);
+                return li;
+            }
+
+            // 모바일 사이드바 메뉴 생성
+            function createMobileMenuItem(item) {
+                const isCurrent = item.current || false;
+                if (typeof renderMenuItem === 'function') {
+                    const li = renderMenuItem(item, isCurrent);
+                    const link = li.querySelector('a');
+                    if (isCurrent && link) {
+                        link.addEventListener('click', (e) => {
+                            e.preventDefault();
+                        });
+                    }
+                    return li;
+                } else {
+                    // renderMenuItem이 없을 경우 기본 생성
+                    const li = document.createElement('li');
+                    const a = document.createElement('a');
+                    a.href = isCurrent ? '#' : item.url;
+                    a.textContent = item.name;
+                    if (isCurrent) {
+                        a.addEventListener('click', (e) => e.preventDefault());
+                    }
+                    li.appendChild(a);
+                    return li;
+                }
+            }
+
+            // 메뉴 렌더링
+            if (navbarMenu) {
+                menuItems.forEach(item => {
+                    navbarMenu.appendChild(createNavbarMenuItem(item));
+                });
+            }
+            
+            if (mobileMenuList) {
+                menuItems.forEach(item => {
+                    mobileMenuList.appendChild(createMobileMenuItem(item));
+                });
+            }
+            
+            if (menuList) {
+                menuItems.forEach(item => {
+                    menuList.appendChild(createMobileMenuItem(item));
+                });
+            }
+
+            // 모바일 메뉴 토글
+            if (navbarToggle && mobileMenu) {
+                navbarToggle.addEventListener('click', () => {
+                    navbarToggle.classList.toggle('active');
+                    mobileMenu.classList.toggle('active');
+                });
+            }
+        })();
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>
+

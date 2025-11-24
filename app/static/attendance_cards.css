@@ -1,0 +1,219 @@
+/* ============================
+   출석 관리 카드 스타일
+============================ */
+.attendance-cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.attendance-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-md);
+    border: 3px solid;
+    transition: all var(--transition-base);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.attendance-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: currentColor;
+    opacity: 0.3;
+}
+
+.attendance-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* 상태별 테두리 색상 */
+.attendance-card.status-safe {
+    border-color: var(--success-color);
+    color: var(--success-color);
+}
+
+.attendance-card.status-warning {
+    border-color: var(--warning-color);
+    color: var(--warning-color);
+}
+
+.attendance-card.status-danger {
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+}
+
+.card-header {
+    margin-bottom: var(--spacing-md);
+}
+
+.card-subject-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-xs);
+    line-height: 1.3;
+}
+
+.card-professor-name {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 0;
+    font-weight: 400;
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.card-percentage {
+    display: flex;
+    align-items: baseline;
+    gap: var(--spacing-sm);
+}
+
+.card-percentage-value {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.card-percentage-unit {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.card-status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: var(--spacing-xs);
+}
+
+.attendance-card.status-safe .card-status-badge {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--success-color);
+}
+
+.attendance-card.status-warning .card-status-badge {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--warning-color);
+}
+
+.attendance-card.status-danger .card-status-badge {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+}
+
+/* 진행 바 그래프 */
+.card-progress-container {
+    margin-top: var(--spacing-md);
+}
+
+.card-progress-bar {
+    width: 100%;
+    height: 12px;
+    background-color: var(--bg-tertiary);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    position: relative;
+}
+
+.card-progress-fill {
+    height: 100%;
+    border-radius: var(--radius-full);
+    position: relative;
+}
+
+.attendance-card.status-safe .card-progress-fill {
+    background: linear-gradient(90deg, var(--success-color) 0%, #34d399 100%);
+}
+
+.attendance-card.status-warning .card-progress-fill {
+    background: linear-gradient(90deg, var(--warning-color) 0%, #fbbf24 100%);
+}
+
+.attendance-card.status-danger .card-progress-fill {
+    background: linear-gradient(90deg, var(--danger-color) 0%, #f87171 100%);
+}
+
+.card-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-top: var(--spacing-sm);
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.card-stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.card-stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.card-stat-value {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .attendance-cards-container {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    .attendance-card {
+        padding: var(--spacing-md);
+    }
+
+    .card-subject-name {
+        font-size: 18px;
+    }
+
+    .card-percentage-value {
+        font-size: 28px;
+    }
+    
+    .card-stats {
+        font-size: 11px;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .attendance-cards-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1400px) {
+    .attendance-cards-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
