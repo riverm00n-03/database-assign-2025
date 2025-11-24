@@ -267,9 +267,9 @@ def calculate_attendance_status(total_sessions, present_count, late_count, absen
     if total_sessions == 0:
         return 100, '안전', 'green'
 
-    # 지각 3회를 결석 1회로 환산하여 유효 결석 수 계산
-    effective_absent_count = absent_count + (late_count // 3)
-    effective_present_count = total_sessions - effective_absent_count
+    # 지각 3회를 결석 1회로 환산하여 유효 출석 수 계산
+    # 지각도 출석으로 간주하되, 지각 3회당 결석 1회로 차감
+    effective_present_count = present_count + late_count - (late_count // 3)
 
     # 음수 방지 (로직상 발생하지 않아야 하지만 안전장치)
     if effective_present_count < 0:
