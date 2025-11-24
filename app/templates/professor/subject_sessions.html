@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ subject_name }} - 수업 목록</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='time_table.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='professor.css') }}">
     <link rel="stylesheet" as="style" crossorigin
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+    <script src="{{ url_for('static', filename='menu-icons.js') }}"></script>
     <style>
         .session-list-container {
             max-height: 70vh; /* 화면 높이의 70%를 최대 높이로 설정 */
@@ -94,22 +96,17 @@
     ];
 
     menuItems.forEach(item => {
-        const li = document.createElement("li");
-        const link = document.createElement("a");
-        link.href = item.url;
-        link.textContent = item.name;
+        const isCurrent = item.name === "출석 관리";
+        const li = renderMenuItem(item, isCurrent);
+        const link = li.querySelector('a');
 
-        // '출석 관리' 메뉴를 항상 활성화된 것처럼 보이게 함
-        if (item.name === "출석 관리") {
-            link.style.color = "#2563eb";
-            link.style.fontWeight = "700";
-            // 현재 페이지와 관련된 기능이므로, 클릭 시 알림을 띄우고 이동을 막습니다.
+        if (isCurrent) {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 alert('이미 출석 관리 기능 페이지입니다.');
             });
         }
-        li.appendChild(link);
+        
         menuList.appendChild(li);
     });
 

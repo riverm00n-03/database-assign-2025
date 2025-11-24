@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>시간표</title>
 
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='time_table.css') }}">
     <link rel="stylesheet" as="style" crossorigin
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+    <script src="{{ url_for('static', filename='menu-icons.js') }}"></script>
 </head>
 <body>
 
@@ -100,21 +102,18 @@
 
     // 기존 구조 유지 + "시간표" 클릭 시 alert 추가
     menuItems.forEach(item => {
-        const li = document.createElement("li");
-        li.innerHTML = `<a href="${item.url}">${item.name}</a>`;
-        menuList.appendChild(li);
-
-        // "시간표" 항목 클릭 시 알림 추가
-        if (item.name === "시간표") {
+        const isCurrent = item.name === "시간표";
+        const li = renderMenuItem(item, isCurrent);
+        
+        if (isCurrent) {
             const link = li.querySelector("a");
             link.addEventListener("click", (e) => {
                 e.preventDefault();
                 alert("이미 시간표 페이지입니다.");
             });
-            // 현재 메뉴 강조 스타일
-            link.style.color = "#2563eb";
-            link.style.fontWeight = "700";
         }
+        
+        menuList.appendChild(li);
     });
 </script>
 

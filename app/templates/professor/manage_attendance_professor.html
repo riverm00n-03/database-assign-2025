@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>출석 관리</title>
     <!-- 공통 레이아웃 CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='time_table.css') }}">
     <!-- 출석 관리 전용 CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='manage_attendance.css') }}">
     <!-- Pretendard 폰트 -->
     <link rel="stylesheet" as="style" crossorigin
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+    <script src="{{ url_for('static', filename='menu-icons.js') }}"></script>
 </head>
 <body>
 <!-- 왼쪽 사이드바 -->
@@ -93,11 +95,7 @@
     }
 
     menuItems.forEach(item => {
-        const li = document.createElement("li");
-        const link = document.createElement("a");
-        link.href = item.url;
-        link.textContent = item.name;
-        li.appendChild(link);
+        const li = renderMenuItem(item);
         menuList.appendChild(li);
     });
 </script>

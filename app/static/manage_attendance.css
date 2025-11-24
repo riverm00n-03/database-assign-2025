@@ -51,11 +51,14 @@
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     overflow: hidden;
+    overflow-x: auto;
+    min-width: 0;
 }
 
 .student-table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 560px;
 }
 
 .student-table th,
@@ -141,4 +144,61 @@
 
 .btn-save:hover {
     background-color: #3147d8;
+}
+
+@media screen and (max-width: 768px) {
+    .manage-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 20px;
+    }
+
+    .main-content {
+        padding: 16px 20px;
+    }
+
+    .student-table {
+        min-width: 480px;
+    }
+
+    .student-table th,
+    .student-table td {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    .status-selector .radio-group {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .manage-header {
+        padding: 16px;
+    }
+
+    .main-content {
+        padding: 14px 16px;
+    }
+
+    .student-table {
+        min-width: 400px;
+    }
+
+    .student-table th,
+    .student-table td {
+        padding: 10px;
+        font-size: 13px;
+    }
+
+    .status-selector label {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    .btn-save {
+        width: 100%;
+    }
 }

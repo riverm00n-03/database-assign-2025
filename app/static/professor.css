@@ -71,6 +71,7 @@
 .session-table-inline {
     width: 100%;
     border-collapse: collapse;
+    min-width: 400px;
 }
 
 .session-table-inline td {
@@ -140,12 +141,14 @@
     max-width: 900px; /* 최대 너비를 900px로 제한 */
     padding: 0; /* 내부 여백 제거 (테이블이 꽉 차도록) */
     overflow: hidden; /* border-radius가 테이블에도 적용되도록 */
+    overflow-x: auto;
 }
 
 .session-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 15px;
+    min-width: 560px;
 }
 
 .session-table th, .session-table td {
@@ -246,4 +249,47 @@
 .is_next_class td {
     font-weight: 600;
     color: #1d4ed8; /* 진한 파란색 텍스트 */
+}
+
+@media screen and (max-width: 768px) {
+    .class-list {
+        padding: 0 12px;
+    }
+
+    .card-header,
+    .card-actions {
+        padding: 16px 18px;
+    }
+
+    .session-table {
+        min-width: 480px;
+    }
+
+    .session-table th,
+    .session-table td {
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+
+    .session-actions {
+        flex-wrap: wrap;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .session-table {
+        min-width: 400px;
+    }
+
+    .session-table th,
+    .session-table td {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+
+    .btn-view-att,
+    .btn-cancel,
+    .btn-uncancel {
+        padding: 6px 10px;
+    }
 }

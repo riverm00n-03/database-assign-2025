@@ -1,64 +1,4 @@
 /* ============================
-   Pretendard + 전체 레이아웃
-============================ */
-body {
-    margin: 0;
-    font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
-    background-color: #f3f6fa;
-    color: #1e293b;
-    display: flex;
-    flex-direction: row; /* ✅ 가로 정렬 강제 */
-    height: 100vh;
-    width: 100%;
-    overflow: hidden; /* ✅ 스크롤바가 생기며 밀리는 현상 방지 */
-}
-
-/* ============================
-   왼쪽 사이드바
-============================ */
-.sidebar {
-    width: 220px;
-    background-color: #ffffff;
-    border-right: 1px solid #e2e8f0;
-    padding: 30px 20px;
-    box-sizing: border-box;
-    flex-shrink: 0; /* ✅ 사이드바 크기 줄어들지 않게 */
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
-    height: 100vh; /* ✅ 세로 전체 고정 */
-}
-
-.sidebar-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: #1e3a8a;
-    margin-bottom: 25px;
-}
-
-.menu-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.menu-list li {
-    margin: 12px 0;
-}
-
-.menu-list a {
-    text-decoration: none;
-    color: #334155;
-    font-weight: 500;
-    transition: color 0.2s ease;
-}
-
-.menu-list a:hover {
-    color: #2563eb;
-}
-
-/* ============================
    오른쪽 메인 영역
 ============================ */
 .content-area {
@@ -135,6 +75,8 @@ body {
     transform: translateY(-1px);
     border-top-left-radius: 0;
     border-top-right-radius: 0;
+    overflow-x: auto;
+    min-width: 0;
 }
 
 /* ============================
@@ -144,6 +86,7 @@ body {
     border-collapse: collapse;
     width: 100%;
     table-layout: fixed;
+    min-width: 560px;
 }
 
 .timetable th,
@@ -205,5 +148,40 @@ body {
 @media screen and (max-width: 1400px) {
     .timetable-container {
         max-width: 95%;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .timetable-container {
+        padding: 0 12px 16px;
+    }
+
+    .timetable {
+        min-width: 480px;
+    }
+
+    .timetable th,
+    .timetable td {
+        padding: 6px;
+        font-size: 12px;
+    }
+
+    .subject-name {
+        font-size: 13px;
+    }
+
+    .professor-name,
+    .location {
+        font-size: 11px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .timetable {
+        min-width: 400px;
+    }
+
+    .page-title {
+        font-size: 22px;
     }
 }

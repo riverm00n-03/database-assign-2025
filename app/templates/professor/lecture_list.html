@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>담당 과목</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='time_table.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='professor.css') }}">
     <link rel="stylesheet" as="style" crossorigin
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+    <script src="{{ url_for('static', filename='menu-icons.js') }}"></script>
 </head>
 <body>
 <div class="sidebar">
@@ -62,20 +64,17 @@
     );
 
     uniqueMenuItems.forEach(item => {
-        const li = document.createElement("li");
-        const link = document.createElement("a");
-        link.href = item.url;
-        link.textContent = item.name;
+        const isCurrent = item.name === "출석 관리";
+        const li = renderMenuItem(item, isCurrent);
+        const link = li.querySelector('a');
 
-        if (item.name === "출석 관리") {
-            link.style.color = "#2563eb";
-            link.style.fontWeight = "700";
+        if (isCurrent) {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 alert('이미 현재 페이지입니다.');
             });
         }
-        li.appendChild(link);
+        
         menuList.appendChild(li);
     });
 </script>

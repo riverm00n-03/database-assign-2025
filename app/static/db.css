@@ -60,6 +60,8 @@
 .table-section {
     display: none;
     padding: 16px;
+    overflow-x: auto;
+    min-width: 0;
 }
 
 .table-section.active {
@@ -72,6 +74,7 @@ table {
     border-collapse: collapse;
     font-size: 13px;
     background-color: var(--card-color);
+    min-width: 560px;
 }
 
 thead {
@@ -133,9 +136,21 @@ tbody tr:nth-child(even):hover {
 
     table {
         font-size: 12px;
+        min-width: 480px;
     }
 
     th, td {
         padding: 8px 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    table {
+        min-width: 400px;
+    }
+
+    th, td {
+        padding: 6px 8px;
+        font-size: 11px;
     }
 }

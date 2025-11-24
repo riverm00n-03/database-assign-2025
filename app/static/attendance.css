@@ -1,28 +1,3 @@
-/* 레이아웃은 기존 스타일 유지(시간표 페이지와 톤 맞춤) */
-body{
-    margin:0;
-    font-family:'Pretendard','Noto Sans KR',sans-serif;
-    background:#f3f6fa;
-    color:#1e293b;
-    display:flex;
-    height:100vh;
-}
-
-/* 사이드바: 기존과 동일 무드 */
-.sidebar{
-    width:220px;
-    background:#fff;
-    border-right:1px solid #e2e8f0;
-    padding:30px 20px;
-    box-sizing:border-box;
-    flex-shrink:0;
-}
-.sidebar-title{font-size:18px;font-weight:700;color:#1e3a8a;margin-bottom:25px;}
-.menu-list{list-style:none;margin:0;padding:0;}
-.menu-list li{margin:12px 0;}
-.menu-list a{color:#334155;text-decoration:none;font-weight:500;transition:color .2s;}
-.menu-list a:hover{color:#2563eb;}
-
 /* 오른쪽 영역 */
 .content-area{
     flex:1;
@@ -80,6 +55,8 @@ body{
     padding:20px;
     box-sizing:border-box;
     margin:18px auto;
+    overflow-x: auto;
+    min-width: 0;
 }
 
 /* 상단 안내 */
@@ -100,6 +77,7 @@ body{
     table-layout:fixed;
     border-radius:10px;
     overflow:hidden;
+    min-width: 560px;
 }
 .att-table th,
 .att-table td{
@@ -128,6 +106,51 @@ body{
     margin-top:4px;
     font-size:12px;
     color:#64748b;
+}
+
+@media screen and (max-width: 768px) {
+    .title-wrap {
+        padding: 0 12px;
+    }
+
+    .attendance-container {
+        padding: 16px;
+    }
+
+    .att-table {
+        min-width: 480px;
+    }
+
+    .att-table th,
+    .att-table td {
+        padding: 10px 8px;
+        font-size: 13px;
+    }
+
+    .title-wrap h1 {
+        font-size: 20px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .attendance-container {
+        padding: 14px 12px;
+    }
+
+    .att-table {
+        min-width: 400px;
+    }
+
+    .att-table th,
+    .att-table td {
+        padding: 8px 6px;
+        font-size: 12px;
+    }
+
+    .hint {
+        font-size: 13px;
+        padding: 8px 10px;
+    }
 }
 
 /* 상태 / 버튼 */
