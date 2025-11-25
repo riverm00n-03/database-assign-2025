@@ -130,8 +130,43 @@ def timetable():
                 today_day = weekday_map.get(current_weekday)
                 
                 if today_day:
-                    # 오늘의 수업만 필터링
-                    today_schedules = [s for s in schedules if s['day_of_week'] == today_day]
+                    # 오늘 날짜에 실제로 진행되는 수업만 조회 (class_session 테이블 조인)
+                    today_query = ""
+                    if role == 'student':
+                        today_query = """
+                            SELECT s.name AS subject_name, p.name AS professor_name, ss.day_of_week,
+                                   ss.start_time, ss.end_time, ss.location, cs.class_date, cs.is_cancelled
+                            FROM enrollment e
+                            JOIN subject s ON e.subject_id = s.subject_id
+                            JOIN subject_schedule ss ON s.subject_id = ss.subject_id
+                            JOIN class_session cs ON ss.schedule_id = cs.schedule_id
+                            LEFT JOIN professor p ON s.professor_id = p.professor_id
+                            WHERE e.student_id = %s
+                              AND cs.class_date = %s
+                              AND cs.is_cancelled = FALSE
+                        """
+                    elif role == 'professor':
+                        today_query = """
+                            SELECT s.name AS subject_name, p.name AS professor_name, ss.day_of_week,
+                                   ss.start_time, ss.end_time, ss.location, cs.class_date, cs.is_cancelled
+                            FROM subject s
+                            JOIN subject_schedule ss ON s.subject_id = ss.subject_id
+                            JOIN class_session cs ON ss.schedule_id = cs.schedule_id
+                            JOIN professor p ON s.professor_id = p.professor_id
+                            WHERE p.professor_id = %s
+                              AND cs.class_date = %s
+                              AND cs.is_cancelled = FALSE
+                        """
+                    
+                    # 오늘의 실제 수업 조회
+                    today_schedules = []
+                    if today_query:
+                        cursor.execute(today_query, (user_id, today))
+                        today_schedules = cursor.fetchall()
+                    
+                    # 요일 형식 통일
+                    for schedule in today_schedules:
+                        schedule['day_of_week'] = day_map.get(schedule['day_of_week'], schedule['day_of_week'])
                     
                     # 시간 문자열을 time 객체로 변환하는 헬퍼
                     def parse_time(time_val):
