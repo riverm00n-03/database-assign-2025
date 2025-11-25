@@ -83,12 +83,46 @@
     min-width: 560px;
 }
 
-.student-table th,
-.student-table td {
-    padding: 16px;
+.student-table.table th,
+.student-table.table td {
     text-align: left;
     border-bottom: 1px solid #f1f5f9;
+    border-right: none !important;
+    border-left: none !important;
     vertical-align: middle;
+}
+
+/* 헤더와 본문의 패딩을 정확히 일치시킴 */
+.student-table.table th {
+    padding: 16px !important;
+}
+
+.student-table.table td {
+    padding: 16px !important;
+}
+
+.student-table.table th:first-child {
+    padding-left: 16px !important;
+}
+
+.student-table.table td:first-child {
+    padding-left: 16px !important;
+}
+
+.student-table.table th:last-child {
+    padding-right: 16px !important;
+}
+
+.student-table.table td:last-child {
+    padding-right: 16px !important;
+}
+
+.student-table.table tbody tr {
+    position: static !important;
+}
+
+.student-table.table tbody tr::before {
+    display: none !important;
 }
 
 .student-table th {

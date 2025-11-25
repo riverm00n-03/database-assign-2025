@@ -14,6 +14,7 @@ body {
     padding: 0;
     font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
     background: var(--bg-gradient);
+    background-attachment: fixed;
     color: #1e293b;
     display: flex;
     flex-direction: column;
@@ -21,6 +22,21 @@ body {
     width: 100%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
 }
 
 @media (max-width: 768px) {
@@ -110,6 +126,11 @@ body {
     .menu-list a:active {
         color: var(--primary-color);
         background-color: var(--bg-hover);
+        transform: translateY(-2px);
+    }
+    
+    .menu-list a {
+        transition: all var(--transition-base);
     }
 }
 
@@ -120,11 +141,13 @@ body {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    background: var(--bg-gradient);
+    background: transparent;
     padding: var(--spacing-xl);
     width: 100%;
     box-sizing: border-box;
     min-height: calc(100vh - 64px);
+    position: relative;
+    z-index: 1;
 }
 
 /* 헤더가 없을 때만 상단 마진 추가 */
@@ -250,13 +273,32 @@ body:not(:has(.full-title-header)) .main-content {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     padding: var(--spacing-md);
-    transition: all var(--transition-fast);
+    transition: all var(--transition-base);
     text-align: left;
+    position: relative;
+    overflow: hidden;
+}
+
+.today-class-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--primary-gradient);
+    opacity: 0;
+    transition: opacity var(--transition-base);
 }
 
 .today-class-card:hover {
-    border-color: var(--primary-color);
-    box-shadow: 0 2px 8px rgba(67, 96, 255, 0.1);
+    border-color: rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.12), 0 2px 4px rgba(99, 102, 241, 0.08);
+    transform: translateY(-2px);
+}
+
+.today-class-card:hover::before {
+    opacity: 1;
 }
 
 .today-class-subject {

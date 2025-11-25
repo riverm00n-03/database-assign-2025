@@ -26,6 +26,46 @@
 .att-table .col-time { width: 18%; }
 .att-table .col-action { width: 16%; }
 
+/* 출석 테이블 border 정렬 수정 */
+.att-table.table th,
+.att-table.table td {
+    border-right: none !important;
+    border-left: none !important;
+}
+
+/* 헤더와 본문의 패딩을 정확히 일치시킴 */
+.att-table.table th {
+    padding: 12px 16px !important;
+}
+
+.att-table.table td {
+    padding: 12px 16px !important;
+}
+
+.att-table.table th:first-child {
+    padding-left: 16px !important;
+}
+
+.att-table.table td:first-child {
+    padding-left: 16px !important;
+}
+
+.att-table.table th:last-child {
+    padding-right: 16px !important;
+}
+
+.att-table.table td:last-child {
+    padding-right: 16px !important;
+}
+
+.att-table.table tbody tr {
+    position: static !important;
+}
+
+.att-table.table tbody tr::before {
+    display: none !important;
+}
+
 /* 상단 안내 */
 .hint {
     background-color: #eff6ff;
@@ -308,28 +348,45 @@
 
 .attendance-card:hover {
     box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
 }
 
-/* 출석 가능한 경우: 파랑-보라 그라데이션 테두리 + 은은한 빛나는 효과 */
+/* 출석 가능한 경우: 마젠타-군청/파랑 그라데이션 테두리 + 은은한 빛나는 효과 */
 .attendance-card.status-available {
     border: 2px solid transparent;
     background: linear-gradient(var(--bg-secondary), var(--bg-secondary)) padding-box,
-                linear-gradient(135deg, #4360ff 0%, #8b5cf6 50%, #6366f1 100%) border-box;
-    animation: glow-pulse 2s ease-in-out infinite;
+                linear-gradient(135deg, #d946ef 0%, #a855f7 25%, #6366f1 50%, #3b82f6 75%, #1e40af 100%) border-box;
+    animation: gradient-rotate 4s ease-in-out infinite;
+    position: relative;
+    box-shadow: 0 4px 16px rgba(168, 85, 247, 0.2), 
+                0 0 8px 2px rgba(217, 70, 239, 0.25),
+                0 0 12px 4px rgba(99, 102, 241, 0.2);
 }
 
 .attendance-card.status-available::before {
-    background: linear-gradient(135deg, rgba(67, 96, 255, 0.1) 0%, rgba(139, 92, 246, 0.1) 50%, rgba(99, 102, 241, 0.1) 100%);
+    background: linear-gradient(135deg, rgba(217, 70, 239, 0.08) 0%, rgba(168, 85, 247, 0.08) 25%, rgba(99, 102, 241, 0.08) 50%, rgba(59, 130, 246, 0.08) 75%, rgba(30, 64, 175, 0.08) 100%);
     opacity: 1;
 }
 
-@keyframes glow-pulse {
-    0%, 100% {
-        box-shadow: 0 4px 12px rgba(67, 96, 255, 0.2), 0 0 0 0 rgba(67, 96, 255, 0.4);
+@keyframes gradient-rotate {
+    0% {
+        background: linear-gradient(var(--bg-secondary), var(--bg-secondary)) padding-box,
+                    linear-gradient(135deg, #d946ef 0%, #a855f7 25%, #6366f1 50%, #3b82f6 75%, #1e40af 100%) border-box;
+    }
+    25% {
+        background: linear-gradient(var(--bg-secondary), var(--bg-secondary)) padding-box,
+                    linear-gradient(180deg, #d946ef 0%, #a855f7 25%, #6366f1 50%, #3b82f6 75%, #1e40af 100%) border-box;
     }
     50% {
-        box-shadow: 0 4px 12px rgba(67, 96, 255, 0.3), 0 0 20px 4px rgba(139, 92, 246, 0.3);
+        background: linear-gradient(var(--bg-secondary), var(--bg-secondary)) padding-box,
+                    linear-gradient(225deg, #d946ef 0%, #a855f7 25%, #6366f1 50%, #3b82f6 75%, #1e40af 100%) border-box;
+    }
+    75% {
+        background: linear-gradient(var(--bg-secondary), var(--bg-secondary)) padding-box,
+                    linear-gradient(270deg, #d946ef 0%, #a855f7 25%, #6366f1 50%, #3b82f6 75%, #1e40af 100%) border-box;
+    }
+    100% {
+        background: linear-gradient(var(--bg-secondary), var(--bg-secondary)) padding-box,
+                    linear-gradient(135deg, #d946ef 0%, #a855f7 25%, #6366f1 50%, #3b82f6 75%, #1e40af 100%) border-box;
     }
 }
 
@@ -561,11 +618,9 @@
 .btn-attend:hover {
     box-shadow: 0 8px 20px rgba(67, 96, 255, 0.35);
     background: var(--primary-dark);
-    transform: translateY(-2px);
 }
 
 .btn-attend:active {
-    transform: translateY(0);
     box-shadow: var(--shadow-md);
 }
 

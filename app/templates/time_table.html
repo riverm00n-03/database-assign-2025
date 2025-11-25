@@ -21,49 +21,150 @@
 </div>
 {% endif %}
 
-<div class="timetable-container card fade-in">
-    <table class="timetable table">
-        <thead>
-            <tr>
-                <th>시간</th>
-                <th>월</th>
-                <th>화</th>
-                <th>수</th>
-                <th>목</th>
-                <th>금</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for hour in range(9, 22) %}
-                {% for minute in [0, 30] %}
+<div class="timetable-wrapper fade-in">
+    <div class="timetable-main-container">
+        <div class="timetable-container card">
+            <table class="timetable table">
+                <colgroup>
+                    <col class="time-col" style="width: 90px;">
+                    <col style="width: auto;">
+                    <col style="width: auto;">
+                    <col style="width: auto;">
+                    <col style="width: auto;">
+                    <col style="width: auto;">
+                </colgroup>
+                <thead>
                     <tr>
-                        {% if minute == 0 %}
-                            <td class="time-cell" rowspan="2">
-                                {{ "%02d"|format(hour) }}:00
-                            </td>
-                        {% endif %}
-                        {% for day in days %}
-                            {% set cell_data = timetable.get((hour, minute), {}).get(day) %}
-                            {% if cell_data and cell_data != 'skip' %}
-                                <td class="class-cell" rowspan="{{ cell_data.rowspan }}">
-                                    <div class="class-content">
-                                        <div class="subject-name">{{ cell_data.subject_name }}</div>
-                                        {% if role == 'student' %}
-                                            <div class="professor-name">{{ cell_data.professor_name }}</div>
-                                        {% endif %}
-                                        <div class="location">{{ cell_data.location }}</div>
-                                    </div>
-                                </td>
-                            {% elif cell_data == 'skip' %}
-                                {# 병합된 셀 생략 #}
-                            {% else %}
-                                <td></td>
-                            {% endif %}
-                        {% endfor %}
+                        <th class="time-header">시간</th>
+                        <th>월</th>
+                        <th>화</th>
+                        <th>수</th>
+                        <th>목</th>
+                        <th>금</th>
                     </tr>
+                </thead>
+                <tbody>
+                    {% for hour in range(9, 22) %}
+                        {% for minute in [0, 30] %}
+                            <tr>
+                                {% if minute == 0 %}
+                                    <td class="time-cell" rowspan="2">
+                                        {{ "%02d"|format(hour) }}:00
+                                    </td>
+                                {% endif %}
+                                {% for day in days %}
+                                    {% set cell_data = timetable.get((hour, minute), {}).get(day) %}
+                                    {% if cell_data and cell_data != 'skip' %}
+                                        <td class="class-cell" rowspan="{{ cell_data.rowspan }}">
+                                            <div class="class-content">
+                                                <div class="subject-name">{{ cell_data.subject_name }}</div>
+                                                {% if role == 'student' %}
+                                                    <div class="professor-name">{{ cell_data.professor_name }}</div>
+                                                {% endif %}
+                                                <div class="location">{{ cell_data.location }}</div>
+                                            </div>
+                                        </td>
+                                    {% elif cell_data == 'skip' %}
+                                        {# 병합된 셀 생략 #}
+                                    {% else %}
+                                        <td class="empty-cell"></td>
+                                    {% endif %}
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="timetable-sidebar">
+        {% if current_class %}
+        <div class="class-notification-card card current-class-card">
+            <div class="notification-header">
+                <div class="notification-icon current-icon">📚</div>
+                <h3 class="notification-title">현재 수업</h3>
+            </div>
+            <div class="notification-content">
+                <div class="class-info-main">
+                    <div class="class-subject-name">{{ current_class.subject_name }}</div>
+                    {% if role == 'student' %}
+                        <div class="class-professor-name">{{ current_class.professor_name }}</div>
+                    {% endif %}
+                    <div class="class-location">📍 {{ current_class.location }}</div>
+                </div>
+                <div class="class-time-info">
+                    <div class="time-range">
+                        {{ current_class.start_time }} - {{ current_class.end_time }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if next_class %}
+        <div class="class-notification-card card next-class-card">
+            <div class="notification-header">
+                <div class="notification-icon next-icon">⏰</div>
+                <h3 class="notification-title">다음 수업</h3>
+            </div>
+            <div class="notification-content">
+                <div class="class-info-main">
+                    <div class="class-subject-name">{{ next_class.subject_name }}</div>
+                    {% if role == 'student' %}
+                        <div class="class-professor-name">{{ next_class.professor_name }}</div>
+                    {% endif %}
+                    <div class="class-location">📍 {{ next_class.location }}</div>
+                </div>
+                <div class="class-time-info">
+                    <div class="time-range">
+                        {{ next_class.start_time }} - {{ next_class.end_time }}
+                    </div>
+                    <div class="time-until">
+                        {% if next_class.hours_until > 0 %}
+                            <span class="time-value">{{ next_class.hours_until }}</span>시간 
+                            <span class="time-value">{{ next_class.minutes_until }}</span>분 후
+                        {% else %}
+                            <span class="time-value">{{ next_class.minutes_until }}</span>분 후
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if remaining_classes and remaining_classes|length > 0 %}
+        <div class="today-classes-section">
+            <h3 class="today-classes-title">오늘의 수업</h3>
+            <div class="today-classes-list">
+                {% for class_item in remaining_classes %}
+                <div class="today-class-card {% if class_item.is_past %}past-class{% else %}upcoming-class{% endif %}">
+                    <div class="today-class-header">
+                        <div class="today-class-subject">{{ class_item.subject_name }}</div>
+                        <div class="today-class-time-badge">
+                            {% if class_item.is_past %}
+                                <span class="badge badge-neutral">종료</span>
+                            {% else %}
+                                {% if class_item.hours_until > 0 %}
+                                    <span class="badge badge-info">{{ class_item.hours_until }}시간 {{ class_item.minutes_until }}분 후</span>
+                                {% else %}
+                                    <span class="badge badge-info">{{ class_item.minutes_until }}분 후</span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="today-class-info">
+                        {% if role == 'student' %}
+                            <div class="today-class-professor">{{ class_item.professor_name }}</div>
+                        {% endif %}
+                        <div class="today-class-location">📍 {{ class_item.location }}</div>
+                        <div class="today-class-time">{{ class_item.start_time }} - {{ class_item.end_time }}</div>
+                    </div>
+                </div>
                 {% endfor %}
-            {% endfor %}
-        </tbody>
-    </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}

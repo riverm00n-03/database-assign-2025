@@ -177,6 +177,18 @@
     padding: 16px 24px;
     text-align: left;
     border-bottom: 1px solid #e5e7eb;
+    border-right: none !important;
+    border-left: none !important;
+}
+
+.session-table th:first-child,
+.session-table td:first-child {
+    padding-left: 24px !important;
+}
+
+.session-table th:last-child,
+.session-table td:last-child {
+    padding-right: 24px !important;
 }
 
 .session-table thead th {

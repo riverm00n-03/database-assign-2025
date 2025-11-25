@@ -7,11 +7,11 @@
     left: 0;
     right: 0;
     z-index: 1000;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
     backdrop-filter: blur(24px) saturate(180%);
     -webkit-backdrop-filter: blur(24px) saturate(180%);
     border-bottom: 1px solid var(--border-light);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.06);
     padding: 0;
     margin: 0;
     width: 100%;
@@ -31,7 +31,10 @@
 .navbar-brand {
     font-size: 22px;
     font-weight: 800;
-    color: var(--text-primary);
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--primary-color) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     text-decoration: none;
     display: flex;
     align-items: center;
@@ -41,7 +44,11 @@
 }
 
 .navbar-brand:hover {
-    color: var(--primary-color);
+    background: linear-gradient(135deg, var(--primary-color) 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    transform: scale(1.02);
 }
 
 .navbar-menu {
@@ -77,7 +84,7 @@
 }
 
 .navbar-menu a.active {
-    background: linear-gradient(135deg, rgba(67, 96, 255, 0.12) 0%, rgba(107, 130, 255, 0.08) 100%);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(139, 92, 246, 0.08) 100%);
     color: var(--primary-color);
     font-weight: 700;
 }
@@ -90,9 +97,9 @@
     transform: translateX(-50%);
     width: 70%;
     height: 3px;
-    background: var(--primary-gradient);
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     border-radius: var(--radius-full);
-    box-shadow: 0 2px 8px rgba(67, 96, 255, 0.3);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
 .navbar-menu a .menu-icon {

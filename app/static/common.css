@@ -4,42 +4,42 @@
 ============================ */
 
 :root {
-    /* 색상 시스템 - 개선된 팔레트 */
-    --primary-color: #4360ff;
-    --primary-dark: #3147d8;
-    --primary-light: #6b82ff;
-    --primary-gradient: linear-gradient(135deg, #4360ff 0%, #6b82ff 100%);
+    /* 색상 시스템 - 감성적이고 따뜻한 팔레트 */
+    --primary-color: #6366f1;
+    --primary-dark: #4f46e5;
+    --primary-light: #818cf8;
+    --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     --secondary-color: #64748b;
     --success-color: #10b981;
-    --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --success-gradient: linear-gradient(135deg, #10b981 0%, #34d399 100%);
     --warning-color: #f59e0b;
     --danger-color: #ef4444;
     --info-color: #3b82f6;
     
-    /* 배경 색상 - 더 부드러운 톤 */
-    --bg-primary: #f5f7fa;
+    /* 배경 색상 - 더 따뜻하고 부드러운 톤 */
+    --bg-primary: #fafbfc;
     --bg-secondary: #ffffff;
     --bg-tertiary: #f8fafc;
-    --bg-hover: #f0f4f8;
-    --bg-gradient: linear-gradient(180deg, #f5f7fa 0%, #eef2f6 100%);
+    --bg-hover: #f1f5f9;
+    --bg-gradient: linear-gradient(180deg, #fafbfc 0%, #f1f5f9 50%, #eef2f6 100%);
     
-    /* 텍스트 색상 - 가독성 향상 */
-    --text-primary: #0f172a;
+    /* 텍스트 색상 - 더 부드러운 톤 */
+    --text-primary: #1e293b;
     --text-secondary: #475569;
     --text-muted: #64748b;
     --text-light: #94a3b8;
     
-    /* 테두리 색상 */
+    /* 테두리 색상 - 더 부드럽게 */
     --border-color: #e2e8f0;
     --border-light: #f1f5f9;
     --border-dark: #cbd5e1;
     
-    /* 그림자 - 더 부드럽고 깊이감 있는 그림자 */
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 24px rgba(0, 0, 0, 0.12);
-    --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.15);
-    --shadow-colored: 0 8px 24px rgba(67, 96, 255, 0.2);
+    /* 그림자 - 더 부드럽고 자연스러운 그림자 */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.05), 0 10px 15px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.06), 0 20px 25px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.08), 0 25px 50px rgba(0, 0, 0, 0.12);
+    --shadow-colored: 0 8px 16px rgba(99, 102, 241, 0.15), 0 4px 8px rgba(99, 102, 241, 0.1);
     
     /* 간격 */
     --spacing-xs: 4px;
@@ -49,17 +49,17 @@
     --spacing-xl: 32px;
     --spacing-2xl: 48px;
     
-    /* 둥근 모서리 */
-    --radius-sm: 6px;
-    --radius-md: 10px;
-    --radius-lg: 16px;
-    --radius-xl: 20px;
+    /* 둥근 모서리 - 더 부드럽게 */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --radius-xl: 24px;
     --radius-full: 9999px;
     
-    /* 트랜지션 */
-    --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-slow: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    /* 트랜지션 - 더 부드러운 애니메이션 */
+    --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ============================
@@ -85,16 +85,31 @@
     background: var(--primary-gradient);
     color: white;
     box-shadow: var(--shadow-colored);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-primary:hover::before {
+    left: 100%;
 }
 
 .btn-primary:hover {
-    background: var(--primary-dark);
-    box-shadow: 0 12px 28px rgba(67, 96, 255, 0.3);
-    transform: translateY(-2px);
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    box-shadow: 0 12px 24px rgba(99, 102, 241, 0.25), 0 6px 12px rgba(99, 102, 241, 0.15);
 }
 
 .btn-primary:active {
-    transform: translateY(0);
     box-shadow: var(--shadow-md);
 }
 
@@ -110,17 +125,32 @@
 .btn-success {
     background: var(--success-gradient);
     color: white;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-success::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-success:hover::before {
+    left: 100%;
 }
 
 .btn-success:hover {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%);
-    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
-    transform: translateY(-2px);
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3), 0 4px 10px rgba(16, 185, 129, 0.2);
 }
 
 .btn-success:active {
-    transform: translateY(0);
 }
 
 .btn-danger {
@@ -171,12 +201,31 @@
     box-shadow: var(--shadow-md);
     padding: var(--spacing-xl);
     border: 1px solid var(--border-color);
-    transition: box-shadow var(--transition-base);
+    transition: all var(--transition-base);
     width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--primary-gradient);
+    opacity: 0;
+    transition: opacity var(--transition-base);
 }
 
 .card:hover {
     box-shadow: var(--shadow-lg);
+    border-color: rgba(99, 102, 241, 0.2);
+}
+
+.card:hover::before {
+    opacity: 1;
 }
 
 @media (max-width: 768px) {
@@ -197,7 +246,11 @@
     color: var(--text-primary);
     margin: 0;
     letter-spacing: -0.01em;
-    line-height: 1.4;
+    line-height: 1.5;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .card-body {
@@ -209,13 +262,13 @@
 ============================ */
 .table {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
+    border-collapse: collapse;
     background-color: var(--bg-secondary);
     border-radius: var(--radius-md);
     overflow: hidden;
     min-width: 560px;
     border: 1px solid var(--border-color);
+    table-layout: auto;
 }
 
 @media (max-width: 768px) {
@@ -250,6 +303,17 @@
     font-size: 13px;
     color: var(--text-primary);
     border-bottom: 1px solid var(--border-color);
+    border-right: none;
+    border-left: none;
+    vertical-align: middle;
+}
+
+.table th:first-child {
+    padding-left: 16px;
+}
+
+.table th:last-child {
+    padding-right: 16px;
 }
 
 .table td {
@@ -257,15 +321,55 @@
     font-size: 14px;
     color: var(--text-secondary);
     border-bottom: 1px solid var(--border-light);
+    border-right: none;
+    border-left: none;
+    vertical-align: middle;
+}
+
+.table td:first-child {
+    padding-left: 16px;
+}
+
+.table td:last-child {
+    padding-right: 16px;
+}
+
+/* 특정 테이블에서 ::before 스타일 비활성화 */
+.table.att-table tbody tr::before,
+.table.student-table tbody tr::before {
+    display: none !important;
+}
+
+.table.att-table tbody tr,
+.table.student-table tbody tr {
+    position: static !important;
 }
 
 .table tbody tr {
-    transition: background-color var(--transition-fast);
+    transition: all var(--transition-base);
     border-bottom: 1px solid var(--border-light);
+    position: relative;
+}
+
+.table:not(.timetable) tbody tr::before {
+    content: '';
+    position: absolute;
+    left: -1px;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--primary-gradient);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+    z-index: 1;
 }
 
 .table tbody tr:hover {
     background-color: var(--bg-hover);
+}
+
+.table:not(.timetable) tbody tr:hover::before {
+    opacity: 1;
 }
 
 .table tbody tr:last-child {
@@ -281,11 +385,18 @@
 ============================ */
 .badge {
     display: inline-block;
-    padding: 4px 12px;
+    padding: 6px 14px;
     font-size: 12px;
     font-weight: 600;
     border-radius: var(--radius-full);
     border: 1px solid;
+    transition: all var(--transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.badge:hover {
+    transform: scale(1.05);
 }
 
 .badge-success {
@@ -323,9 +434,9 @@
 ============================ */
 .input {
     width: 100%;
-    padding: 10px 14px;
+    padding: 12px 16px;
     font-size: 14px;
-    border: 1px solid var(--border-color);
+    border: 1.5px solid var(--border-color);
     border-radius: var(--radius-md);
     background-color: var(--bg-secondary);
     color: var(--text-primary);
@@ -335,7 +446,11 @@
 .input:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(67, 96, 255, 0.1);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.08), var(--shadow-sm);
+}
+
+.input:hover:not(:focus) {
+    border-color: var(--border-dark);
 }
 
 .input::placeholder {
@@ -401,7 +516,7 @@
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(15px);
+        transform: translateY(20px);
     }
     to {
         opacity: 1;
@@ -423,11 +538,20 @@
 @keyframes scaleIn {
     from {
         opacity: 0;
-        transform: scale(0.95);
+        transform: scale(0.96);
     }
     to {
         opacity: 1;
         transform: scale(1);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
     }
 }
 
@@ -436,16 +560,34 @@
 }
 
 .slide-in {
-    animation: slideIn var(--transition-base) ease-out;
+    animation: slideIn var(--transition-base) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .scale-in {
-    animation: scaleIn var(--transition-base) ease-out;
+    animation: scaleIn var(--transition-base) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* 부드러운 스크롤 */
 html {
     scroll-behavior: smooth;
+}
+
+/* 전체적인 폰트 렌더링 개선 */
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* 선택된 텍스트 스타일 */
+::selection {
+    background-color: rgba(99, 102, 241, 0.2);
+    color: var(--text-primary);
+}
+
+::-moz-selection {
+    background-color: rgba(99, 102, 241, 0.2);
+    color: var(--text-primary);
 }
 
 /* ============================
@@ -488,7 +630,11 @@ html {
     color: var(--text-primary);
     margin: 0;
     letter-spacing: -0.02em;
-    line-height: 1.3;
+    line-height: 1.4;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--primary-color) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .server-time {
