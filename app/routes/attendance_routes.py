@@ -347,22 +347,58 @@ def manage_attendance_students():
                 for subject in enrolled_subjects:
                     subject_id = subject['subject_id']
                     
-                    # 해당 과목의 총 수업 세션 수 조회 (휴강 제외, 오늘 이전의 수업만)
                     from datetime import date
                     today = date.today()
+                    
+                    # 과목 정보 조회 (연도, 학기)
                     cursor.execute("""
-                        SELECT COUNT(DISTINCT cs.session_id) AS total_sessions
-                        FROM class_session cs
-                        JOIN subject_schedule ss ON cs.schedule_id = ss.schedule_id
-                        WHERE ss.subject_id = %s 
-                          AND cs.is_cancelled = FALSE
-                          AND cs.class_date <= %s
-                    """, (subject_id, today))
-                    total_sessions_result = cursor.fetchone()
-                    # 결과가 없으면 0으로 설정
-                    total_sessions = total_sessions_result['total_sessions'] if total_sessions_result else 0
-
-                    # 해당 과목에 대한 학생의 출석 통계 조회 (오늘 이전의 수업만)
+                        SELECT subject_year, subject_semester
+                        FROM subject
+                        WHERE subject_id = %s
+                    """, (subject_id,))
+                    subject_info = cursor.fetchone()
+                    
+                    if not subject_info or not subject_info['subject_year'] or not subject_info['subject_semester']:
+                        # 과목 정보가 없으면 기본값 사용
+                        continue
+                    
+                    subject_year = subject_info['subject_year']
+                    subject_semester = subject_info['subject_semester']
+                    
+                    # 학기 시작일과 종료일 계산
+                    semester_start, semester_end = get_semester_dates(subject_year, subject_semester)
+                    
+                    # 전체 주차 수 계산 (학기 시작일부터 종료일까지)
+                    total_weeks = ((semester_end - semester_start).days // 7) + 1
+                    if total_weeks > MAX_WEEKS_PER_SEMESTER:
+                        total_weeks = MAX_WEEKS_PER_SEMESTER
+                    
+                    # 현재 주차 계산 (학기 시작일부터 오늘까지)
+                    days_since_start = (today - semester_start).days
+                    current_week = (days_since_start // 7) + 1
+                    # 학기 시작 전이면 1주차로, 학기 종료 후면 전체 주차로 제한
+                    if current_week < 1:
+                        current_week = 1
+                    elif current_week > total_weeks:
+                        current_week = total_weeks
+                    
+                    # 주차 당 수업 수 (subject_schedule 개수)
+                    cursor.execute("""
+                        SELECT COUNT(*) AS schedules_per_week
+                        FROM subject_schedule
+                        WHERE subject_id = %s
+                    """, (subject_id,))
+                    schedules_result = cursor.fetchone()
+                    schedules_per_week = schedules_result['schedules_per_week'] if schedules_result else 0
+                    
+                    # 총 수업 수 = 전체 주차 수 * 주차 당 수업 수 (표시용)
+                    total_sessions = total_weeks * schedules_per_week
+                    
+                    # 현재 주차까지의 예상 수업 수 (출석률 계산 기준)
+                    expected_sessions_by_current_week = current_week * schedules_per_week
+                    
+                    # 오늘까지 진행된 수업에 대한 통계 조회
+                    # 1. 오늘까지의 출석/지각/결석 수 (휴강 제외, 출석 기록이 있는 수업만)
                     cursor.execute("""
                         SELECT
                             SUM(CASE WHEN c.status = 'PRESENT' THEN 1 ELSE 0 END) AS present_count,
@@ -383,27 +419,57 @@ def manage_attendance_students():
                     late_count = checkin_counts['late_count'] if checkin_counts and checkin_counts['late_count'] is not None else 0
                     absent_count = checkin_counts['absent_count'] if checkin_counts and checkin_counts['absent_count'] is not None else 0
                     
-                    # "기간 아님" (미래 수업)은 출석으로 간주
-                    # 미래 수업 수를 계산하여 present_count에 추가
+                    # 2. 오늘까지의 휴강 수
                     cursor.execute("""
-                        SELECT COUNT(DISTINCT cs.session_id) AS future_sessions
+                        SELECT COUNT(DISTINCT cs.session_id) AS cancelled_count
                         FROM class_session cs
                         JOIN subject_schedule ss ON cs.schedule_id = ss.schedule_id
                         WHERE ss.subject_id = %s 
-                          AND cs.is_cancelled = FALSE
-                          AND cs.class_date > %s
+                          AND cs.is_cancelled = TRUE
+                          AND cs.class_date <= %s
                     """, (subject_id, today))
-                    future_sessions_result = cursor.fetchone()
-                    future_sessions = future_sessions_result['future_sessions'] if future_sessions_result else 0
+                    cancelled_result = cursor.fetchone()
+                    cancelled_count = cancelled_result['cancelled_count'] if cancelled_result else 0
                     
-                    # 미래 수업을 출석으로 간주하여 present_count에 추가
-                    present_count += future_sessions
-                    # 총 세션 수에도 미래 수업 포함
-                    total_sessions += future_sessions
-
-                    attendance_percentage, status_text, status_color = calculate_attendance_status(
-                        total_sessions, present_count, late_count, absent_count
-                    )
+                    # 3. 오늘까지 진행된 전체 수업 수 (휴강 포함, 출석 기록 유무와 무관)
+                    cursor.execute("""
+                        SELECT COUNT(DISTINCT cs.session_id) AS total_held_sessions
+                        FROM class_session cs
+                        JOIN subject_schedule ss ON cs.schedule_id = ss.schedule_id
+                        WHERE ss.subject_id = %s 
+                          AND cs.class_date <= %s
+                    """, (subject_id, today))
+                    total_held_result = cursor.fetchone()
+                    total_held_sessions = total_held_result['total_held_sessions'] if total_held_result else 0
+                    
+                    # 출석 기록이 없는 수업 수 = 전체 진행된 수업 수 - (출석 + 지각 + 결석 + 휴강)
+                    # 출석 기록이 없는 수업은 결석으로 간주
+                    recorded_sessions = present_count + late_count + absent_count + cancelled_count
+                    unrecorded_sessions = total_held_sessions - recorded_sessions
+                    
+                    # 출석률 계산: 지금까지 진행된 수업 중 출석한 비율
+                    # 분자: 출석 + 지각 (실제로 출석한 수업)
+                    numerator = present_count + late_count
+                    
+                    # 분모: 실제 진행된 수업 (휴강 제외)
+                    # 실제 진행된 수업 = 전체 진행된 수업 - 휴강 수업
+                    denominator = total_held_sessions - cancelled_count
+                    
+                    if denominator > 0:
+                        attendance_percentage = (numerator / denominator) * 100
+                    else:
+                        attendance_percentage = 100.0  # 진행된 수업이 없으면 100%로 간주
+                    
+                    # 상태 결정
+                    if attendance_percentage >= 80:
+                        status_text = '안전'
+                        status_color = 'green'
+                    elif attendance_percentage >= 70:
+                        status_text = '주의'
+                        status_color = 'orange'
+                    else:
+                        status_text = '위험'
+                        status_color = 'red'
 
                     enrolled_subjects_data.append({
                         'subject_id': subject_id,

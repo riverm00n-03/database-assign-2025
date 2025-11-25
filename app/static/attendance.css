@@ -42,94 +42,483 @@
     gap: var(--spacing-sm);
 }
 
-/* 출석 테이블을 감싸는 카드 스타일 */
-.att-table-wrapper {
+/* 출석률 계산 방식 힌트 */
+.attendance-calculation-hint {
+    margin-bottom: var(--spacing-md);
+    font-size: 13px;
+}
+
+.calculation-link {
+    color: #4360ff;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 3px;
+    transition: color var(--transition-base);
+}
+
+.calculation-link:hover {
+    color: #3147d8;
+}
+
+/* 모달 오버레이 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* 모달 콘텐츠 */
+.modal-content {
+    background-color: #fff;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.modal-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-base);
+}
+
+.modal-close:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-modal-close {
+    padding: 10px 24px;
+    background-color: #4360ff;
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color var(--transition-base);
+}
+
+.btn-modal-close:hover {
+    background-color: #3147d8;
+}
+
+/* 계산 공식 섹션 */
+.calculation-formula {
+    margin-bottom: 24px;
+}
+
+.calculation-formula h3 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.formula-box {
+    background-color: #f8fafc;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--text-primary);
+    font-family: 'Courier New', monospace;
+}
+
+.formula-numerator {
+    color: #10b981;
+    font-weight: 600;
+}
+
+.formula-denominator {
+    color: #3b82f6;
+    font-weight: 600;
+}
+
+/* 설명 섹션 */
+.calculation-explanation {
+    margin-bottom: 24px;
+}
+
+.calculation-explanation h3 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.explanation-list {
+    margin: 0;
+    padding-left: 20px;
+    list-style-type: disc;
+}
+
+.explanation-list li {
+    margin-bottom: 8px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+.explanation-list li strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* 예시 섹션 */
+.calculation-example h3 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.example-box {
+    background-color: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: var(--radius-md);
+    padding: 16px;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text-secondary);
+}
+
+.example-box p {
+    margin: 0 0 8px 0;
+}
+
+.example-box p:last-child {
+    margin-bottom: 0;
+}
+
+.example-result {
+    margin-top: 12px !important;
+    padding-top: 12px;
+    border-top: 1px solid #bae6fd;
+    font-family: 'Courier New', monospace;
+    color: var(--text-primary);
+}
+
+.example-result strong {
+    color: #10b981;
+    font-size: 16px;
+}
+
+/* 출석 카드 컨테이너 */
+.attendance-cards-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    margin-top: 0;
+}
+
+/* 출석 카드 기본 스타일 */
+.attendance-card {
     background-color: var(--bg-secondary);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
     padding: var(--spacing-lg);
-    border: 1px solid var(--border-color);
-    overflow-x: auto;
-    margin-top: 0;
-}
-
-/* 출석 테이블 */
-.att-table {
-    border-collapse: separate;
-    border-spacing: 0;
-    width: 100%;
-    table-layout: fixed;
-    border-radius: var(--radius-md);
+    border: 2px solid var(--border-color);
+    transition: all var(--transition-base);
+    position: relative;
     overflow: hidden;
-    min-width: 400px;
-    border: none;
-    margin: 0;
 }
 
-.att-table th,
-.att-table td {
-    border: 1px solid var(--border-light);
-    padding: 14px 12px;
-    text-align: center;
-    vertical-align: middle;
-    font-size: 14px;
-    background: transparent;
-    transition: background-color var(--transition-fast);
+.attendance-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: var(--radius-lg);
+    opacity: 0;
+    transition: opacity var(--transition-base);
+    pointer-events: none;
+    z-index: 0;
 }
 
-.att-table thead th {
-    background-color: var(--bg-tertiary);
-    font-weight: 600;
-    color: var(--text-primary);
-    font-size: 13px;
-    padding: 16px 12px;
+.attendance-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
 }
 
-.att-row .sbj .subject-name {
+/* 출석 가능한 경우: 파랑-보라 그라데이션 테두리 + 은은한 빛나는 효과 */
+.attendance-card.status-available {
+    border: 2px solid transparent;
+    background: linear-gradient(var(--bg-secondary), var(--bg-secondary)) padding-box,
+                linear-gradient(135deg, #4360ff 0%, #8b5cf6 50%, #6366f1 100%) border-box;
+    animation: glow-pulse 2s ease-in-out infinite;
+}
+
+.attendance-card.status-available::before {
+    background: linear-gradient(135deg, rgba(67, 96, 255, 0.1) 0%, rgba(139, 92, 246, 0.1) 50%, rgba(99, 102, 241, 0.1) 100%);
+    opacity: 1;
+}
+
+@keyframes glow-pulse {
+    0%, 100% {
+        box-shadow: 0 4px 12px rgba(67, 96, 255, 0.2), 0 0 0 0 rgba(67, 96, 255, 0.4);
+    }
+    50% {
+        box-shadow: 0 4px 12px rgba(67, 96, 255, 0.3), 0 0 20px 4px rgba(139, 92, 246, 0.3);
+    }
+}
+
+/* 출석 완료: 초록빛 */
+.attendance-card.status-present {
+    border-color: #10b981;
+    background: linear-gradient(var(--bg-secondary), var(--bg-secondary)) padding-box;
+}
+
+.attendance-card.status-present::before {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.08) 100%);
+    opacity: 1;
+}
+
+.attendance-card.status-present:hover {
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.2);
+}
+
+/* 지각: 노란 빛 */
+.attendance-card.status-late {
+    border-color: #f59e0b;
+    background: linear-gradient(var(--bg-secondary), var(--bg-secondary)) padding-box;
+}
+
+.attendance-card.status-late::before {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(217, 119, 6, 0.08) 100%);
+    opacity: 1;
+}
+
+.attendance-card.status-late:hover {
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.2);
+}
+
+/* 결석: 빨간 빛 */
+.attendance-card.status-absent {
+    border-color: #ef4444;
+    background: linear-gradient(var(--bg-secondary), var(--bg-secondary)) padding-box;
+}
+
+.attendance-card.status-absent::before {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(220, 38, 38, 0.08) 100%);
+    opacity: 1;
+}
+
+.attendance-card.status-absent:hover {
+    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.2);
+}
+
+/* 출석 불가능한 경우 */
+.attendance-card.status-unavailable {
+    border-color: var(--border-color);
+    opacity: 0.7;
+}
+
+/* 카드 내용 레이아웃 */
+.attendance-card-content {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    position: relative;
+    z-index: 1;
+}
+
+.card-left {
+    flex: 1;
+    min-width: 0;
+}
+
+.card-center {
+    flex: 0 0 auto;
+    min-width: 200px;
+}
+
+.card-right {
+    flex: 0 0 auto;
+    min-width: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* 과목 정보 */
+.subject-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.subject-name {
     font-weight: 700;
-    color: #1a3b5d;
-    text-align: left;
-    font-size: 15px;
+    color: var(--text-primary);
+    font-size: 18px;
     letter-spacing: -0.01em;
+    margin: 0;
+    line-height: 1.3;
 }
 
-.att-row:hover {
-    background-color: var(--bg-hover);
+.class-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: 13px;
+    color: var(--text-secondary);
+    flex-wrap: wrap;
 }
 
-.time-cell-content {
-    text-align: left;
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.meta-label {
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.meta-value {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.meta-divider {
+    color: var(--text-muted);
+    margin: 0 4px;
+}
+
+/* 시간 정보 */
+.time-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    align-items: flex-start;
 }
 
 .time-badge {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
     font-weight: 700;
     color: var(--text-primary);
-    font-size: 14px;
+    font-size: 17px;
     letter-spacing: -0.01em;
-    margin-bottom: var(--spacing-xs);
+}
+
+.time-icon {
+    font-size: 18px;
+}
+
+.time-text {
+    font-weight: 700;
+    font-size: 17px;
 }
 
 .window-range {
     font-size: 12px;
     color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .window-icon {
     color: var(--success-color);
+    font-weight: 600;
 }
 
-.action-cell {
+/* 상태 섹션 */
+.status-section {
     display: flex;
     flex-direction: column;
+    align-items: flex-end;
     gap: var(--spacing-sm);
-    align-items: center;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: var(--radius-full);
+    white-space: nowrap;
 }
 
 .att-form {
     margin: 0;
     width: 100%;
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
 }
 
 /* 빈 행 */
@@ -186,27 +575,52 @@
         padding: 0;
     }
 
-    .att-table {
-        min-width: 450px;
+    .attendance-card {
+        padding: var(--spacing-md);
     }
 
-    .att-table th,
-    .att-table td {
-        padding: 10px 8px;
-        font-size: 12px;
+    .attendance-card-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-md);
     }
 
-    .att-table th {
-        font-size: 11px;
-        padding: 12px 8px;
+    .card-left,
+    .card-center,
+    .card-right {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .card-center {
+        min-width: 0;
+    }
+
+    .card-right {
+        justify-content: flex-start;
+    }
+
+    .status-section {
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .att-form {
+        justify-content: flex-start;
     }
 
     .subject-name {
-        font-size: 13px;
+        font-size: 16px;
     }
 
     .time-badge {
-        font-size: 12px;
+        font-size: 15px;
+    }
+
+    .time-text {
+        font-size: 15px;
     }
 
     .window-range {
@@ -217,30 +631,49 @@
         font-size: 13px;
         padding: 10px 14px;
     }
-}
 
-@media (max-width: 480px) {
-    .att-table {
-        min-width: 380px;
-    }
-
-    .att-table th,
-    .att-table td {
-        padding: 8px 6px;
-        font-size: 11px;
-    }
-
-    .att-table th {
-        font-size: 10px;
-        padding: 10px 6px;
-    }
-
-    .subject-name {
+    .attendance-calculation-hint {
         font-size: 12px;
     }
 
+    .modal-content {
+        width: 95%;
+        max-height: 85vh;
+    }
+
+    .modal-header {
+        padding: 16px 20px;
+    }
+
+    .modal-title {
+        font-size: 18px;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .formula-box {
+        font-size: 13px;
+        padding: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .attendance-card {
+        padding: var(--spacing-sm);
+    }
+
+    .subject-name {
+        font-size: 15px;
+    }
+
     .time-badge {
-        font-size: 11px;
+        font-size: 14px;
+    }
+
+    .time-text {
+        font-size: 14px;
     }
 
     .window-range {
@@ -251,6 +684,43 @@
         font-size: 12px;
         padding: 8px 12px;
     }
+
+    .attendance-calculation-hint {
+        font-size: 11px;
+    }
+
+    .modal-content {
+        width: 98%;
+        max-height: 90vh;
+    }
+
+    .modal-header {
+        padding: 14px 16px;
+    }
+
+    .modal-title {
+        font-size: 16px;
+    }
+
+    .modal-body {
+        padding: 16px;
+    }
+
+    .calculation-formula h3,
+    .calculation-explanation h3,
+    .calculation-example h3 {
+        font-size: 14px;
+    }
+
+    .formula-box {
+        font-size: 12px;
+        padding: 10px;
+    }
+
+    .example-box {
+        font-size: 12px;
+        padding: 12px;
+    }
 }
 
 /* 19:8 비율 이상의 가로 화면 대응 */
@@ -259,44 +729,32 @@
         max-width: 100%;
     }
 
-    .att-table-wrapper {
-        padding: var(--spacing-lg);
+    .attendance-cards-wrapper {
+        gap: var(--spacing-lg);
     }
 
-    .att-table {
-        min-width: 100%;
-    }
-
-    .att-table th,
-    .att-table td {
-        padding: 12px 10px;
-        font-size: 13px;
-    }
-
-    .att-table th {
-        font-size: 12px;
-        padding: 14px 10px;
+    .attendance-card-content {
+        gap: var(--spacing-xl);
     }
 
     .subject-name {
-        font-size: 14px;
+        font-size: 19px;
     }
 
     .time-badge {
-        font-size: 13px;
+        font-size: 18px;
+    }
+
+    .time-text {
+        font-size: 18px;
     }
 
     .window-range {
-        font-size: 11px;
+        font-size: 13px;
     }
 
     .hint {
-        font-size: 13px;
+        font-size: 14px;
         padding: 12px 16px;
-    }
-
-    .action-cell {
-        flex-direction: row;
-        gap: var(--spacing-sm);
     }
 }

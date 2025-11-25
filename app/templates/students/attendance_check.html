@@ -28,34 +28,54 @@
         <span>수업 시작 <b>10분 전 ~ 10분 후</b>에만 출석이 가능합니다.</span>
     </div>
 
-    <div class="att-table-wrapper card fade-in">
-        <table class="att-table table">
-            <thead>
-                <tr>
-                    <th class="col-subject">과목</th>
-                    <th class="col-professor">교수</th>
-                    <th class="col-location">강의실</th>
-                    <th class="col-time">시간</th>
-                    <th class="col-action">상태 / 출석</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if today_classes %}
-                    {% for cls in today_classes %}
-                        <tr class="att-row" data-schedule-id="{{ cls.schedule_id }}" data-window-open="{{ '1' if cls.window_open else '0' }}">
-                            <td class="sbj">
-                                <div class="subject-name">{{ cls.subject_name }}</div>
-                            </td>
-                            <td>{{ cls.professor_name or '-' }}</td>
-                            <td>{{ cls.location or '-' }}</td>
-                            <td class="time-cell-content">
-                                <div class="time-badge">{{ cls.start_time_str }} ~ {{ cls.end_time_str }}</div>
-                                <div class="window-range">
-                                    <span class="window-icon">✓</span> 가능: {{ cls.window_from_str }} ~ {{ cls.window_to_str }}
+    <div class="attendance-cards-wrapper fade-in">
+        {% if today_classes %}
+            {% for cls in today_classes %}
+                <div class="attendance-card 
+                    {% if cls.status == '출석완료' %}status-present
+                    {% elif cls.status == '지각' %}status-late
+                    {% elif cls.status == '결석' %}status-absent
+                    {% elif cls.window_open %}status-available
+                    {% else %}status-unavailable{% endif %}"
+                    data-schedule-id="{{ cls.schedule_id }}" 
+                    data-window-open="{{ '1' if cls.window_open else '0' }}"
+                    data-status="{{ cls.status }}">
+                    <div class="attendance-card-content">
+                        <div class="card-left">
+                            <div class="subject-info">
+                                <h3 class="subject-name">{{ cls.subject_name }}</h3>
+                                <div class="class-meta">
+                                    <span class="meta-item">
+                                        <span class="meta-label">교수:</span>
+                                        <span class="meta-value">{{ cls.professor_name or '-' }}</span>
+                                    </span>
+                                    <span class="meta-divider">•</span>
+                                    <span class="meta-item">
+                                        <span class="meta-label">강의실:</span>
+                                        <span class="meta-value">{{ cls.location or '-' }}</span>
+                                    </span>
                                 </div>
-                            </td>
-                            <td class="action-cell">
-                                <span class="badge {{ 'badge-success' if cls.status == '출석완료' else 'badge-neutral' }}">
+                            </div>
+                        </div>
+                        <div class="card-center">
+                            <div class="time-info">
+                                <div class="time-badge">
+                                    <span class="time-icon">🕐</span>
+                                    <span class="time-text">{{ cls.start_time_str }} ~ {{ cls.end_time_str }}</span>
+                                </div>
+                                <div class="window-range">
+                                    <span class="window-icon">✓</span>
+                                    <span>출석 가능: {{ cls.window_from_str }} ~ {{ cls.window_to_str }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-right">
+                            <div class="status-section">
+                                <span class="status-badge 
+                                    {% if cls.status == '출석완료' %}badge-success
+                                    {% elif cls.status == '지각' %}badge-warning
+                                    {% elif cls.status == '결석' %}badge-danger
+                                    {% else %}badge-neutral{% endif %}">
                                     {{ cls.status }}
                                 </span>
                                 {% if cls.window_open and cls.status != '출석완료' %}
@@ -66,16 +86,16 @@
                                 {% else %}
                                     <button class="btn btn-sm disabled" disabled>출석 불가</button>
                                 {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="5" class="empty">오늘 예정된 수업이 없습니다.</td>
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <p class="empty-message">오늘 예정된 수업이 없습니다.</p>
+            </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

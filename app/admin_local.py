@@ -1,5 +1,5 @@
-# admin.py
-# tkinter GUI 환경에서 데이터베이스를 관리하기 위한 파일
+# admin_local.py
+# tkinter GUI 환경에서 데이터베이스를 관리하기 위한 파일 (로컬 MySQL 전용, Docker 미사용)
 
 import sys
 from pathlib import Path
@@ -15,16 +15,19 @@ sys.path.insert(0, str(project_root))
 from mysql.connector import connect
 from config import DB_CONFIG
 
-# 로컬 실행 시 Docker MySQL에 연결하기 위한 설정
-# Docker 컨테이너 내부에서는 'db'를 사용하고, 로컬에서는 'localhost:3307'을 사용
+# 로컬 MySQL 연결 설정 (Docker 미사용)
+# .env 파일의 DB_HOST, DB_USER, DB_PASSWORD, DB_NAME을 사용
+# 포트가 설정되어 있지 않으면 기본값 3306 사용
 LOCAL_DB_CONFIG = DB_CONFIG.copy()
-if LOCAL_DB_CONFIG.get('host') == 'db':
-    # 로컬 실행 시 Docker MySQL에 연결 (포트 3307로 매핑됨)
-    LOCAL_DB_CONFIG['host'] = 'localhost'
-    LOCAL_DB_CONFIG['port'] = int(3307)  # 포트는 정수형이어야 함
-elif 'port' in LOCAL_DB_CONFIG:
+if 'port' not in LOCAL_DB_CONFIG or LOCAL_DB_CONFIG.get('port') is None:
+    LOCAL_DB_CONFIG['port'] = 3306  # 기본 MySQL 포트
+elif isinstance(LOCAL_DB_CONFIG.get('port'), str):
     # 포트가 문자열로 설정되어 있을 경우 정수로 변환
     LOCAL_DB_CONFIG['port'] = int(LOCAL_DB_CONFIG['port'])
+
+# 호스트가 'db'로 설정되어 있으면 'localhost'로 변경 (Docker 호스트명 제거)
+if LOCAL_DB_CONFIG.get('host') == 'db':
+    LOCAL_DB_CONFIG['host'] = 'localhost'
 
 # 테이블 목록
 TABLES = [
@@ -40,7 +43,7 @@ TABLES = [
 class DatabaseAdminGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("WCHECK DB 관리 프로그램")
+        self.root.title("WCHECK DB 관리 프로그램 (로컬)")
         self.root.geometry("1200x700")
         
         self.current_table = None
@@ -1220,3 +1223,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

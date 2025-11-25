@@ -4,7 +4,8 @@
 .
 ├── app/ (Flask 애플리케이션 패키지 루트)
 │   ├── __init__.py (Flask 앱/DB 초기화 진입점)
-│   ├── admin.py (콘솔용 DB 리셋·데이터 관리 스크립트)
+│   ├── admin.py (Docker MySQL용 DB 리셋·데이터 관리 GUI 스크립트)
+│   ├── admin_local.py (로컬 MySQL용 DB 리셋·데이터 관리 GUI 스크립트)
 │   ├── routes/ (블루프린트 라우트 모듈)
 │   │   ├── auth_routes.py (로그인, 로그아웃 등 인증 처리)
 │   │   ├── attendance_routes.py (학생용 출석 체크/조회)
@@ -14,7 +15,16 @@
 │   |   └── timetable_routes.py (시간표 관련 페이지)
 │   │   
 │   ├── static/ (정적 파일)
+│   │   ├── attendance_cards.css (출석 관리 카드 스타일)
+│   │   ├── attendance.css (출석 관련 스타일)
+│   │   ├── common.css (공통 스타일)
 │   │   ├── db.css (공통 테이블 스타일)
+│   │   ├── login.css (로그인 페이지 스타일)
+│   │   ├── manage_attendance.css (출석 관리 페이지 스타일)
+│   │   ├── menu-icons.js (메뉴 아이콘 스크립트)
+│   │   ├── navbar.css (네비게이션 바 스타일)
+│   │   ├── navbar.js (네비게이션 바 스크립트)
+│   │   ├── professor.css (교수 페이지 스타일)
 │   │   ├── style.css (기본 레이아웃 스타일 시트)
 │   │   └── time_table.css (시간표 전용 스타일)
 │   ├── templates/
@@ -33,8 +43,11 @@
 │   ├── utils/
 │   │   ├── auth.py (로그인 검증 데코레이터)
 │   │   ├── attendance_helpers.py (출석 관련 헬퍼 함수)
+│   │   ├── attendance_test.py (출석 테스트 유틸리티)
+│   │   ├── auto_absent.py (자동 결석 처리 유틸리티)
 │   │   ├── constants.py (학기, 출석 상태 등 상수 모음)
-│   │   └── db_helpers.py (DB 연결 및 데이터 변환 헬퍼)
+│   │   ├── db_helpers.py (DB 연결 및 데이터 변환 헬퍼)
+│   │   └── login.py (로그인 관련 유틸리티)
 │   ├── services/ (추가 예정: 비즈니스 로직 계층)
 │   │   └── (attendance_service.py – 출석 생성/검증 로직)
 │   ├── repositories/ (추가 예정: DB 접근 추상화)
@@ -55,6 +68,8 @@
 │   └── (test_repositories.py – DB 레이어 단위 테스트)
 ├── docs/ (추가 예정: 추가 문서)
 │   └── (api.md – REST API 명세)
+├── scripts/ (스크립트 파일)
+│   └── auto_absent_daily.py (일일 자동 결석 처리 스크립트)
 ├── tree.md (파일 트리 문서)
 └── venv/ (가상환경, 배포 시 제외)
     ├── Include/
