@@ -7,63 +7,59 @@
 {% endblock %}
 
 {% block header %}
-    <header class="full-title-header">
-        <div class="title-wrap">
-            <h1 class="page-title">{{ username }}님 출석 체크</h1>
-            <div class="server-time" style="display: flex; align-items: center; gap: var(--spacing-sm); font-size: 14px; color: var(--text-secondary);">
-                <span style="font-weight: 600;">현재 시간:</span>
-                <span id="serverNow" data-server-iso="{{ server_now_iso }}" style="font-family: 'Courier New', monospace; font-weight: 600; color: var(--text-primary);">
-                    {{ server_now_fmt }}
-                </span>
-                <span id="serverWeekday" class="badge badge-info" style="font-size: 11px;"></span>
-            </div>
+<header class="full-title-header">
+    <div class="title-wrap">
+        <h1 class="page-title">{{ username }}님 출석 체크</h1>
+        <div class="server-time">
+            <span class="server-time-label">현재 시간:</span>
+            <span id="serverNow" data-server-iso="{{ server_now_iso }}" class="server-time-value">
+                {{ server_now_fmt }}
+            </span>
+            <span id="serverWeekday" class="badge badge-info"></span>
         </div>
-    </header>
+    </div>
+</header>
 {% endblock %}
 
 {% block content %}
-        <div class="attendance-container">
-            <div class="hint alert alert-info" style="margin-bottom: var(--spacing-md); display: flex; align-items: center; gap: var(--spacing-sm);">
-                <span>ℹ️</span>
-                <span>수업 시작 <b>10분 전 ~ 10분 후</b>에만 출석이 가능합니다.</span>
-            </div>
+<div class="attendance-container">
+    <div class="hint alert alert-info">
+        <span>ℹ️</span>
+        <span>수업 시작 <b>10분 전 ~ 10분 후</b>에만 출석이 가능합니다.</span>
+    </div>
 
-            <table class="att-table table fade-in">
-                <thead>
+    <div class="att-table-wrapper card fade-in">
+        <table class="att-table table">
+            <thead>
                 <tr>
-                    <th style="width:34%;">과목</th>
-                    <th style="width:16%;">교수</th>
-                    <th style="width:16%;">강의실</th>
-                    <th style="width:18%;">시간</th>
-                    <th style="width:16%;">상태 / 출석</th>
+                    <th class="col-subject">과목</th>
+                    <th class="col-professor">교수</th>
+                    <th class="col-location">강의실</th>
+                    <th class="col-time">시간</th>
+                    <th class="col-action">상태 / 출석</th>
                 </tr>
-                </thead>
-                <tbody>
+            </thead>
+            <tbody>
                 {% if today_classes %}
                     {% for cls in today_classes %}
-                        <tr class="att-row"
-                            data-schedule-id="{{ cls.schedule_id }}"
-                            data-window-open="{{ '1' if cls.window_open else '0' }}">
+                        <tr class="att-row" data-schedule-id="{{ cls.schedule_id }}" data-window-open="{{ '1' if cls.window_open else '0' }}">
                             <td class="sbj">
                                 <div class="subject-name">{{ cls.subject_name }}</div>
                             </td>
                             <td>{{ cls.professor_name or '-' }}</td>
                             <td>{{ cls.location or '-' }}</td>
-                            <td style="text-align: left;">
-                                <div class="time-badge" style="font-weight: 600; color: var(--text-primary); margin-bottom: var(--spacing-xs);">
-                                    {{ cls.start_time_str }} ~ {{ cls.end_time_str }}
-                                </div>
-                                <div class="window-range" style="font-size: 12px; color: var(--text-muted);">
-                                    <span style="color: var(--success-color);">✓</span> 가능: {{ cls.window_from_str }} ~ {{ cls.window_to_str }}
+                            <td class="time-cell-content">
+                                <div class="time-badge">{{ cls.start_time_str }} ~ {{ cls.end_time_str }}</div>
+                                <div class="window-range">
+                                    <span class="window-icon">✓</span> 가능: {{ cls.window_from_str }} ~ {{ cls.window_to_str }}
                                 </div>
                             </td>
-                            <td class="action" style="display: flex; flex-direction: column; gap: var(--spacing-sm); align-items: center;">
+                            <td class="action-cell">
                                 <span class="badge {{ 'badge-success' if cls.status == '출석완료' else 'badge-neutral' }}">
                                     {{ cls.status }}
                                 </span>
-
                                 {% if cls.window_open and cls.status != '출석완료' %}
-                                    <form class="att-form" method="POST" action="{{ url_for('attendance.check_attendance') }}" style="margin: 0;">
+                                    <form class="att-form" method="POST" action="{{ url_for('attendance.check_attendance') }}">
                                         <input type="hidden" name="schedule_id" value="{{ cls.schedule_id }}">
                                         <button type="submit" class="btn btn-success btn-sm">출석하기</button>
                                     </form>
@@ -78,13 +74,13 @@
                         <td colspan="5" class="empty">오늘 예정된 수업이 없습니다.</td>
                     </tr>
                 {% endif %}
-                </tbody>
-            </table>
-        </div>
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
-<!-- 시간 + 요일 자동 갱신 -->
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const timeSpan = document.getElementById('serverNow');
@@ -116,7 +112,6 @@
             render();
         }, 1000);
 
-        // 10분마다 서버 동기화
         setInterval(async () => {
             try {
                 const res = await fetch("/api/server_time");

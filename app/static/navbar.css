@@ -7,14 +7,15 @@
     left: 0;
     right: 0;
     z-index: 1000;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border-color);
-    box-shadow: var(--shadow-sm);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border-bottom: 1px solid var(--border-light);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
     padding: 0;
     margin: 0;
     width: 100%;
+    transition: all var(--transition-base);
 }
 
 .navbar-container {
@@ -28,13 +29,19 @@
 }
 
 .navbar-brand {
-    font-size: 20px;
-    font-weight: 700;
+    font-size: 22px;
+    font-weight: 800;
     color: var(--text-primary);
     text-decoration: none;
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
+    transition: all var(--transition-base);
+    letter-spacing: -0.02em;
+}
+
+.navbar-brand:hover {
+    color: var(--primary-color);
 }
 
 .navbar-menu {
@@ -54,10 +61,10 @@
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    padding: 8px 16px;
+    padding: 10px 18px;
     text-decoration: none;
     color: var(--text-secondary);
-    font-weight: 500;
+    font-weight: 600;
     font-size: 14px;
     border-radius: var(--radius-md);
     transition: all var(--transition-base);
@@ -70,9 +77,9 @@
 }
 
 .navbar-menu a.active {
-    background-color: rgba(67, 96, 255, 0.1);
+    background: linear-gradient(135deg, rgba(67, 96, 255, 0.12) 0%, rgba(107, 130, 255, 0.08) 100%);
     color: var(--primary-color);
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .navbar-menu a.active::after {
@@ -81,10 +88,11 @@
     bottom: -1px;
     left: 50%;
     transform: translateX(-50%);
-    width: 60%;
-    height: 2px;
-    background-color: var(--primary-color);
+    width: 70%;
+    height: 3px;
+    background: var(--primary-gradient);
     border-radius: var(--radius-full);
+    box-shadow: 0 2px 8px rgba(67, 96, 255, 0.3);
 }
 
 .navbar-menu a .menu-icon {
@@ -138,8 +146,10 @@
     top: 64px;
     left: 0;
     right: 0;
-    background: var(--bg-secondary);
-    border-bottom: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-bottom: 1px solid var(--border-light);
     box-shadow: var(--shadow-lg);
     max-height: calc(100vh - 64px);
     overflow-y: auto;
@@ -203,7 +213,7 @@
 /* 반응형 */
 @media (max-width: 768px) {
     .navbar-toggle {
-        display: flex;
+        display: none !important; /* 모바일에서 햄버거 메뉴 숨김 (독 바와 중복) */
     }
 
     .navbar-menu {
@@ -212,12 +222,33 @@
 
     .navbar-container {
         padding: 0 var(--spacing-md);
+        justify-content: flex-start; /* 브랜드만 왼쪽 정렬 */
+    }
+    
+    .mobile-menu {
+        display: none !important; /* 모바일 메뉴도 숨김 */
     }
 }
 
 @media (min-width: 769px) {
     .mobile-menu {
         display: none !important;
+    }
+}
+
+/* 19:8 비율 이상의 가로 화면 대응 */
+@media (min-aspect-ratio: 19/8) {
+    .navbar-container {
+        padding: 0 var(--spacing-xl);
+    }
+    
+    .navbar-brand {
+        font-size: 20px;
+    }
+    
+    .navbar-menu a {
+        padding: 10px 20px;
+        font-size: 14px;
     }
 }
 

@@ -3,28 +3,43 @@
 {% block title %}환영합니다 - WCheck{% endblock %}
 
 {% block content %}
-    <div class="container fade-in" style="width: 100%; max-width: 600px; margin: 0 auto; padding-top: 0;">
-        <div class="card" style="text-align: center;">
-            <div class="card-header">
-                <h1 class="card-title" style="font-size: 32px; margin-bottom: var(--spacing-md);">
-                    환영합니다, {{ username }}님! 👋
-                </h1>
-            </div>
-            <div class="card-body">
-                <p style="font-size: 18px; color: var(--text-secondary); margin-bottom: var(--spacing-lg);">
-                    성공적으로 로그인되었습니다.
-                </p>
-                <div style="display: flex; gap: var(--spacing-md); justify-content: center; flex-wrap: wrap;">
-                    <a href="{{ url_for('timetable.timetable') }}" class="btn btn-primary">
-                        시간표 보기
-                    </a>
-                    {% if role == 'student' %}
-                    <a href="{{ url_for('attendance.show_attendance') }}" class="btn btn-success">
-                        출석 체크
-                    </a>
-                    {% endif %}
+<div class="welcome-container fade-in">
+    <div class="welcome-card card">
+        <div class="card-header">
+            <h1 class="card-title">환영합니다, {{ username }}님! 👋</h1>
+        </div>
+        <div class="card-body">
+            <p class="welcome-message">성공적으로 로그인되었습니다.</p>
+            
+            {% if today_classes %}
+            <div class="today-classes-section">
+                <h2 class="today-classes-title">오늘의 수업</h2>
+                <div class="today-classes-grid">
+                    {% for class in today_classes %}
+                    <div class="today-class-card">
+                        <div class="today-class-subject">{{ class.subject_name }}</div>
+                        <div class="today-class-info">
+                            <span class="today-class-time">{{ class.start_time_str }} ~ {{ class.end_time_str }}</span>
+                            <span class="today-class-location">{{ class.location }}</span>
+                        </div>
+                        <div class="today-class-professor">{{ class.professor_name }}</div>
+                    </div>
+                    {% endfor %}
                 </div>
+            </div>
+            {% endif %}
+            
+            <div class="welcome-actions">
+                <a href="{{ url_for('timetable.timetable') }}" class="btn btn-primary btn-lg">
+                    📅 시간표 보기
+                </a>
+                {% if role == 'student' %}
+                <a href="{{ url_for('attendance.show_attendance') }}" class="btn btn-success btn-lg">
+                    ✅ 출석 체크
+                </a>
+                {% endif %}
             </div>
         </div>
     </div>
+</div>
 {% endblock %}

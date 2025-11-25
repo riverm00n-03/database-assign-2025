@@ -21,47 +21,36 @@
     <script src="{{ url_for('static', filename='menu-icons.js') }}"></script>
 </head>
 <body>
-    <!-- 상단 Navbar (PC) -->
+    <!-- 상단 Navbar -->
     <nav class="navbar">
         <div class="navbar-container">
             <a href="{{ url_for('main.root') }}" class="navbar-brand">📚 WCheck</a>
-            <button class="navbar-toggle" id="navbarToggle" aria-label="메뉴">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
             <ul class="navbar-menu" id="navbarMenu"></ul>
-        </div>
-        <div class="mobile-menu" id="mobileMenu">
-            <ul class="mobile-menu-list" id="mobileMenuList"></ul>
         </div>
     </nav>
 
-    <!-- 하단 사이드바 (모바일) -->
+    <!-- 페이지 헤더 -->
+    {% block header %}{% endblock %}
+
+    <!-- 메인 콘텐츠 -->
+    <main class="main-content">
+        <div class="content-wrapper">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- 하단 독 바 (모바일) -->
     <div class="sidebar">
         <ul id="menuList" class="menu-list"></ul>
     </div>
 
-    <!-- 메인 콘텐츠 -->
-    <div class="content-area">
-        {% block header %}{% endblock %}
-        
-        <main class="main-content">
-            {% block content %}{% endblock %}
-        </main>
-    </div>
-
     <!-- 공통 스크립트 -->
     <script>
-        // Navbar 메뉴 초기화
         (function() {
             const userRole = "{{ role }}";
             const currentPage = "{{ current_page|default('') }}";
             const menuList = document.getElementById("menuList");
             const navbarMenu = document.getElementById("navbarMenu");
-            const mobileMenuList = document.getElementById("mobileMenuList");
-            const navbarToggle = document.getElementById("navbarToggle");
-            const mobileMenu = document.getElementById("mobileMenu");
             
             let menuItems = [];
 
@@ -96,9 +85,7 @@
                 if (isCurrent) {
                     a.classList.add('active');
                     a.href = '#';
-                    a.addEventListener('click', (e) => {
-                        e.preventDefault();
-                    });
+                    a.addEventListener('click', (e) => e.preventDefault());
                 } else {
                     a.href = item.url;
                 }
@@ -108,20 +95,17 @@
                 return li;
             }
 
-            // 모바일 사이드바 메뉴 생성
+            // 모바일 독 바 메뉴 생성
             function createMobileMenuItem(item) {
                 const isCurrent = item.current || false;
                 if (typeof renderMenuItem === 'function') {
                     const li = renderMenuItem(item, isCurrent);
                     const link = li.querySelector('a');
                     if (isCurrent && link) {
-                        link.addEventListener('click', (e) => {
-                            e.preventDefault();
-                        });
+                        link.addEventListener('click', (e) => e.preventDefault());
                     }
                     return li;
                 } else {
-                    // renderMenuItem이 없을 경우 기본 생성
                     const li = document.createElement('li');
                     const a = document.createElement('a');
                     a.href = isCurrent ? '#' : item.url;
@@ -141,23 +125,9 @@
                 });
             }
             
-            if (mobileMenuList) {
-                menuItems.forEach(item => {
-                    mobileMenuList.appendChild(createMobileMenuItem(item));
-                });
-            }
-            
             if (menuList) {
                 menuItems.forEach(item => {
                     menuList.appendChild(createMobileMenuItem(item));
-                });
-            }
-
-            // 모바일 메뉴 토글
-            if (navbarToggle && mobileMenu) {
-                navbarToggle.addEventListener('click', () => {
-                    navbarToggle.classList.toggle('active');
-                    mobileMenu.classList.toggle('active');
                 });
             }
         })();
@@ -166,4 +136,3 @@
     {% block scripts %}{% endblock %}
 </body>
 </html>
-

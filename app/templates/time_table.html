@@ -7,61 +7,63 @@
 {% endblock %}
 
 {% block header %}
-    <header class="full-title-header">
+<header class="full-title-header">
+    <div class="title-wrap">
         <h1 class="page-title">{{ username }}님 시간표</h1>
-    </header>
+    </div>
+</header>
 {% endblock %}
 
 {% block content %}
-        {% if error %}
-            <div class="error-message">
-                <p>{{ error }}</p>
-            </div>
-        {% endif %}
+{% if error %}
+<div class="error-message alert alert-danger">
+    <p>{{ error }}</p>
+</div>
+{% endif %}
 
-        <div class="timetable-container card fade-in" style="max-width: 1200px; margin: 0 auto; padding: var(--spacing-lg); margin-top: 0;">
-            <table class="timetable table">
-                <thead>
-                <tr>
-                    <th>시간</th>
-                    <th>월</th>
-                    <th>화</th>
-                    <th>수</th>
-                    <th>목</th>
-                    <th>금</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for hour in range(9, 22) %}
-                    {% for minute in [0, 30] %}
-                        <tr>
-                            {% if minute == 0 %}
-                                <td class="time-cell" rowspan="2">
-                                    {{ "%02d"|format(hour) }}:00
+<div class="timetable-container card fade-in">
+    <table class="timetable table">
+        <thead>
+            <tr>
+                <th>시간</th>
+                <th>월</th>
+                <th>화</th>
+                <th>수</th>
+                <th>목</th>
+                <th>금</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for hour in range(9, 22) %}
+                {% for minute in [0, 30] %}
+                    <tr>
+                        {% if minute == 0 %}
+                            <td class="time-cell" rowspan="2">
+                                {{ "%02d"|format(hour) }}:00
+                            </td>
+                        {% endif %}
+                        {% for day in days %}
+                            {% set cell_data = timetable.get((hour, minute), {}).get(day) %}
+                            {% if cell_data and cell_data != 'skip' %}
+                                <td class="class-cell" rowspan="{{ cell_data.rowspan }}">
+                                    <div class="class-content">
+                                        <div class="subject-name">{{ cell_data.subject_name }}</div>
+                                        {% if role == 'student' %}
+                                            <div class="professor-name">{{ cell_data.professor_name }}</div>
+                                        {% endif %}
+                                        <div class="location">{{ cell_data.location }}</div>
+                                    </div>
                                 </td>
+                            {% elif cell_data == 'skip' %}
+                                {# 병합된 셀 생략 #}
+                            {% else %}
+                                <td></td>
                             {% endif %}
-                            {% for day in days %}
-                                {% set cell_data = timetable.get((hour, minute), {}).get(day) %}
-                                {% if cell_data and cell_data != 'skip' %}
-                                    <td class="class-cell" rowspan="{{ cell_data.rowspan }}">
-                                        <div class="class-content">
-                                            <div class="subject-name">{{ cell_data.subject_name }}</div>
-                                            {% if role == 'student' %}
-                                                <div class="professor-name">{{ cell_data.professor_name }}</div>
-                                            {% endif %}
-                                            <div class="location">{{ cell_data.location }}</div>
-                                        </div>
-                                    </td>
-                                {% elif cell_data == 'skip' %}
-                                    {# 병합된 셀 생략 #}
-                                {% else %}
-                                    <td></td>
-                                {% endif %}
-                            {% endfor %}
-                        </tr>
-                    {% endfor %}
+                        {% endfor %}
+                    </tr>
                 {% endfor %}
-                </tbody>
-            </table>
-        </div>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

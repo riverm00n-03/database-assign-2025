@@ -1,81 +1,189 @@
-/* full-title-header, title-wrap, page-title는 common.css에서 정의됨 */
-/* content-area, main-content는 style.css에서 정의됨 */
+/* ============================
+   출석 관련 스타일
+============================ */
 
-.server-time{
-    font-size:14px;
-    color:var(--text-secondary);
+/* 카드 컨테이너 */
+.attendance-container {
+    width: 100%;
+    max-width: 1200px;
+    background: transparent;
+    padding: 0;
+    box-sizing: border-box;
+    margin: 0 auto;
+    overflow-x: visible;
+    min-width: 0;
+}
+
+/* 헤더 다음에 오는 attendance-container의 첫 번째 hint에 여백 추가 */
+.full-title-header ~ * .attendance-container > .hint:first-child {
+    margin-top: var(--spacing-md);
+}
+
+/* 출석 테이블 컬럼 너비 */
+.att-table .col-subject { width: 34%; }
+.att-table .col-professor { width: 16%; }
+.att-table .col-location { width: 16%; }
+.att-table .col-time { width: 18%; }
+.att-table .col-action { width: 16%; }
+
+/* 상단 안내 */
+.hint {
+    background-color: #eff6ff;
+    border: 1px solid rgba(67, 96, 255, 0.2);
+    color: #1e40af;
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    font-size: 14px;
+    margin-top: 0;
+    margin-bottom: var(--spacing-md);
+    font-weight: 500;
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
 }
 
-/* 카드 컨테이너 */
-.attendance-container{
-    width:100%;
-    max-width:1400px;
-    background:transparent;
-    border-radius:0;
-    box-shadow:none;
-    padding:0;
-    box-sizing:border-box;
-    margin:0 auto;
-    overflow-x: visible;
-    min-width: 0;
-}
-
-/* 상단 안내 */
-.hint{
-    background:#f8fafc;
-    border:1px solid #e2e8f0;
-    color:#334155;
-    border-radius:10px;
-    padding:10px 12px;
-    font-size:14px;
-    margin-bottom:14px;
+/* 출석 테이블을 감싸는 카드 스타일 */
+.att-table-wrapper {
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: var(--spacing-lg);
+    border: 1px solid var(--border-color);
+    overflow-x: auto;
+    margin-top: 0;
 }
 
 /* 출석 테이블 */
-.att-table{
-    border-collapse:collapse;
-    width:100%;
-    table-layout:fixed;
-    border-radius:10px;
-    overflow:hidden;
+.att-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    table-layout: fixed;
+    border-radius: var(--radius-md);
+    overflow: hidden;
     min-width: 400px;
-}
-.att-table th,
-.att-table td{
-    border:1px solid #e2e8f0;
-    padding:12px 10px;
-    text-align:center;
-    vertical-align:middle;
-    font-size:14px;
-    background:#fff;
-}
-.att-table thead th{
-    background:#f8fafc;
-    font-weight:700;
-    color:#1e293b;
-}
-.att-row .sbj .subject-name{
-    font-weight:700;
-    color:#1a3b5d;
-    text-align:left;
-}
-.time-badge{
-    font-weight:600;
-    color:#0f172a;
-}
-.window-range{
-    margin-top:4px;
-    font-size:12px;
-    color:#64748b;
+    border: none;
+    margin: 0;
 }
 
-@media screen and (max-width: 768px) {
+.att-table th,
+.att-table td {
+    border: 1px solid var(--border-light);
+    padding: 14px 12px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 14px;
+    background: transparent;
+    transition: background-color var(--transition-fast);
+}
+
+.att-table thead th {
+    background-color: var(--bg-tertiary);
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 13px;
+    padding: 16px 12px;
+}
+
+.att-row .sbj .subject-name {
+    font-weight: 700;
+    color: #1a3b5d;
+    text-align: left;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+}
+
+.att-row:hover {
+    background-color: var(--bg-hover);
+}
+
+.time-cell-content {
+    text-align: left;
+}
+
+.time-badge {
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 14px;
+    letter-spacing: -0.01em;
+    margin-bottom: var(--spacing-xs);
+}
+
+.window-range {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.window-icon {
+    color: var(--success-color);
+}
+
+.action-cell {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    align-items: center;
+}
+
+.att-form {
+    margin: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+/* 빈 행 */
+.empty {
+    padding: 40px 20px;
+    color: var(--text-muted);
+    background: linear-gradient(135deg, #fafbff 0%, #f8fafc 100%);
+    font-size: 15px;
+    font-weight: 500;
+    text-align: center;
+}
+
+/* 빈 상태 */
+.empty-state {
+    text-align: center;
+    padding: var(--spacing-xl);
+}
+
+.empty-message {
+    color: var(--text-muted);
+    font-size: 16px;
+    margin: 0;
+}
+
+/* 버튼 스타일 */
+.btn-attend {
+    width: 100%;
+    max-width: 120px;
+    height: 40px;
+    border: 1px solid var(--primary-color);
+    background: var(--primary-gradient);
+    color: #fff;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-colored);
+}
+
+.btn-attend:hover {
+    box-shadow: 0 8px 20px rgba(67, 96, 255, 0.35);
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+.btn-attend:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-md);
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
     .attendance-container {
-        padding: var(--spacing-sm) var(--spacing-xs);
-        margin-top: var(--spacing-xs);
+        padding: 0;
     }
 
     .att-table {
@@ -84,283 +192,111 @@
 
     .att-table th,
     .att-table td {
-        padding: 8px 4px;
+        padding: 10px 8px;
         font-size: 12px;
     }
 
     .att-table th {
         font-size: 11px;
+        padding: 12px 8px;
     }
 
     .subject-name {
-        font-size: 12px;
+        font-size: 13px;
     }
 
     .time-badge {
-        font-size: 11px;
+        font-size: 12px;
     }
 
     .window-range {
-        font-size: 10px;
+        font-size: 11px;
     }
 
     .hint {
-        font-size: 12px;
-        padding: 8px 10px;
+        font-size: 13px;
+        padding: 10px 14px;
     }
 }
 
-@media screen and (max-width: 480px) {
-    .attendance-container {
-        padding: var(--spacing-xs);
-    }
-
+@media (max-width: 480px) {
     .att-table {
         min-width: 380px;
     }
 
     .att-table th,
     .att-table td {
-        padding: 6px 3px;
+        padding: 8px 6px;
         font-size: 11px;
     }
 
     .att-table th {
         font-size: 10px;
+        padding: 10px 6px;
     }
 
     .subject-name {
-        font-size: 11px;
+        font-size: 12px;
     }
 
     .time-badge {
-        font-size: 10px;
-        margin-bottom: 2px;
+        font-size: 11px;
     }
 
     .window-range {
-        font-size: 9px;
+        font-size: 10px;
     }
 
     .hint {
-        font-size: 11px;
-        padding: 6px 8px;
-    }
-
-    .badge {
-        font-size: 10px;
-        padding: 3px 8px;
-    }
-
-    .btn {
-        font-size: 11px;
-        padding: 6px 12px;
+        font-size: 12px;
+        padding: 8px 12px;
     }
 }
 
-@media screen and (max-width: 360px) {
+/* 19:8 비율 이상의 가로 화면 대응 */
+@media (min-aspect-ratio: 19/8) {
+    .attendance-container {
+        max-width: 100%;
+    }
+
+    .att-table-wrapper {
+        padding: var(--spacing-lg);
+    }
+
     .att-table {
-        min-width: 340px;
+        min-width: 100%;
     }
 
     .att-table th,
     .att-table td {
-        padding: 4px 2px;
-        font-size: 10px;
+        padding: 12px 10px;
+        font-size: 13px;
     }
 
     .att-table th {
-        font-size: 9px;
+        font-size: 12px;
+        padding: 14px 10px;
     }
 
     .subject-name {
-        font-size: 10px;
+        font-size: 14px;
     }
 
     .time-badge {
-        font-size: 9px;
+        font-size: 13px;
     }
 
     .window-range {
-        font-size: 8px;
+        font-size: 11px;
     }
 
-    .badge {
-        font-size: 9px;
-        padding: 2px 6px;
+    .hint {
+        font-size: 13px;
+        padding: 12px 16px;
     }
 
-    .btn {
-        font-size: 10px;
-        padding: 5px 10px;
+    .action-cell {
+        flex-direction: row;
+        gap: var(--spacing-sm);
     }
-}
-
-/* 상태 / 버튼 - common.css의 badge 클래스 사용 권장 */
-.status-badge{
-    display:inline-block;
-    min-width:72px;
-    padding:6px 10px;
-    border-radius:var(--radius-full);
-    border:1px solid var(--border-color);
-    background:var(--bg-tertiary);
-    color:var(--text-secondary);
-    font-size:12px;
-    margin-bottom:8px;
-    font-weight:600;
-}
-.status-badge.done{ /* 출석이 완료된 상태 배지이다. */
-    background:#ecfdf5;
-    border-color:#a7f3d0;
-    color:#065f46;
-}
-
-/* 새로운 상태 색상이다. */
-.status-green {
-    background: #ecfdf5; /* 연한 초록색이다. */
-    border-color: #a7f3d0; /* 초록색 테두리이다. */
-    color: #065f46; /* 진한 초록색 텍스트이다. */
-}
-
-.status-orange {
-    background: #fff7ed; /* 연한 주황색이다. */
-    border-color: #fed7aa; /* 주황색 테두리이다. */
-    color: #c2410c; /* 진한 주황색 텍스트이다. */
-}
-
-.status-red {
-    background: #fef2f2; /* 연한 빨간색이다. */
-    border-color: #fecaca; /* 빨간색 테두리이다. */
-    color: #b91c1c; /* 진한 빨간색 텍스트이다. */
-}
-
-/* 출석 상세를 위한 특정 상태이다. */
-.status-출석 {
-    background: #ecfdf5;
-    border-color: #a7f3d0;
-    color: #065f46;
-}
-
-.status-지각 {
-    background: #fff7ed;
-    border-color: #fed7aa;
-    color: #c2410c;
-}
-
-.status-결석 {
-    background: #fef2f2;
-    border-color: #fecaca;
-    color: #b91c1c;
-}
-
-.status-휴강 {
-    background: #eff6ff; /* 연한 파란색이다. */
-    border-color: #bfdbfe; /* 파란색 테두리이다. */
-    color: #1e40af; /* 진한 파란색 텍스트이다. */
-}
-
-.status-미출석 {
-    background: #f8fafc;
-    border-color: #e2e8f0;
-    color: #334155;
-}
-
-.status-not-period {
-    background: #f1f5f9; /* 회색 배경 */
-    border-color: #cbd5e1; /* 회색 테두리 */
-    color: #64748b; /* 회색 텍스트 */
-}
-
-.status-present {
-    background: #ecfdf5;
-    border-color: #a7f3d0;
-    color: #065f46;
-}
-
-.status-late {
-    background: #fff7ed;
-    border-color: #fed7aa;
-    color: #c2410c;
-}
-
-.status-absent {
-    background: #fef2f2;
-    border-color: #fecaca;
-    color: #b91c1c;
-}
-
-.status-cancelled {
-    background: #eff6ff;
-    border-color: #bfdbfe;
-    color: #1e40af;
-}
-
-
-.att-form{margin:0;}
-/* btn-attend는 common.css의 btn 클래스 사용 권장 */
-.btn-attend{
-    width:100%;
-    max-width:120px;
-    height:36px;
-    border:1px solid var(--primary-color);
-    background:var(--primary-color);
-    color:#fff;
-    border-radius:var(--radius-md);
-    font-weight:600;
-    cursor:pointer;
-    transition:all var(--transition-base);
-}
-.btn-attend:hover{
-    box-shadow:var(--shadow-md);
-    background:var(--primary-dark);
-    transform:translateY(-1px);
-}
-.btn-attend:active{transform:translateY(0);}
-.btn-attend:disabled{
-    background:var(--bg-tertiary);
-    border-color:var(--border-color);
-    color:var(--text-light);
-    cursor:not-allowed;
-    box-shadow:none;
-    transform:none;
-}
-
-/* 빈 행 */
-.empty{
-    padding:28px 10px;
-    color:#64748b;
-    background:#fafbff;
-}
-
-/* 클릭 가능한 테이블 행이다. */
-.clickable-row {
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.clickable-row:hover {
-    background-color: #f0f4f8; /* 호버 시 더 밝은 배경이다. */
-}
-
-/* 상세 페이지를 위한 뒤로 가기 버튼 - common.css의 btn 클래스 사용 권장 */
-.back-button-container {
-    margin-top: var(--spacing-lg);
-    text-align: center;
-}
-
-.btn-back {
-    padding: 10px 20px;
-    border: 1px solid var(--secondary-color);
-    background: var(--secondary-color);
-    color: #fff;
-    border-radius: var(--radius-md);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all var(--transition-base);
-}
-
-.btn-back:hover {
-    background-color: #475569;
-    border-color: #475569;
-    transform: translateY(-1px);
 }

@@ -8,73 +8,72 @@
 {% endblock %}
 
 {% block header %}
-    <header class="full-title-header">
-        <div class="title-wrap">
-            <h1 class="page-title">{{ username }}님 출석 관리</h1>
-        </div>
-    </header>
+<header class="full-title-header">
+    <div class="title-wrap">
+        <h1 class="page-title">{{ username }}님 출석 관리</h1>
+    </div>
+</header>
 {% endblock %}
 
 {% block content %}
-        <div class="attendance-container">
-            <div class="hint alert alert-info" style="margin-bottom: var(--spacing-lg); display: flex; align-items: center; gap: var(--spacing-sm);">
-                <span>💡</span>
-                <span>과목별 출석 현황을 확인하고, 상세 내역을 보려면 카드를 클릭하세요.</span>
-            </div>
+<div class="attendance-container">
+    <div class="hint alert alert-info">
+        <span>💡</span>
+        <span>과목별 출석 현황을 확인하고, 상세 내역을 보려면 카드를 클릭하세요.</span>
+    </div>
 
-            {% if enrolled_subjects %}
-                <div class="attendance-cards-container fade-in">
-                    {% for subject in enrolled_subjects %}
-                        <div class="attendance-card status-{{ 'safe' if subject.status_color == 'green' else 'warning' if subject.status_color == 'orange' else 'danger' }} clickable-row" 
-                             data-subject-id="{{ subject.subject_id }}">
-                            <div class="card-header">
-                                <h3 class="card-subject-name">{{ subject.subject_name }}</h3>
-                                <p class="card-professor-name">{{ subject.professor_name or '교수 정보 없음' }}</p>
+    {% if enrolled_subjects %}
+        <div class="attendance-cards-container fade-in">
+            {% for subject in enrolled_subjects %}
+                <div class="attendance-card status-{{ 'safe' if subject.status_color == 'green' else 'warning' if subject.status_color == 'orange' else 'danger' }} clickable-row" 
+                     data-subject-id="{{ subject.subject_id }}">
+                    <div class="card-header">
+                        <h3 class="card-subject-name">{{ subject.subject_name }}</h3>
+                        <p class="card-professor-name">{{ subject.professor_name or '교수 정보 없음' }}</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-percentage">
+                            <span class="card-percentage-value">{{ subject.attendance_percentage }}</span>
+                            <span class="card-percentage-unit">%</span>
+                            <span class="card-status-badge">{{ subject.status_text }}</span>
+                        </div>
+                        <div class="card-progress-container">
+                            <div class="card-progress-bar">
+                                <div class="card-progress-fill" style="width: {{ subject.attendance_percentage }}%;"></div>
                             </div>
-                            <div class="card-body">
-                                <div class="card-percentage">
-                                    <span class="card-percentage-value">{{ subject.attendance_percentage }}</span>
-                                    <span class="card-percentage-unit">%</span>
-                                    <span class="card-status-badge">{{ subject.status_text }}</span>
+                            <div class="card-stats">
+                                <div class="card-stat-item">
+                                    <span class="card-stat-label">출석</span>
+                                    <span class="card-stat-value">{{ subject.present_count }}</span>
                                 </div>
-                                <div class="card-progress-container">
-                                    <div class="card-progress-bar">
-                                        <div class="card-progress-fill" style="width: {{ subject.attendance_percentage }}%;"></div>
-                                    </div>
-                                    <div class="card-stats">
-                                        <div class="card-stat-item">
-                                            <span class="card-stat-label">출석</span>
-                                            <span class="card-stat-value">{{ subject.present_count }}</span>
-                                        </div>
-                                        <div class="card-stat-item">
-                                            <span class="card-stat-label">지각</span>
-                                            <span class="card-stat-value">{{ subject.late_count }}</span>
-                                        </div>
-                                        <div class="card-stat-item">
-                                            <span class="card-stat-label">결석</span>
-                                            <span class="card-stat-value">{{ subject.absent_count }}</span>
-                                        </div>
-                                        <div class="card-stat-item">
-                                            <span class="card-stat-label">총 수업</span>
-                                            <span class="card-stat-value">{{ subject.total_sessions }}</span>
-                                        </div>
-                                    </div>
+                                <div class="card-stat-item">
+                                    <span class="card-stat-label">지각</span>
+                                    <span class="card-stat-value">{{ subject.late_count }}</span>
+                                </div>
+                                <div class="card-stat-item">
+                                    <span class="card-stat-label">결석</span>
+                                    <span class="card-stat-value">{{ subject.absent_count }}</span>
+                                </div>
+                                <div class="card-stat-item">
+                                    <span class="card-stat-label">총 수업</span>
+                                    <span class="card-stat-value">{{ subject.total_sessions }}</span>
                                 </div>
                             </div>
                         </div>
-                    {% endfor %}
+                    </div>
                 </div>
-            {% else %}
-                <div class="card" style="text-align: center; padding: var(--spacing-xl);">
-                    <p style="color: var(--text-muted); font-size: 16px;">수강 중인 과목이 없습니다.</p>
-                </div>
-            {% endif %}
+            {% endfor %}
         </div>
+    {% else %}
+        <div class="empty-state card">
+            <p class="empty-message">수강 중인 과목이 없습니다.</p>
+        </div>
+    {% endif %}
+</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    // 카드 클릭 이벤트
     document.querySelectorAll('.clickable-row').forEach(card => {
         card.addEventListener('click', () => {
             const subjectId = card.dataset.subjectId;

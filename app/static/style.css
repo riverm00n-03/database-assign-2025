@@ -1,18 +1,8 @@
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
 
-:root {
-    --primary-color: #4360ff;
-    --primary-dark-color: #3147d8;
-    --background-color: #eef1f6;
-    --card-color: #ffffff;
-    --text-color: #1f2740;
-    --text-muted: #6c7a9c;
-    --border-color: #dce1ec;
-    --input-background: #f7f8fc;
-    --focus-ring: rgba(67, 96, 255, 0.18);
-    --shadow-color: rgba(24, 33, 56, 0.14);
-}
-
+/* ============================
+   전체 레이아웃 구조
+============================ */
 *,
 *::before,
 *::after {
@@ -20,51 +10,32 @@
 }
 
 body {
-    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui;
     margin: 0;
-    background-color: var(--background-color);
-    color: var(--text-color);
-    min-height: 100vh;
-    display: flex;
-}
-
-/* ============================
-   Pretendard + 전체 레이아웃
-============================ */
-body {
-    margin: 0;
+    padding: 0;
     font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
-    background-color: #f3f6fa;
+    background: var(--bg-gradient);
     color: #1e293b;
     display: flex;
-    flex-direction: column; /* ✅ 세로 정렬 (Navbar 위쪽) */
+    flex-direction: column;
     min-height: 100vh;
     width: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-/* PC 환경: Navbar 사용 */
-@media (min-width: 769px) {
-    body {
-        flex-direction: column;
-    }
-}
-
-/* 모바일 환경: 기존 레이아웃 유지 */
 @media (max-width: 768px) {
     body {
-        flex-direction: column;
-        padding-bottom: 80px; /* 하단 네비게이션 공간 */
+        padding-bottom: 70px;
     }
 }
 
 /* ============================
-   왼쪽 사이드바 (모바일 전용)
+   하단 독 바 (모바일 전용)
 ============================ */
 .sidebar {
-    display: none; /* PC에서는 숨김 */
+    display: none;
 }
 
-/* 모바일에서만 사이드바 표시 */
 @media (max-width: 768px) {
     .sidebar {
         position: fixed;
@@ -72,155 +43,17 @@ body {
         left: 0;
         right: 0;
         width: 100%;
-        background: var(--bg-secondary, #ffffff);
-        border: none;
-        border-top: 1px solid var(--border-color, #e2e8f0);
-        padding: 8px 12px;
-        margin: 0;
-        border-radius: 0;
+        background: var(--bg-secondary);
+        border-top: 1px solid var(--border-color);
+        padding: 8px 4px;
         box-sizing: border-box;
         display: flex;
         flex-direction: row;
         justify-content: space-around;
         align-items: center;
-        height: auto;
-        min-height: auto;
+        height: 70px;
         z-index: 1000;
-        flex-shrink: 0;
-        gap: 4px;
-    }
-}
-
-.sidebar-title {
-    font-size: 15px;
-    font-weight: 700;
-    color: rgba(30, 60, 140, 0.85);
-    margin-bottom: 16px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-}
-
-.menu-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.menu-list li {
-    margin: 6px 0;
-}
-
-.menu-list a {
-    text-decoration: none;
-    color: var(--text-primary, #334155);
-    font-weight: 500;
-    transition: color 0.2s ease, background-color 0.2s ease;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    padding: 7px 6px;
-    border-radius: 8px;
-    width: 100%;
-    background: transparent;
-    border: none;
-}
-
-.menu-list a:hover {
-    color: var(--primary-color, #2563eb);
-    background-color: var(--bg-hover, #f1f5f9);
-}
-
-.menu-list a:active {
-    background-color: var(--bg-tertiary, #e2e8f0);
-}
-
-.menu-list a .menu-icon {
-    width: 20px;
-    height: 20px;
-    flex-shrink: 0;
-    transition: color 0.2s ease;
-}
-
-.menu-list a .menu-text {
-    font-size: 12px;
-    line-height: 1.2;
-    text-align: center;
-    letter-spacing: 0.01em;
-    color: rgba(51, 65, 85, 0.85);
-}
-
-/* 메인 콘텐츠 영역 */
-.content-area {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow-x: hidden;
-    min-height: calc(100vh - 64px);
-    margin-top: 64px; /* Navbar 높이만큼 여백 */
-    background-color: #f3f6fa;
-}
-
-.main-content {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: var(--spacing-lg);
-    padding-top: calc(var(--spacing-md) + 72px); /* 헤더 높이(72px) + 여백 - 기본값 */
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 0;
-    width: 100%;
-}
-
-@media (max-width: 768px) {
-    .content-area {
-        min-height: calc(100vh - 64px - 60px); /* Navbar + 하단 메뉴 높이 */
-        padding-bottom: 60px; /* 하단 메뉴 공간 */
-    }
-    
-    .main-content {
-        padding: var(--spacing-sm) var(--spacing-xs);
-        padding-top: calc(var(--spacing-sm) + 100px); /* 헤더 높이(동적) + 여백 */
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-}
-
-@media (max-width: 480px) {
-    .main-content {
-        padding: var(--spacing-xs);
-    }
-}
-
-.container {
-    background-color: var(--card-color);
-    border-radius: 32px;
-    box-shadow: 0 8px 28px rgba(24,33,56,0.08);
-    padding: 60px 80px;
-    text-align: center;
-    max-width: 520px;
-    width: 100%;
-}
-
-.container h1 {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--text-color);
-    margin-bottom: 12px;
-}
-
-.container p {
-    font-size: 16px;
-    color: var(--text-muted);
-    margin: 0;
-}
-
-/* 모바일 반응형 */
-@media (max-width: 768px) {
-    .sidebar-title {
-        display: none; /* 모바일에서 제목 숨기기 */
+        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
     }
 
     .menu-list {
@@ -230,6 +63,9 @@ body {
         justify-content: space-around;
         align-items: center;
         gap: 4px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
     }
 
     .menu-list li {
@@ -246,12 +82,14 @@ body {
         justify-content: center;
         padding: 4px 2px;
         border-radius: 8px;
-        color: var(--text-primary, #334155);
+        color: var(--text-primary);
+        font-weight: 500;
         transition: color 0.2s ease, background-color 0.2s ease;
         gap: 3px;
         width: 100%;
         background: transparent;
         border: none;
+        text-decoration: none;
     }
 
     .menu-list a .menu-icon {
@@ -266,17 +104,246 @@ body {
         overflow: hidden;
         text-overflow: ellipsis;
         width: 100%;
-        max-width: 100%;
     }
 
     .menu-list a:hover,
     .menu-list a:active {
-        color: var(--primary-color, #2563eb);
-        background-color: var(--bg-hover, #f1f5f9);
+        color: var(--primary-color);
+        background-color: var(--bg-hover);
     }
+}
 
-    .container {
-        padding: 40px 28px;
-        border-radius: 20px;
+/* ============================
+   메인 콘텐츠 영역
+============================ */
+.main-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: var(--bg-gradient);
+    padding: var(--spacing-xl);
+    width: 100%;
+    box-sizing: border-box;
+    min-height: calc(100vh - 64px);
+}
+
+/* 헤더가 없을 때만 상단 마진 추가 */
+body:not(:has(.full-title-header)) .main-content {
+    margin-top: 64px;
+}
+
+/* 헤더 다음에 오는 메인 콘텐츠 */
+.full-title-header ~ .main-content {
+    margin-top: 0;
+    padding-top: var(--spacing-xl);
+}
+
+.content-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        min-height: calc(100vh - 64px - 70px);
+        padding: var(--spacing-md) var(--spacing-sm);
+    }
+    
+    /* 헤더가 있을 때 */
+    .full-title-header ~ .main-content {
+        min-height: calc(100vh - 64px - 70px);
+    }
+    
+    /* 헤더가 없을 때 */
+    body:not(:has(.full-title-header)) .main-content {
+        min-height: calc(100vh - 64px - 70px);
+    }
+    
+    .content-wrapper {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content {
+        padding: var(--spacing-sm);
+    }
+}
+
+/* 19:8 비율 이상의 가로 화면 대응 */
+@media (min-aspect-ratio: 19/8) {
+    .main-content {
+        padding: var(--spacing-lg) var(--spacing-xl);
+    }
+    
+    .content-wrapper {
+        max-width: 100%;
+    }
+    
+    .welcome-card {
+        max-width: 100%;
+    }
+    
+    .today-classes-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-md);
+    }
+}
+
+/* ============================
+   환영 페이지 스타일
+============================ */
+.welcome-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 400px;
+}
+
+.welcome-card {
+    max-width: 800px;
+    width: 100%;
+    text-align: center;
+}
+
+.welcome-message {
+    font-size: 18px;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xl);
+    font-weight: 500;
+}
+
+.welcome-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* 오늘의 수업 섹션 */
+.today-classes-section {
+    margin-bottom: var(--spacing-xl);
+    width: 100%;
+}
+
+.today-classes-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-md) 0;
+    text-align: left;
+}
+
+.today-classes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--spacing-md);
+    width: 100%;
+}
+
+.today-class-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    transition: all var(--transition-fast);
+    text-align: left;
+}
+
+.today-class-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 8px rgba(67, 96, 255, 0.1);
+}
+
+.today-class-subject {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    line-height: 1.4;
+}
+
+.today-class-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 4px;
+}
+
+.today-class-time {
+    font-size: 12px;
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.today-class-location {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.today-class-professor {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+@media (max-width: 768px) {
+    .welcome-container {
+        min-height: 300px;
+    }
+    
+    .welcome-card {
+        max-width: 100%;
+    }
+    
+    .today-classes-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xs);
+    }
+    
+    .today-class-card {
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+    
+    .today-class-subject {
+        font-size: 13px;
+    }
+    
+    .today-class-time {
+        font-size: 11px;
+    }
+    
+    .today-class-location,
+    .today-class-professor {
+        font-size: 10px;
+    }
+}
+
+/* 19:8 비율 이상의 가로 화면에서 오늘의 수업 카드 레이아웃 조정 */
+@media (min-aspect-ratio: 19/8) {
+    .today-classes-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: var(--spacing-sm);
+    }
+    
+    .today-class-card {
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+    
+    .today-class-subject {
+        font-size: 13px;
+    }
+    
+    .today-class-time {
+        font-size: 11px;
+    }
+    
+    .welcome-actions {
+        flex-direction: row;
+        justify-content: center;
     }
 }

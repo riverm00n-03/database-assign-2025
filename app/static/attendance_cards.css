@@ -3,7 +3,7 @@
 ============================ */
 .attendance-cards-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: var(--spacing-lg);
     width: 100%;
     margin: 0;
@@ -15,7 +15,7 @@
     border-radius: var(--radius-lg);
     padding: var(--spacing-lg);
     box-shadow: var(--shadow-md);
-    border: 3px solid;
+    border: 2px solid;
     transition: all var(--transition-base);
     cursor: pointer;
     position: relative;
@@ -28,13 +28,13 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 4px;
+    height: 3px;
     background: currentColor;
     opacity: 0.3;
 }
 
 .attendance-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
 }
 
@@ -54,7 +54,7 @@
     color: var(--danger-color);
 }
 
-.card-header {
+.attendance-card .card-header {
     margin-bottom: var(--spacing-md);
 }
 
@@ -73,7 +73,7 @@
     font-weight: 400;
 }
 
-.card-body {
+.attendance-card .card-body {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
@@ -83,6 +83,7 @@
     display: flex;
     align-items: baseline;
     gap: var(--spacing-sm);
+    flex-wrap: wrap;
 }
 
 .card-percentage-value {
@@ -105,6 +106,7 @@
     font-size: 12px;
     font-weight: 600;
     margin-top: var(--spacing-xs);
+    flex-shrink: 0;
 }
 
 .attendance-card.status-safe .card-status-badge {
@@ -129,17 +131,15 @@
 
 .card-progress-bar {
     width: 100%;
-    height: 12px;
+    height: 10px;
     background-color: var(--bg-tertiary);
     border-radius: var(--radius-full);
     overflow: hidden;
-    position: relative;
 }
 
 .card-progress-fill {
     height: 100%;
     border-radius: var(--radius-full);
-    position: relative;
 }
 
 .attendance-card.status-safe .card-progress-fill {
@@ -184,19 +184,16 @@
 /* 반응형 */
 @media (max-width: 768px) {
     .attendance-cards-container {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
         gap: var(--spacing-md);
-        width: 85vw;
-        margin: 0 auto;
     }
 
     .attendance-card {
-        padding: calc(var(--spacing-md) * 0.8);
-        width: 100%;
+        padding: var(--spacing-md);
     }
 
     .card-subject-name {
-        font-size: 18px;
+        font-size: 16px;
     }
 
     .card-percentage-value {
@@ -206,6 +203,14 @@
     .card-stats {
         font-size: 11px;
     }
+    
+    /* 화면이 좁아지면 pill을 다음 줄로 내리기 */
+    .card-status-badge {
+        flex-basis: 100%;
+        width: fit-content;
+        margin-top: var(--spacing-sm);
+        margin-left: 0;
+    }
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
@@ -214,9 +219,32 @@
     }
 }
 
-@media (min-width: 1400px) {
+@media (min-width: 1025px) {
     .attendance-cards-container {
         grid-template-columns: repeat(3, 1fr);
     }
 }
 
+/* 19:8 비율 이상의 가로 화면 대응 */
+@media (min-aspect-ratio: 19/8) {
+    .attendance-cards-container {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: var(--spacing-md);
+    }
+
+    .attendance-card {
+        padding: var(--spacing-md);
+    }
+
+    .card-subject-name {
+        font-size: 18px;
+    }
+
+    .card-percentage-value {
+        font-size: 32px;
+    }
+
+    .card-stats {
+        font-size: 11px;
+    }
+}
