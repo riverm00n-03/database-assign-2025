@@ -1,21 +1,547 @@
 # admin.py
-# 콘솔 환경에서 데이터베이스를 관리하기 위한 파일
+# tkinter GUI 환경에서 데이터베이스를 관리하기 위한 파일
 
 import sys
 from pathlib import Path
 from datetime import datetime, timedelta
+import tkinter as tk
+from tkinter import ttk, messagebox, simpledialog
+from typing import List, Dict, Any, Optional
 
-# 프로젝트 루트 디렉토리를 sys.path에 추가
+# 프로젝트 루트 디렉토리를 sys.path에 추가 : config 파일을 불러오기 위함.
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from mysql.connector import connect
 from config import DB_CONFIG
 
+# 로컬 실행 시 Docker MySQL에 연결하기 위한 설정
+# Docker 컨테이너 내부에서는 'db'를 사용하고, 로컬에서는 'localhost:3307'을 사용
+LOCAL_DB_CONFIG = DB_CONFIG.copy()
+if LOCAL_DB_CONFIG.get('host') == 'db':
+    # 로컬 실행 시 Docker MySQL에 연결 (포트 3307로 매핑됨)
+    LOCAL_DB_CONFIG['host'] = 'localhost'
+    LOCAL_DB_CONFIG['port'] = int(3307)  # 포트는 정수형이어야 함
+elif 'port' in LOCAL_DB_CONFIG:
+    # 포트가 문자열로 설정되어 있을 경우 정수로 변환
+    LOCAL_DB_CONFIG['port'] = int(LOCAL_DB_CONFIG['port'])
+
+# 테이블 목록
+TABLES = [
+    'student',
+    'professor',
+    'subject',
+    'subject_schedule',
+    'enrollment',
+    'class_session',
+    'checkin'
+]
+
+class DatabaseAdminGUI:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("WCHECK DB 관리 프로그램")
+        self.root.geometry("1200x700")
+        
+        self.current_table = None
+        self.table_data = []
+        self.table_columns = []
+        self.column_types = {}  # 컬럼 타입 정보
+        self.row_data_map = {}  # Treeview item_id -> row_data 매핑
+        
+        self.setup_ui()
+        self.load_table_list()
+        
+    def setup_ui(self):
+        # 상단 프레임: 테이블 선택
+        top_frame = ttk.Frame(self.root, padding="10")
+        top_frame.pack(fill=tk.X)
+        
+        ttk.Label(top_frame, text="테이블 선택:", font=("Arial", 12)).pack(side=tk.LEFT, padx=5)
+        
+        self.table_combo = ttk.Combobox(top_frame, state="readonly", width=20, font=("Arial", 11))
+        self.table_combo.pack(side=tk.LEFT, padx=5)
+        self.table_combo.bind("<<ComboboxSelected>>", self.on_table_selected)
+        
+        ttk.Button(top_frame, text="새로고침", command=self.refresh_data).pack(side=tk.LEFT, padx=5)
+        
+        # 중간 프레임: 데이터 표시
+        middle_frame = ttk.Frame(self.root, padding="10")
+        middle_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Treeview와 스크롤바
+        tree_frame = ttk.Frame(middle_frame)
+        tree_frame.pack(fill=tk.BOTH, expand=True)
+        
+        scrollbar_y = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL)
+        scrollbar_y.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        scrollbar_x = ttk.Scrollbar(tree_frame, orient=tk.HORIZONTAL)
+        scrollbar_x.pack(side=tk.BOTTOM, fill=tk.X)
+        
+        self.tree = ttk.Treeview(tree_frame, yscrollcommand=scrollbar_y.set, xscrollcommand=scrollbar_x.set)
+        self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        scrollbar_y.config(command=self.tree.yview)
+        scrollbar_x.config(command=self.tree.xview)
+        
+        # 하단 프레임: 버튼
+        bottom_frame = ttk.Frame(self.root, padding="10")
+        bottom_frame.pack(fill=tk.X)
+        
+        ttk.Button(bottom_frame, text="추가", command=self.add_record).pack(side=tk.LEFT, padx=5)
+        ttk.Button(bottom_frame, text="수정", command=self.update_record).pack(side=tk.LEFT, padx=5)
+        ttk.Button(bottom_frame, text="삭제", command=self.delete_record).pack(side=tk.LEFT, padx=5)
+        
+        # 관리 기능 버튼
+        ttk.Separator(bottom_frame, orient=tk.VERTICAL).pack(side=tk.LEFT, padx=10, fill=tk.Y)
+        ttk.Button(bottom_frame, text="DB 리셋", command=self.reset_database).pack(side=tk.LEFT, padx=5)
+        ttk.Button(bottom_frame, text="테스트 데이터 삽입", command=self.insert_test_data).pack(side=tk.LEFT, padx=5)
+        
+    def load_table_list(self):
+        """Combobox에 테이블 목록 로드"""
+        self.table_combo['values'] = TABLES
+        if TABLES:
+            self.table_combo.current(0)
+            self.on_table_selected()
+    
+    def on_table_selected(self, event=None):
+        """테이블 선택 시 데이터 로드"""
+        selected_table = self.table_combo.get()
+        if selected_table:
+            self.current_table = selected_table
+            self.load_table_data()
+    
+    def load_table_data(self):
+        """선택된 테이블의 데이터 로드 및 표시"""
+        if not self.current_table:
+            return
+        
+        try:
+            with connect(**LOCAL_DB_CONFIG) as connection:
+                with connection.cursor(dictionary=True) as cursor:
+                    cursor.execute("USE wcheck")
+                    
+                    # 컬럼 정보 가져오기 (타입 정보 포함)
+                    cursor.execute(f"DESCRIBE {self.current_table}")
+                    columns_info = cursor.fetchall()
+                    self.table_columns = [col['Field'] for col in columns_info]
+                    # 컬럼 타입 정보 저장 (타입 변환에 사용)
+                    # Type과 Null 정보를 함께 저장
+                    self.column_types = {}
+                    for col in columns_info:
+                        field_name = col['Field']
+                        self.column_types[field_name] = {
+                            'type': col['Type'],
+                            'null': col['Null']
+                        }
+                    
+                    # 데이터 가져오기
+                    cursor.execute(f"SELECT * FROM {self.current_table}")
+                    self.table_data = cursor.fetchall()
+            
+            # Treeview 업데이트
+            self.update_treeview()
+            
+        except Exception as e:
+            messagebox.showerror("오류", f"데이터 로드 중 오류 발생: {e}")
+    
+    def update_treeview(self):
+        """Treeview에 데이터 표시"""
+        # 기존 항목 삭제
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+        
+        if not self.table_columns:
+            return
+        
+        # 컬럼 설정
+        self.tree['columns'] = self.table_columns
+        self.tree['show'] = 'headings'
+        
+        # 컬럼 헤더 설정
+        for col in self.table_columns:
+            self.tree.heading(col, text=col)
+            self.tree.column(col, width=120, anchor=tk.W)
+        
+        # PRIMARY KEY 찾기
+        pk_column = self.get_primary_key_column()
+        
+        # 데이터 삽입 (PK를 iid로 사용)
+        self.row_data_map = {}  # iid -> row_data 매핑
+        for row in self.table_data:
+            values = [str(row.get(col, '')) if row.get(col) is not None else '' for col in self.table_columns]
+            
+            # PK를 iid로 사용 (enrollment는 복합 키)
+            if self.current_table == 'enrollment':
+                iid = f"{row.get('student_id', '')}_{row.get('subject_id', '')}"
+            elif pk_column and pk_column in row:
+                iid = str(row[pk_column])
+            else:
+                iid = ''
+            
+            item_id = self.tree.insert('', tk.END, iid=iid, values=values)
+            self.row_data_map[item_id] = row
+    
+    def get_primary_key_column(self):
+        """PRIMARY KEY 컬럼 찾기"""
+        if not self.table_columns:
+            return None
+        
+        # 일반적인 PK 패턴 확인
+        for col in self.table_columns:
+            if col.endswith('_id') or col in ['student_id', 'professor_id', 'subject_id', 
+                                               'schedule_id', 'session_id', 'checkin_id']:
+                return col
+        
+        # 첫 번째 컬럼을 기본값으로 사용
+        return self.table_columns[0]
+    
+    def refresh_data(self):
+        """데이터 새로고침"""
+        if self.current_table:
+            self.load_table_data()
+            messagebox.showinfo("알림", "데이터가 새로고침되었습니다.")
+    
+    def add_record(self):
+        """레코드 추가"""
+        if not self.current_table:
+            messagebox.showwarning("경고", "테이블을 선택해주세요.")
+            return
+        
+        dialog = RecordDialog(self.root, self.current_table, self.table_columns, self.column_types, mode='add')
+        self.root.wait_window(dialog.dialog)
+        
+        if dialog.result:
+            try:
+                with connect(**LOCAL_DB_CONFIG) as connection:
+                    with connection.cursor() as cursor:
+                        cursor.execute("USE wcheck")
+                        
+                        # INSERT 쿼리 생성
+                        columns = [col for col in self.table_columns if col not in ['created_at'] and dialog.result.get(col) is not None]
+                        values = [dialog.result[col] for col in columns]
+                        placeholders = ', '.join(['%s'] * len(values))
+                        columns_str = ', '.join(columns)
+                        
+                        query = f"INSERT INTO {self.current_table} ({columns_str}) VALUES ({placeholders})"
+                        cursor.execute(query, values)
+                        connection.commit()
+                
+                messagebox.showinfo("성공", "레코드가 추가되었습니다.")
+                self.load_table_data()
+                
+            except Exception as e:
+                messagebox.showerror("오류", f"레코드 추가 중 오류 발생: {e}")
+    
+    def update_record(self):
+        """레코드 수정"""
+        if not self.current_table:
+            messagebox.showwarning("경고", "테이블을 선택해주세요.")
+            return
+        
+        selected_item = self.tree.selection()
+        if not selected_item:
+            messagebox.showwarning("경고", "수정할 레코드를 선택해주세요.")
+            return
+        
+        # 선택된 항목의 데이터 가져오기
+        item_id = selected_item[0]
+        if item_id not in self.row_data_map:
+            messagebox.showerror("오류", "레코드 데이터를 찾을 수 없습니다.")
+            return
+        
+        original_data = self.row_data_map[item_id]
+        
+        dialog = RecordDialog(self.root, self.current_table, self.table_columns, self.column_types, mode='update', initial_data=original_data)
+        self.root.wait_window(dialog.dialog)
+        
+        if dialog.result:
+            try:
+                with connect(**LOCAL_DB_CONFIG) as connection:
+                    with connection.cursor() as cursor:
+                        cursor.execute("USE wcheck")
+                        
+                        # PRIMARY KEY 찾기
+                        pk_column = self.get_primary_key_column()
+                        
+                        # enrollment 테이블은 복합 PRIMARY KEY 처리
+                        if self.current_table == 'enrollment':
+                            update_cols = [col for col in self.table_columns if col not in ['student_id', 'subject_id', 'registered_at'] and dialog.result.get(col) is not None]
+                            if update_cols:
+                                update_values = [dialog.result[col] for col in update_cols]
+                                set_clause = ', '.join([f"{col} = %s" for col in update_cols])
+                                query = f"UPDATE {self.current_table} SET {set_clause} WHERE student_id = %s AND subject_id = %s"
+                                update_values.extend([original_data['student_id'], original_data['subject_id']])
+                                cursor.execute(query, update_values)
+                        else:
+                            # UPDATE 쿼리 생성
+                            update_cols = [col for col in self.table_columns if col != pk_column and col not in ['created_at'] and dialog.result.get(col) is not None]
+                            update_values = [dialog.result[col] for col in update_cols]
+                            set_clause = ', '.join([f"{col} = %s" for col in update_cols])
+                            
+                            query = f"UPDATE {self.current_table} SET {set_clause} WHERE {pk_column} = %s"
+                            update_values.append(original_data[pk_column])
+                            cursor.execute(query, update_values)
+                        
+                        connection.commit()
+                
+                messagebox.showinfo("성공", "레코드가 수정되었습니다.")
+                self.load_table_data()
+                
+            except Exception as e:
+                messagebox.showerror("오류", f"레코드 수정 중 오류 발생: {e}")
+    
+    def delete_record(self):
+        """레코드 삭제"""
+        if not self.current_table:
+            messagebox.showwarning("경고", "테이블을 선택해주세요.")
+            return
+        
+        selected_item = self.tree.selection()
+        if not selected_item:
+            messagebox.showwarning("경고", "삭제할 레코드를 선택해주세요.")
+            return
+        
+        # 확인 대화상자
+        if not messagebox.askyesno("확인", "정말로 이 레코드를 삭제하시겠습니까?"):
+            return
+        
+        # 선택된 항목의 데이터 가져오기
+        item_id = selected_item[0]
+        if item_id not in self.row_data_map:
+            messagebox.showerror("오류", "레코드 데이터를 찾을 수 없습니다.")
+            return
+        
+        original_data = self.row_data_map[item_id]
+        
+        try:
+            with connect(**LOCAL_DB_CONFIG) as connection:
+                with connection.cursor() as cursor:
+                    cursor.execute("USE wcheck")
+                    
+                    # PRIMARY KEY 찾기
+                    pk_column = self.get_primary_key_column()
+                    
+                    # enrollment 테이블은 복합 PRIMARY KEY 처리
+                    if self.current_table == 'enrollment':
+                        query = f"DELETE FROM {self.current_table} WHERE student_id = %s AND subject_id = %s"
+                        cursor.execute(query, (original_data['student_id'], original_data['subject_id']))
+                    else:
+                        # DELETE 쿼리 실행
+                        query = f"DELETE FROM {self.current_table} WHERE {pk_column} = %s"
+                        cursor.execute(query, (original_data[pk_column],))
+                    
+                    connection.commit()
+            
+            messagebox.showinfo("성공", "레코드가 삭제되었습니다.")
+            self.load_table_data()
+            
+        except Exception as e:
+            messagebox.showerror("오류", f"레코드 삭제 중 오류 발생: {e}")
+    
+    def reset_database(self):
+        """데이터베이스 리셋"""
+        if not messagebox.askyesno("확인", "정말로 데이터베이스를 리셋하시겠습니까?\n모든 데이터가 삭제됩니다."):
+            return
+        
+        try:
+            reset_database()
+            messagebox.showinfo("성공", "데이터베이스가 리셋되었습니다.")
+            self.load_table_data()
+        except Exception as e:
+            messagebox.showerror("오류", f"데이터베이스 리셋 중 오류 발생: {e}")
+    
+    def insert_test_data(self):
+        """테스트 데이터 삽입"""
+        if not messagebox.askyesno("확인", "테스트 데이터를 삽입하시겠습니까?\n기존 데이터가 삭제됩니다."):
+            return
+        
+        try:
+            result = test_database()
+            if result == 0:
+                messagebox.showinfo("성공", "테스트 데이터가 삽입되었습니다.")
+                self.load_table_data()
+            else:
+                messagebox.showerror("오류", "테스트 데이터 삽입에 실패했습니다.")
+        except Exception as e:
+            messagebox.showerror("오류", f"테스트 데이터 삽입 중 오류 발생: {e}")
+
+
+class RecordDialog:
+    """레코드 추가/수정을 위한 다이얼로그"""
+    def __init__(self, parent, table_name, columns, column_types, mode='add', initial_data=None):
+        self.result = None
+        self.table_name = table_name
+        self.columns = columns
+        self.column_types = column_types or {}
+        self.mode = mode
+        self.initial_data = initial_data or {}
+        
+        self.dialog = tk.Toplevel(parent)
+        self.dialog.title(f"{'수정' if mode == 'update' else '추가'} - {table_name}")
+        self.dialog.geometry("500x600")
+        self.dialog.transient(parent)
+        self.dialog.grab_set()
+        
+        self.entries = {}
+        self.setup_ui()
+    
+    def setup_ui(self):
+        # 스크롤 가능한 프레임
+        canvas = tk.Canvas(self.dialog)
+        scrollbar = ttk.Scrollbar(self.dialog, orient="vertical", command=canvas.yview)
+        scrollable_frame = ttk.Frame(canvas)
+        
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # 입력 필드 생성
+        for col in self.columns:
+            # 자동 생성 컬럼은 제외
+            if col in ['created_at', 'registered_at']:
+                continue
+            
+            # enrollment 테이블 수정 모드에서 student_id, subject_id는 읽기 전용
+            if self.table_name == 'enrollment' and self.mode == 'update' and col in ['student_id', 'subject_id']:
+                ttk.Label(scrollable_frame, text=f"{col} (읽기 전용):").pack(anchor=tk.W, padx=10, pady=5)
+                entry = ttk.Entry(scrollable_frame, width=50, state='readonly')
+                entry.insert(0, initial_value if self.mode == 'update' and col in self.initial_data else "")
+                entry.pack(anchor=tk.W, padx=10, pady=5)
+                self.entries[col] = entry
+                continue
+            
+            ttk.Label(scrollable_frame, text=f"{col}:").pack(anchor=tk.W, padx=10, pady=5)
+            
+            # 초기값 설정
+            initial_value = ""
+            if self.mode == 'update' and col in self.initial_data:
+                initial_value = str(self.initial_data[col]) if self.initial_data[col] is not None else ""
+            
+            # ENUM 타입이나 특정 컬럼은 Combobox 사용
+            if col == 'day_of_week':
+                entry = ttk.Combobox(scrollable_frame, state="readonly", width=50)
+                entry['values'] = ('MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN')
+                if initial_value:
+                    entry.set(initial_value)
+            elif col == 'status':
+                entry = ttk.Combobox(scrollable_frame, state="readonly", width=50)
+                entry['values'] = ('PRESENT', 'LATE', 'ABSENT')
+                if initial_value:
+                    entry.set(initial_value)
+            elif col.endswith('_id') and self.mode == 'add':
+                # 외래키는 수정 모드에서만 표시
+                entry = ttk.Entry(scrollable_frame, width=50)
+                entry.insert(0, initial_value)
+            elif col == 'is_cancelled':
+                entry = ttk.Combobox(scrollable_frame, state="readonly", width=50)
+                entry['values'] = ('0', '1', 'False', 'True')
+                if initial_value:
+                    entry.set(str(initial_value))
+            else:
+                entry = ttk.Entry(scrollable_frame, width=50)
+                entry.insert(0, initial_value)
+            
+            entry.pack(anchor=tk.W, padx=10, pady=5)
+            self.entries[col] = entry
+        
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+        
+        # 버튼 프레임
+        button_frame = ttk.Frame(self.dialog)
+        button_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Button(button_frame, text="확인", command=self.on_ok).pack(side=tk.RIGHT, padx=5)
+        ttk.Button(button_frame, text="취소", command=self.on_cancel).pack(side=tk.RIGHT, padx=5)
+    
+    def on_ok(self):
+        """확인 버튼 클릭"""
+        self.result = {}
+        
+        for col, entry in self.entries.items():
+            value = entry.get().strip()
+            
+            # 컬럼 타입 정보 가져오기
+            col_info = self.column_types.get(col, {})
+            col_type = col_info.get('type', '').upper() if isinstance(col_info, dict) else str(col_info).upper()
+            is_nullable = col_info.get('null', 'YES') == 'YES' if isinstance(col_info, dict) else True
+            
+            # 빈 값 처리
+            if not value:
+                # NULL 가능한 필드는 None으로 설정
+                if is_nullable:
+                    self.result[col] = None
+                    continue
+                elif self.mode == 'add':
+                    # 필수 필드는 빈 값일 때 건너뛰지 않음 (DB에서 처리)
+                    pass
+            
+            # 컬럼 타입에 따른 변환
+            try:
+                # INT 타입 (INT, INT UNSIGNED 등)
+                if 'INT' in col_type or col.endswith('_id') or col in ['student_grade', 'subject_year', 'subject_semester']:
+                    if value:
+                        self.result[col] = int(value)
+                    else:
+                        self.result[col] = None
+                
+                # BOOLEAN 타입
+                elif 'BOOLEAN' in col_type or 'TINYINT(1)' in col_type or col == 'is_cancelled':
+                    if value in ('1', 'True', 'true', 'TRUE'):
+                        self.result[col] = True
+                    elif value in ('0', 'False', 'false', 'FALSE'):
+                        self.result[col] = False
+                    elif value:
+                        self.result[col] = bool(int(value)) if value.isdigit() else bool(value)
+                    else:
+                        self.result[col] = False
+                
+                # TIME 타입
+                elif 'TIME' in col_type and 'TIMESTAMP' not in col_type:
+                    # TIME 형식: 'HH:MM:SS' 또는 'HH:MM'
+                    self.result[col] = value if value else None
+                
+                # DATE 타입
+                elif 'DATE' in col_type and 'TIMESTAMP' not in col_type:
+                    # DATE 형식: 'YYYY-MM-DD'
+                    self.result[col] = value if value else None
+                
+                # TIMESTAMP/DATETIME 타입
+                elif 'TIMESTAMP' in col_type or 'DATETIME' in col_type:
+                    # TIMESTAMP 형식: 'YYYY-MM-DD HH:MM:SS' 또는 현재 시간
+                    self.result[col] = value if value else None
+                
+                # ENUM 타입
+                elif 'ENUM' in col_type:
+                    # ENUM 값은 그대로 전달
+                    self.result[col] = value if value else None
+                
+                # VARCHAR, TEXT 등 문자열 타입
+                else:
+                    self.result[col] = value if value else None
+                    
+            except ValueError as e:
+                messagebox.showerror("오류", f"{col}의 값 형식이 올바르지 않습니다: {e}")
+                return
+        
+        self.dialog.destroy()
+    
+    def on_cancel(self):
+        """취소 버튼 클릭"""
+        self.result = None
+        self.dialog.destroy()
+
+
 # 데이터베이스 리셋 함수
 def reset_database():
     try:
-        with connect(**DB_CONFIG) as connection:
+        with connect(**LOCAL_DB_CONFIG) as connection:
             with connection.cursor() as cursor:
                 # wcheck 데이터베이스 사용
                 cursor.execute("USE wcheck")
@@ -45,7 +571,7 @@ def test_database():
             print("데이터베이스 리셋 실패")
             return 1
         
-        with connect(**DB_CONFIG) as connection:
+        with connect(**LOCAL_DB_CONFIG) as connection:
             with connection.cursor() as cursor:
                 cursor.execute("USE wcheck")
                 
@@ -110,6 +636,10 @@ def test_database():
                               (4, "TUE", "14:30:00", "16:00:00", "202호"))
                 cursor.execute("INSERT INTO subject_schedule (subject_id, day_of_week, start_time, end_time, location) VALUES (%s, %s, %s, %s, %s)", 
                               (4, "THU", "14:30:00", "16:00:00", "202호"))
+                cursor.execute("INSERT INTO subject_schedule (subject_id, day_of_week, start_time, end_time, location) VALUES (%s, %s, %s, %s, %s)", 
+                              (1, "TUE", "12:30:00", "16:00:00", "202호"))
+                cursor.execute("INSERT INTO subject_schedule (subject_id, day_of_week, start_time, end_time, location) VALUES (%s, %s, %s, %s, %s)", 
+                              (2, "TUE", "13:50:00", "46:00:00", "302호"))
                 
                 # 수강 등록 추가
                 print("수강 등록 데이터 삽입 중...")
@@ -489,364 +1019,12 @@ def test_database():
         print("테스트 데이터 삽입 과정 중 오류 발생: ", e)
         return 1
 
-def add_student():
-    try:
-        name = input("이름: ")
-        student_number = input("학번: ")
-        major = input("전공: ")
-        grade = int(input("학년: "))
-        with connect(**DB_CONFIG) as connection:
-            with connection.cursor() as cursor:
-                cursor.execute("USE wcheck")
-                cursor.execute("INSERT INTO student (name, student_number, student_major, student_grade) VALUES (%s, %s, %s, %s)", (name, student_number, major, grade))
-                connection.commit()
-                print("학생 정보 추가 완료")
-    except Exception as e:
-        print("학생 정보 추가 중 오류 발생: ", e)
-
-def add_professor():
-    try:
-        name = input("이름: ")
-        major = input("전공: ")
-        email = input("이메일: ")
-        office_location = input("연구실 위치: ")
-        with connect(**DB_CONFIG) as connection:
-            with connection.cursor() as cursor:
-                cursor.execute("USE wcheck")
-                cursor.execute("INSERT INTO professor (name, major, email, office_location) VALUES (%s, %s, %s, %s)", (name, major, email, office_location))
-                connection.commit()
-                print("교수 정보 추가 완료")
-    except Exception as e:
-        print("교수 정보 추가 중 오류 발생: ", e)
-
-def add_subject():
-    try:
-        name = input("과목명: ")
-        year = int(input("연도: "))
-        semester = int(input("학기: "))
-        professor_id_str = input("담당 교수 ID (없으면 Enter): ")
-        professor_id = int(professor_id_str) if professor_id_str else None
-
-        with connect(**DB_CONFIG) as connection:
-            with connection.cursor() as cursor:
-                cursor.execute("USE wcheck")
-                if professor_id:
-                    cursor.execute("INSERT INTO subject (name, subject_year, subject_semester, professor_id) VALUES (%s, %s, %s, %s)", (name, year, semester, professor_id))
-                else:
-                    cursor.execute("INSERT INTO subject (name, subject_year, subject_semester) VALUES (%s, %s, %s)", (name, year, semester))
-                connection.commit()
-                print("과목 정보 추가 완료")
-    except Exception as e:
-        print("과목 정보 추가 중 오류 발생: ", e)
-
-def show_student():
-    try:
-        with connect(**DB_CONFIG) as connection:
-            with connection.cursor(dictionary=True) as cursor:
-                cursor.execute("USE wcheck")
-                cursor.execute("SELECT * FROM student")
-                students = cursor.fetchall()
-                if not students:
-                    print("학생 정보가 없습니다.")
-                    return
-                for student in students:
-                    print(f"ID: {student['student_id']}, 이름: {student['name']}, 학번: {student['student_number']}, 전공: {student['student_major']}, 학년: {student['student_grade']}")
-    except Exception as e:
-        print("학생 정보 조회 중 오류 발생: ", e)
-
-def show_professor():
-    try:
-        with connect(**DB_CONFIG) as connection:
-            with connection.cursor(dictionary=True) as cursor:
-                cursor.execute("USE wcheck")
-                cursor.execute("SELECT * FROM professor")
-                professors = cursor.fetchall()
-                if not professors:
-                    print("교수 정보가 없습니다.")
-                    return
-                for professor in professors:
-                    print(f"ID: {professor['professor_id']}, 이름: {professor['name']}, 전공: {professor['major']}, 이메일: {professor['email']}, 연구실: {professor['office_location']}")
-    except Exception as e:
-        print("교수 정보 조회 중 오류 발생: ", e)
-
-def show_subject():
-    try:
-        with connect(**DB_CONFIG) as connection:
-            with connection.cursor(dictionary=True) as cursor:
-                cursor.execute("USE wcheck")
-                cursor.execute("SELECT * FROM subject")
-                subjects = cursor.fetchall()
-                if not subjects:
-                    print("과목 정보가 없습니다.")
-                    return
-                for subject in subjects:
-                    print(f"ID: {subject['subject_id']}, 이름: {subject['name']}, 연도: {subject['subject_year']}, 학기: {subject['subject_semester']}, 교수 ID: {subject['professor_id']}")
-    except Exception as e:
-        print("과목 정보 조회 중 오류 발생: ", e)
-
-def show_schedule():
-    try:
-        with connect(**DB_CONFIG) as connection:
-            with connection.cursor(dictionary=True) as cursor:
-                cursor.execute("USE wcheck")
-                cursor.execute("SELECT * FROM subject_schedule")
-                schedules = cursor.fetchall()
-                if not schedules:
-                    print("시간표 정보가 없습니다.")
-                    return
-                for schedule in schedules:
-                    print(f"ID: {schedule['schedule_id']}, 과목 ID: {schedule['subject_id']}, 요일: {schedule['day_of_week']}, 시작 시간: {schedule['start_time']}, 종료 시간: {schedule['end_time']}, 장소: {schedule['location']}")
-    except Exception as e:
-        print("시간표 정보 조회 중 오류 발생: ", e)
-
-def show_session():
-    try:
-        with connect(**DB_CONFIG) as connection:
-            with connection.cursor(dictionary=True) as cursor:
-                cursor.execute("USE wcheck")
-                cursor.execute("SELECT * FROM class_session")
-                sessions = cursor.fetchall()
-                if not sessions:
-                    print("수업 정보가 없습니다.")
-                    return
-                for session in sessions:
-                    print(f"ID: {session['session_id']}, 시간표 ID: {session['schedule_id']}, 날짜: {session['class_date']}, 취소 여부: {'Y' if session['is_cancelled'] else 'N'}")
-    except Exception as e:
-        print("수업 정보 조회 중 오류 발생: ", e)
-
-def show_checkin():
-    try:
-        with connect(**DB_CONFIG) as connection:
-            with connection.cursor(dictionary=True) as cursor:
-                cursor.execute("USE wcheck")
-                cursor.execute("SELECT * FROM checkin")
-                checkins = cursor.fetchall()
-                if not checkins:
-                    print("출석 정보가 없습니다.")
-                    return
-                for checkin in checkins:
-                    print(f"ID: {checkin['checkin_id']}, 수업 ID: {checkin['session_id']}, 학생 ID: {checkin['student_id']}, 출석 시간: {checkin['check_time']}, 상태: {checkin['status']}")
-    except Exception as e:
-        print("출석 정보 조회 중 오류 발생: ", e)
-
-def show_all():
-    show_student()
-    print("-" * 20)
-    show_professor()
-    print("-" * 20)
-    show_subject()
-    print("-" * 20)
-    show_schedule()
-    print("-" * 20)
-    show_session()
-    print("-" * 20)
-    show_checkin()
-
-def delete_student():
-    try:
-        student_id = int(input("삭제할 학생의 ID를 입력하세요: "))
-        with connect(**DB_CONFIG) as connection:
-            with connection.cursor() as cursor:
-                cursor.execute("USE wcheck")
-                cursor.execute("DELETE FROM student WHERE student_id = %s", (student_id,))
-                connection.commit()
-                if cursor.rowcount > 0:
-                    print("학생 정보 삭제 완료")
-                else:
-                    print("해당 ID의 학생 정보가 없습니다.")
-    except Exception as e:
-        print("학생 정보 삭제 중 오류 발생: ", e)
-
-def delete_professor():
-    try:
-        professor_id = int(input("삭제할 교수의 ID를 입력하세요: "))
-        with connect(**DB_CONFIG) as connection:
-            with connection.cursor() as cursor:
-                cursor.execute("USE wcheck")
-                cursor.execute("DELETE FROM professor WHERE professor_id = %s", (professor_id,))
-                connection.commit()
-                if cursor.rowcount > 0:
-                    print("교수 정보 삭제 완료")
-                else:
-                    print("해당 ID의 교수 정보가 없습니다.")
-    except Exception as e:
-        print("교수 정보 삭제 중 오류 발생: ", e)
-
-def delete_subject():
-    try:
-        subject_id = int(input("삭제할 과목의 ID를 입력하세요: "))
-        with connect(**DB_CONFIG) as connection:
-            with connection.cursor() as cursor:
-                cursor.execute("USE wcheck")
-                cursor.execute("DELETE FROM subject WHERE subject_id = %s", (subject_id,))
-                connection.commit()
-                if cursor.rowcount > 0:
-                    print("과목 정보 삭제 완료")
-                else:
-                    print("해당 ID의 과목 정보가 없습니다.")
-    except Exception as e:
-        print("과목 정보 삭제 중 오류 발생: ", e)
-
-def update_student():
-    try:
-        student_id = int(input("수정할 학생의 ID를 입력하세요: "))
-        with connect(**DB_CONFIG) as connection:
-            with connection.cursor(dictionary=True) as cursor:
-                cursor.execute("USE wcheck")
-                cursor.execute("SELECT * FROM student WHERE student_id = %s", (student_id,))
-                student = cursor.fetchone()
-                if not student:
-                    print("해당 ID의 학생 정보가 없습니다.")
-                    return
-
-                print("수정할 정보를 입력하세요. (수정하지 않으려면 Enter)")
-                name = input(f"이름 ({student['name']}): ") or student['name'] # or가 들어간 이유 : 입력을 하지 않으면 기존 값을 유지
-                student_number = input(f"학번 ({student['student_number']}): ") or student['student_number']
-                major = input(f"전공 ({student['student_major']}): ") or student['student_major']
-                grade_str = input(f"학년 ({student['student_grade']}): ")
-                grade = int(grade_str) if grade_str else student['student_grade']
-
-                cursor.execute("UPDATE student SET name = %s, student_number = %s, student_major = %s, student_grade = %s WHERE student_id = %s",
-                               (name, student_number, major, grade, student_id))
-                connection.commit()
-                print("학생 정보 수정 완료")
-    except Exception as e:
-        print("학생 정보 수정 중 오류 발생: ", e)
-
-def update_professor():
-    try:
-        professor_id = int(input("수정할 교수의 ID를 입력하세요: "))
-        with connect(**DB_CONFIG) as connection:
-            with connection.cursor(dictionary=True) as cursor:
-                cursor.execute("USE wcheck")
-                cursor.execute("SELECT * FROM professor WHERE professor_id = %s", (professor_id,))
-                professor = cursor.fetchone()
-                if not professor:
-                    print("해당 ID의 교수 정보가 없습니다.")
-                    return
-
-                print("수정할 정보를 입력하세요. (수정하지 않으려면 Enter)")
-                name = input(f"이름 ({professor['name']}): ") or professor['name']
-                major = input(f"전공 ({professor['major']}): ") or professor['major']
-                email = input(f"이메일 ({professor['email']}): ") or professor['email']
-                office_location = input(f"연구실 위치 ({professor['office_location']}): ") or professor['office_location']
-
-                cursor.execute("UPDATE professor SET name = %s, major = %s, email = %s, office_location = %s WHERE professor_id = %s",
-                               (name, major, email, office_location, professor_id))
-                connection.commit()
-                print("교수 정보 수정 완료")
-    except Exception as e:
-        print("교수 정보 수정 중 오류 발생: ", e)
-
-def update_subject():
-    try:
-        subject_id = int(input("수정할 과목의 ID를 입력하세요: "))
-        with connect(**DB_CONFIG) as connection:
-            with connection.cursor(dictionary=True) as cursor:
-                cursor.execute("USE wcheck")
-                cursor.execute("SELECT * FROM subject WHERE subject_id = %s", (subject_id,))
-                subject = cursor.fetchone()
-                if not subject:
-                    print("해당 ID의 과목 정보가 없습니다.")
-                    return
-
-                print("수정할 정보를 입력하세요. (수정하지 않으려면 Enter)")
-                name = input(f"과목명 ({subject['name']}): ") or subject['name']
-                year_str = input(f"연도 ({subject['subject_year']}): ")
-                year = int(year_str) if year_str else subject['subject_year']
-                semester_str = input(f"학기 ({subject['subject_semester']}): ")
-                semester = int(semester_str) if semester_str else subject['subject_semester']
-                professor_id_str = input(f"담당 교수 ID ({subject['professor_id']}): ")
-                professor_id = int(professor_id_str) if professor_id_str else subject['professor_id']
-
-                cursor.execute("UPDATE subject SET name = %s, subject_year = %s, subject_semester = %s, professor_id = %s WHERE subject_id = %s",
-                               (name, year, semester, professor_id, subject_id))
-                connection.commit()
-                print("과목 정보 수정 완료")
-    except Exception as e:
-        print("과목 정보 수정 중 오류 발생: ", e)
 
 def main():
-    print("WCHECK DB 관리 프로그램")
-    while True:
-        command = input("(도움말 : help) >")
-        command_args = command.split(' ')
-        if command_args[0] == 'help':
-            print("help : 도움말 출력")
-            print("reset : 데이터베이스 리셋")
-            print("test : 데이터베이스 리셋 후 테스트 데이터 삽입")
-            print("add (student | professor | subject) : 데이터 추가")
-            print("delete (student | professor | subject) : 데이터 삭제")
-            print("update (student | professor | subject) : 데이터 수정")
-            print("show (student | professor | subject | schedule | session | checkin | all) : 데이터 조회")
-            print("exit : 프로그램 종료")
-        elif command_args[0] == 'reset':
-            reset_database()
-        elif command_args[0] == 'test':
-            test_database()
-        elif command_args[0] == 'add':
-            if len(command_args) < 2:
-                print("add (student | professor | subject)")
-                continue
-            if command_args[1] == 'student':
-                add_student()
-            elif command_args[1] == 'professor':
-                add_professor()
-            elif command_args[1] == 'subject':
-                add_subject()
-            else:
-                print("올바르지 않은 명령어입니다. 도움말을 참고하세요.")
-        elif command_args[0] == 'show':
-            if len(command_args) < 2:
-                print("show (student | professor | subject | schedule | session | checkin | all)")
-                continue
-            if command_args[1] == 'student':
-                show_student()
-            elif command_args[1] == 'professor':
-                show_professor()
-            elif command_args[1] == 'subject':
-                show_subject()
-            elif command_args[1] == 'schedule':
-                show_schedule()
-            elif command_args[1] == 'session':
-                show_session()
-            elif command_args[1] == 'checkin':
-                show_checkin()
-            elif command_args[1] == 'all':
-                show_all()
-            else:
-                print("올바르지 않은 명령어입니다. 도움말을 참고하세요.")
-        elif command_args[0] == 'delete':
-            if len(command_args) < 2:
-                print("delete (student | professor | subject)")
-                continue
-            if command_args[1] == 'student':
-                delete_student()
-            elif command_args[1] == 'professor':
-                delete_professor()
-            elif command_args[1] == 'subject':
-                delete_subject()
-            else:
-                print("올바르지 않은 명령어입니다. 도움말을 참고하세요.")
-        elif command_args[0] == 'update':
-            if len(command_args) < 2:
-                print("update (student | professor | subject)")
-                continue
-            if command_args[1] == 'student':
-                update_student()
-            elif command_args[1] == 'professor':
-                update_professor()
-            elif command_args[1] == 'subject':
-                update_subject()
-            else:
-                print("올바르지 않은 명령어입니다. 도움말을 참고하세요.")
-        elif command_args[0] == 'exit':
-            break
-        else:
-            print("올바르지 않은 명령어입니다. 도움말을 참고하세요.")
+    root = tk.Tk()
+    app = DatabaseAdminGUI(root)
+    root.mainloop()
+
 
 if __name__ == "__main__":
     main()
-        
-        
-       
