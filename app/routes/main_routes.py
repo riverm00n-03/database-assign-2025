@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, session
 from app.utils.auth import login_required
 from app.utils.db_helpers import get_db_connection, get_student_id_by_number, format_time_to_str, to_time
+from app.utils.session_helpers import get_session_info
+from app.utils.constants import WEEKDAY_TO_STR
 from datetime import datetime
 
 
@@ -15,9 +17,10 @@ def root():
     로그인된 사용자의 홈 화면을 보여줍니다.
     """
     # 세션에서 사용자 정보 가져오기
-    username = session.get('username', '사용자')
-    role = session.get('role', 'student')
-    student_number = session.get('student_number')
+    session_info = get_session_info()
+    username = session_info['username']
+    role = session_info['role']
+    student_number = session_info['student_number']
     
     today_classes = []
     
@@ -29,8 +32,7 @@ def root():
             
             # 주말이 아니면 오늘의 과목 조회
             if today_index <= 4:
-                weekday_map = {0: 'MON', 1: 'TUE', 2: 'WED', 3: 'THU', 4: 'FRI'}
-                today_weekday = weekday_map[today_index]
+                today_weekday = WEEKDAY_TO_STR.get(today_index)
                 
                 with get_db_connection() as conn:
                     with conn.cursor(dictionary=True) as cursor:

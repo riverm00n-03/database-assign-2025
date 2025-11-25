@@ -8,8 +8,9 @@
     gap: var(--spacing-lg);
     width: 100%;
     align-items: stretch;
-    margin: 0;
+    margin: 0 auto;
     padding: 0;
+    max-width: 100%;
 }
 
 .timetable-main-container {
@@ -236,7 +237,6 @@
 }
 
 .notification-icon {
-    font-size: 24px;
     width: 40px;
     height: 40px;
     display: flex;
@@ -244,6 +244,12 @@
     justify-content: center;
     background: rgba(255, 255, 255, 0.6);
     border-radius: var(--radius-md);
+}
+
+.notification-icon svg {
+    width: 24px;
+    height: 24px;
+    color: var(--text-primary);
 }
 
 .current-icon {
@@ -291,6 +297,14 @@
     color: var(--text-secondary);
     font-weight: 500;
     margin-top: var(--spacing-xs);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.class-location .icon-inline {
+    margin-right: 0;
+    flex-shrink: 0;
 }
 
 .class-time-info {
@@ -410,6 +424,14 @@
     font-size: 13px;
     color: var(--text-secondary);
     font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.today-class-location .icon-inline {
+    margin-right: 0;
+    flex-shrink: 0;
 }
 
 .today-class-time {
@@ -425,6 +447,9 @@
         flex-direction: row;
         align-items: flex-start;
         gap: var(--spacing-xl);
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 100%;
     }
     
     .timetable-main-container {

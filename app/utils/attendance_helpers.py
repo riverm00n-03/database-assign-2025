@@ -1,7 +1,7 @@
 """
 출석 관련 유틸리티 함수들
 """
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from app.utils.attendance_test import now
 from app.utils.constants import (
     ATTENDANCE_WINDOW_MINUTES,
@@ -116,6 +116,43 @@ def build_session_map(sessions):
     return session_map
 
 
+def calculate_weeks_info(semester_start, semester_end, today=None):
+    """
+    학기 주차 정보를 계산합니다.
+    
+    Args:
+        semester_start: 학기 시작일 (date 객체)
+        semester_end: 학기 종료일 (date 객체)
+        today: 오늘 날짜 (date 객체, 기본값: 오늘)
+        
+    Returns:
+        dict: 주차 정보 딕셔너리
+            - total_weeks: 전체 주차 수
+            - current_week: 현재 주차
+    """
+    if today is None:
+        today = date.today()
+    
+    # 전체 주차 수 계산 (학기 시작일부터 종료일까지)
+    total_weeks = ((semester_end - semester_start).days // 7) + 1
+    if total_weeks > MAX_WEEKS_PER_SEMESTER:
+        total_weeks = MAX_WEEKS_PER_SEMESTER
+    
+    # 현재 주차 계산 (학기 시작일부터 오늘까지)
+    days_since_start = (today - semester_start).days
+    current_week = (days_since_start // 7) + 1
+    # 학기 시작 전이면 1주차로, 학기 종료 후면 전체 주차로 제한
+    if current_week < 1:
+        current_week = 1
+    elif current_week > total_weeks:
+        current_week = total_weeks
+    
+    return {
+        'total_weeks': total_weeks,
+        'current_week': current_week
+    }
+
+
 # ============================================================================
 # 헬퍼 함수 사용 설명
 # ============================================================================
@@ -140,4 +177,8 @@ def build_session_map(sessions):
 #   - 필요성: 세션 데이터를 (날짜, 스케줄 ID) 키의 딕셔너리로 변환하여 빠른 조회 가능하게 함.
 #   - 사용처: app/routes/attendance_routes.py의 attendance_detail()에서 
 #            주차별 출석 기록 생성 시 세션 정보 조회에 사용됨.
+#
+# calculate_weeks_info(semester_start, semester_end, today)
+#   - 필요성: 학기 주차 정보(전체 주차 수, 현재 주차)를 계산함. 코드 중복 방지.
+#   - 사용처: app/routes/attendance_routes.py에서 주차 정보 계산 시 사용됨.
 #

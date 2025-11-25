@@ -1,6 +1,16 @@
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
 
 /* ============================
+   아이콘 스타일
+============================ */
+.icon-inline {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 6px;
+    flex-shrink: 0;
+}
+
+/* ============================
    전체 레이아웃 구조
 ============================ */
 *,
@@ -28,15 +38,27 @@ body {
 body::before {
     content: '';
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
     background: 
-        radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.03) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.03) 0%, transparent 50%);
+        radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.06) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.06) 0%, transparent 50%);
+    animation: gradientMove 25s ease-in-out infinite;
     pointer-events: none;
     z-index: 0;
+}
+
+@keyframes gradientMove {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translate(3%, 3%) scale(1.05);
+        opacity: 0.9;
+    }
 }
 
 @media (max-width: 768px) {
@@ -161,6 +183,13 @@ body:not(:has(.full-title-header)) .main-content {
     padding-top: var(--spacing-xl);
 }
 
+/* PC 뷰에서 시간표 페이지 오른쪽 패딩 증가 */
+@media (min-width: 1024px) {
+    .full-title-header ~ .main-content:has(.timetable-wrapper) {
+        padding-right: calc(var(--spacing-xl) * 2.2);
+    }
+}
+
 .content-wrapper {
     max-width: 1400px;
     margin: 0 auto;
@@ -172,7 +201,13 @@ body:not(:has(.full-title-header)) .main-content {
 @media (max-width: 768px) {
     .main-content {
         min-height: calc(100vh - 64px - 70px);
-        padding: var(--spacing-md) var(--spacing-sm);
+        padding: var(--spacing-xs) var(--spacing-md);
+    }
+    
+    /* 웰컴 페이지일 때 패딩 최소화 */
+    .main-content:has(.welcome-container) {
+        padding-top: var(--spacing-xs);
+        padding-bottom: var(--spacing-xs);
     }
     
     /* 헤더가 있을 때 */
@@ -192,7 +227,7 @@ body:not(:has(.full-title-header)) .main-content {
 
 @media (max-width: 480px) {
     .main-content {
-        padding: var(--spacing-sm);
+        padding: var(--spacing-sm) var(--spacing-md);
     }
 }
 
@@ -220,172 +255,371 @@ body:not(:has(.full-title-header)) .main-content {
    환영 페이지 스타일
 ============================ */
 .welcome-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     width: 100%;
     min-height: 400px;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--spacing-xl) var(--spacing-lg);
+    position: relative;
 }
 
-.welcome-card {
-    max-width: 800px;
-    width: 100%;
-    text-align: center;
-}
-
-.welcome-message {
-    font-size: 18px;
-    color: var(--text-secondary);
+/* 공통 헤더 (데스크톱/모바일 공통) */
+.welcome-header {
+    text-align: left;
     margin-bottom: var(--spacing-xl);
-    font-weight: 500;
+    padding-bottom: var(--spacing-md);
+    position: relative;
 }
 
-.welcome-actions {
-    display: flex;
-    gap: var(--spacing-md);
-    justify-content: center;
-    flex-wrap: wrap;
+.welcome-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: var(--primary-gradient);
+    border-radius: 2px;
+}
+
+.welcome-name {
+    font-size: 42px;
+    font-weight: 700;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0 0 6px 0;
+    line-height: 1.2;
+    letter-spacing: -1px;
+}
+
+.welcome-greeting {
+    font-size: 16px;
+    color: var(--text-muted);
+    margin: 0;
+    font-weight: 400;
+    letter-spacing: 0.2px;
 }
 
 /* 오늘의 수업 섹션 */
 .today-classes-section {
-    margin-bottom: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
     width: 100%;
 }
 
 .today-classes-title {
-    font-size: 16px;
+    font-size: 20px;
     font-weight: 600;
     color: var(--text-primary);
     margin: 0 0 var(--spacing-md) 0;
     text-align: left;
+    letter-spacing: -0.3px;
 }
 
-.today-classes-grid {
+/* 데스크톱: 가로로 긴 카드 (한 줄에 2개씩) */
+.today-classes-list-desktop {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-md);
     width: 100%;
 }
 
-.today-class-card {
+.today-class-card-desktop {
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
-    padding: var(--spacing-md);
-    transition: all var(--transition-base);
+    padding: var(--spacing-sm) var(--spacing-md);
+    transition: all 0.2s ease;
     text-align: left;
     position: relative;
-    overflow: hidden;
+    width: 100%;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
 }
 
-.today-class-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: var(--primary-gradient);
-    opacity: 0;
-    transition: opacity var(--transition-base);
-}
-
-.today-class-card:hover {
+.today-class-card-desktop:hover {
     border-color: rgba(99, 102, 241, 0.3);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.12), 0 2px 4px rgba(99, 102, 241, 0.08);
-    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
 }
 
-.today-class-card:hover::before {
-    opacity: 1;
+.class-card-number-desktop {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: var(--primary-gradient);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
 }
 
-.today-class-subject {
-    font-size: 14px;
+.class-card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.class-card-subject {
+    font-size: 15px;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 4px;
+    line-height: 1.4;
+    letter-spacing: -0.2px;
+}
+
+.class-card-details {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--text-secondary);
     line-height: 1.4;
 }
 
-.today-class-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    margin-bottom: 4px;
-}
-
-.today-class-time {
-    font-size: 12px;
+.class-card-time {
     color: var(--primary-color);
     font-weight: 500;
 }
 
-.today-class-location {
-    font-size: 11px;
+.class-card-separator {
+    color: var(--text-light);
+    margin: 0 2px;
+}
+
+.class-card-location,
+.class-card-professor {
     color: var(--text-secondary);
 }
 
-.today-class-professor {
-    font-size: 11px;
-    color: var(--text-secondary);
-    margin-top: 4px;
+/* 모바일: 리스트 형식 */
+.today-classes-list-mobile {
+    display: none;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-direction: column;
+    gap: var(--spacing-sm);
 }
 
+.today-class-item-mobile {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-xs) var(--spacing-md);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    position: relative;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+    min-height: 48px;
+}
+
+.today-class-item-mobile:last-child {
+    margin-bottom: 0;
+}
+
+.today-class-item-mobile:hover {
+    border-color: rgba(99, 102, 241, 0.2);
+    box-shadow: var(--shadow-sm);
+}
+
+.class-item-number {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: var(--primary-gradient);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
+}
+
+.class-item-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.class-item-subject {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.4;
+    letter-spacing: -0.1px;
+}
+
+.class-item-details {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.class-item-time {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.class-item-separator {
+    color: var(--text-light);
+    margin: 0 2px;
+}
+
+.class-item-location,
+.class-item-professor {
+    color: var(--text-secondary);
+}
+
+/* 액션 버튼 */
+.welcome-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    margin-top: var(--spacing-lg);
+}
+
+.welcome-actions-desktop {
+    display: flex;
+}
+
+.welcome-actions-mobile {
+    display: none;
+}
+
+/* 반응형: 모바일 */
 @media (max-width: 768px) {
     .welcome-container {
-        min-height: 300px;
+        padding: var(--spacing-sm) var(--spacing-md);
+        min-height: auto;
+        margin-top: 5vh;
+        margin-bottom: 20vh;
     }
     
-    .welcome-card {
-        max-width: 100%;
+    .welcome-header {
+        margin-bottom: var(--spacing-md);
+        padding-bottom: var(--spacing-sm);
+        margin-top: 0;
+        padding-top: 0;
     }
     
-    .today-classes-grid {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-xs);
+    .welcome-name {
+        font-size: 32px;
+        letter-spacing: -0.8px;
+        margin-bottom: 4px;
     }
     
-    .today-class-card {
-        padding: var(--spacing-xs) var(--spacing-sm);
+    .welcome-greeting {
+        font-size: 14px;
     }
     
-    .today-class-subject {
-        font-size: 13px;
+    .today-classes-section {
+        margin-bottom: var(--spacing-md);
     }
     
-    .today-class-time {
-        font-size: 11px;
+    .today-classes-title {
+        font-size: 18px;
+        margin-bottom: var(--spacing-sm);
     }
     
-    .today-class-location,
-    .today-class-professor {
-        font-size: 10px;
+    .today-classes-list-desktop {
+        display: none;
+    }
+    
+    .today-classes-list-mobile {
+        display: flex;
+    }
+    
+    .today-class-item-mobile {
+        padding: var(--spacing-xs) var(--spacing-md);
+        gap: var(--spacing-sm);
+        min-height: 44px;
+    }
+    
+    .class-item-number {
+        width: 24px;
+        height: 24px;
+        font-size: 12px;
+    }
+    
+    .class-item-subject {
+        font-size: 15px;
+    }
+    
+    .class-item-details {
+        font-size: 12px;
+        gap: 4px;
+    }
+    
+    .welcome-actions-desktop {
+        display: none;
+    }
+    
+    .welcome-actions-mobile {
+        display: none;
     }
 }
 
-/* 19:8 비율 이상의 가로 화면에서 오늘의 수업 카드 레이아웃 조정 */
-@media (min-aspect-ratio: 19/8) {
-    .today-classes-grid {
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+/* 데스크톱 최적화 */
+@media (min-width: 769px) {
+    .today-classes-list-desktop {
+        display: grid;
+    }
+    
+    .today-classes-list-mobile {
+        display: none;
+    }
+    
+    .welcome-container {
+        padding: var(--spacing-xl) var(--spacing-lg);
+    }
+    
+    .welcome-header {
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    .today-classes-section {
+        margin-bottom: var(--spacing-md);
+    }
+}
+
+/* 태블릿 크기에서도 2개씩 유지 */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .today-classes-list-desktop {
+        grid-template-columns: repeat(2, 1fr);
         gap: var(--spacing-sm);
     }
     
-    .today-class-card {
+    .today-class-card-desktop {
         padding: var(--spacing-sm) var(--spacing-md);
     }
     
-    .today-class-subject {
-        font-size: 13px;
+    .class-card-subject {
+        font-size: 14px;
     }
     
-    .today-class-time {
-        font-size: 11px;
-    }
-    
-    .welcome-actions {
-        flex-direction: row;
-        justify-content: center;
+    .class-card-details {
+        font-size: 12px;
     }
 }

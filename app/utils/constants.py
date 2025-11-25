@@ -55,6 +55,18 @@ WEEKDAY_MAP = {
     'FRI': 4, 'SAT': 5, 'SUN': 6
 }
 
+# Python weekday 숫자를 요일 문자열로 매핑 (역방향)
+WEEKDAY_TO_STR = {
+    0: 'MON', 1: 'TUE', 2: 'WED', 3: 'THU', 
+    4: 'FRI', 5: 'SAT', 6: 'SUN'
+}
+
+# 한글 요일을 영문 요일로 매핑
+KOREAN_TO_WEEKDAY = {
+    '월': 'MON', '화': 'TUE', '수': 'WED', '목': 'THU', '금': 'FRI',
+    '토': 'SAT', '일': 'SUN'
+}
+
 # 요일 이름 리스트
 WEEKDAY_NAMES = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
 

@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, session, redirect, url_for, request, flash
-from mysql.connector import connect, Error
-from config import DB_CONFIG
 from app.utils.auth import login_required
+from app.utils.db_helpers import get_db_connection, get_subject_name
+from app.utils.constants import WEEKDAY_MAP, get_semester_dates
+from mysql.connector import Error
 from datetime import datetime, timedelta
 
 professor_bp = Blueprint('professor', __name__, url_prefix='/professor')
@@ -21,7 +22,7 @@ def lecture_list():
     subjects = []
     
     try:
-        with connect(**DB_CONFIG) as connection:
+        with get_db_connection() as connection:
             with connection.cursor(dictionary=True) as cursor:
                 # 교수가 담당하는 과목 목록을 가져오는 쿼리
                 query = """
@@ -48,23 +49,21 @@ def list_subject_sessions(subject_id):
     """특정 과목의 학기 전체 수업 목록을 보여줌"""
 
     # --- 1. 기본 정보 설정 ---
-    SEMESTER_START = datetime(2025, 9, 1).date()
-    SEMESTER_END = datetime(2025, 12, 22).date()
+    # 학기 날짜 가져오기 (2025년 2학기)
+    SEMESTER_START, SEMESTER_END = get_semester_dates(2025, 2)
     today = datetime.now().date()
     subject_name = ""
     all_sessions = []
 
     try:
-        with connect(**DB_CONFIG) as connection:
+        with get_db_connection() as connection:
             with connection.cursor(dictionary=True) as cursor:
                 # --- 2. DB에서 필요한 정보 가져오기 ---
                 # 과목 이름 조회
-                cursor.execute("SELECT name FROM subject WHERE subject_id = %s", (subject_id,))
-                subject_result = cursor.fetchone()
-                if not subject_result:
+                subject_name = get_subject_name(cursor, subject_id)
+                if not subject_name:
                     flash("과목 정보를 찾을 수 없습니다.", "error")
                     return redirect(url_for('professor.lecture_list'))
-                subject_name = subject_result['name']
 
                 # 이 과목의 모든 정규 스케줄(요일/시간) 조회
                 schedules_query = "SELECT * FROM subject_schedule WHERE subject_id = %s"
@@ -84,12 +83,12 @@ def list_subject_sessions(subject_id):
                 db_sessions_map = {(s['class_date'], s['schedule_id']): s for s in db_sessions}
 
                 # --- 3. 학기 전체 수업 목록 생성 ---
-                day_map = {'MON': 0, 'TUE': 1, 'WED': 2, 'THU': 3, 'FRI': 4, 'SAT': 5, 'SUN': 6}
                 current_date = SEMESTER_START
                 while current_date <= SEMESTER_END:
                     for schedule in schedules:
                         # 오늘 날짜의 요일과 스케줄의 요일이 일치하는지 확인
-                        if current_date.weekday() == day_map.get(schedule['day_of_week'].upper()):
+                        schedule_weekday = WEEKDAY_MAP.get(schedule['day_of_week'].upper())
+                        if current_date.weekday() == schedule_weekday:
                             session_info = {}
                             session_key = (current_date, schedule['schedule_id'])
                             if session_key in db_sessions_map:
@@ -149,7 +148,7 @@ def cancel_session(schedule_id, class_date):
     subject_id = None
     class_date_obj = datetime.strptime(class_date, '%Y-%m-%d').date()
     try:
-        with connect(**DB_CONFIG) as connection:
+        with get_db_connection() as connection:
             with connection.cursor(dictionary=True) as cursor:
                 # 1. subject_id 조회 (리디렉션 및 학생 목록 조회를 위해)
                 cursor.execute("SELECT subject_id FROM subject_schedule WHERE schedule_id = %s", (schedule_id,))
@@ -206,7 +205,7 @@ def uncancel_session(session_id):
     """휴강 처리를 취소하는 라우트"""
     subject_id = None
     try:
-        with connect(**DB_CONFIG) as connection:
+        with get_db_connection() as connection:
             with connection.cursor(dictionary=True) as cursor:
                 cursor.execute("""
                     SELECT ss.subject_id
@@ -236,7 +235,7 @@ def manage_attendance_professor(session_id):
 
     if request.method == 'POST':
         try:
-            with connect(**DB_CONFIG) as connection:
+            with get_db_connection() as connection:
                 with connection.cursor() as cursor:
                     for key, new_status in request.form.items():
                         if key.startswith('status_'):
@@ -288,7 +287,7 @@ def manage_attendance_professor(session_id):
     subject_info = {}
 
     try:
-        with connect(**DB_CONFIG) as connection:
+        with get_db_connection() as connection:
             with connection.cursor(dictionary=True) as cursor:
                 cursor.execute(student_query, (session_id,))
                 students = cursor.fetchall()

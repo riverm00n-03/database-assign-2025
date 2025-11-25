@@ -75,6 +75,25 @@ def format_time_to_str(time_value):
     return str(time_value)
 
 
+def format_timedelta_to_str(timedelta_value):
+    """
+    timedelta 객체를 HH:MM:SS 형식의 문자열로 변환합니다.
+    
+    Args:
+        timedelta_value: timedelta 객체
+        
+    Returns:
+        "HH:MM:SS" 형식의 문자열
+    """
+    if isinstance(timedelta_value, timedelta):
+        total_seconds = int(timedelta_value.total_seconds())
+        hours = total_seconds // 3600
+        minutes = (total_seconds % 3600) // 60
+        seconds = total_seconds % 60
+        return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+    return str(timedelta_value)
+
+
 def get_student_id_by_number(cursor, student_number):
     """
     학번으로 학생 ID를 조회합니다.
@@ -90,6 +109,91 @@ def get_student_id_by_number(cursor, student_number):
     result = cursor.fetchone()
     # 결과가 있으면 student_id 반환, 없으면 None 반환
     return result['student_id'] if result else None
+
+
+def get_or_create_session(cursor, conn, schedule_id, class_date):
+    """
+    특정 날짜의 수업 세션을 조회하거나 없으면 생성합니다.
+    
+    Args:
+        cursor: 데이터베이스 커서
+        conn: 데이터베이스 연결
+        schedule_id: 스케줄 ID
+        class_date: 수업 날짜 (date 객체)
+        
+    Returns:
+        session_id: 수업 세션 ID
+    """
+    # 기존 세션 조회
+    cursor.execute(
+        "SELECT session_id FROM class_session WHERE schedule_id = %s AND class_date = %s",
+        (schedule_id, class_date)
+    )
+    session_result = cursor.fetchone()
+
+    # 세션이 존재하면 기존 ID 반환
+    if session_result:
+        return session_result['session_id']
+    # 세션이 없으면 새로 생성
+    else:
+        cursor.execute(
+            "INSERT INTO class_session (schedule_id, class_date) VALUES (%s, %s)",
+            (schedule_id, class_date)
+        )
+        conn.commit()
+        return cursor.lastrowid
+
+
+def get_subject_info(cursor, subject_id):
+    """
+    과목 정보를 조회합니다.
+    
+    Args:
+        cursor: 데이터베이스 커서
+        subject_id: 과목 ID
+        
+    Returns:
+        dict: 과목 정보 딕셔너리 또는 None
+    """
+    cursor.execute("SELECT name, subject_year, subject_semester FROM subject WHERE subject_id = %s", (subject_id,))
+    return cursor.fetchone()
+
+
+def get_subject_name(cursor, subject_id):
+    """
+    과목 이름을 조회합니다.
+    
+    Args:
+        cursor: 데이터베이스 커서
+        subject_id: 과목 ID
+        
+    Returns:
+        str: 과목 이름 또는 None
+    """
+    cursor.execute("SELECT name FROM subject WHERE subject_id = %s", (subject_id,))
+    result = cursor.fetchone()
+    return result['name'] if result else None
+
+
+def get_student_enrolled_subjects(cursor, student_id):
+    """
+    학생이 수강하는 모든 과목을 조회합니다.
+    
+    Args:
+        cursor: 데이터베이스 커서
+        student_id: 학생 ID
+        
+    Returns:
+        list: 수강 과목 리스트
+    """
+    cursor.execute("""
+        SELECT s.subject_id, s.name AS subject_name, p.name AS professor_name
+        FROM enrollment e
+        JOIN subject s ON e.subject_id = s.subject_id
+        LEFT JOIN professor p ON s.professor_id = p.professor_id
+        WHERE e.student_id = %s
+    """, (student_id,))
+    return cursor.fetchall()
 
 
 # ============================================================================
@@ -114,6 +218,26 @@ def get_student_id_by_number(cursor, student_number):
 #
 # get_student_id_by_number(cursor, student_number)
 #   - 필요성: 학번으로 학생 ID 조회 로직을 재사용 가능한 함수로 분리함. 코드 중복 방지.
-#   - 사용처: app/routes/attendance_routes.py의 show_attendance()에서 
+#   - 사용처: app/routes/attendance_routes.py, app/routes/main_routes.py에서 
 #            학번으로 학생 ID를 조회할 때 사용됨.
+#
+# format_timedelta_to_str(timedelta_value)
+#   - 필요성: timedelta 객체를 "HH:MM:SS" 형식 문자열로 변환함. 중복된 변환 로직 제거.
+#   - 사용처: app/routes/database_routes.py에서 timedelta 값을 문자열로 변환할 때 사용됨.
+#
+# get_or_create_session(cursor, conn, schedule_id, class_date)
+#   - 필요성: 특정 날짜의 수업 세션을 조회하거나 없으면 생성함. 코드 중복 방지.
+#   - 사용처: app/routes/attendance_routes.py에서 수업 세션 조회/생성 시 사용됨.
+#
+# get_subject_info(cursor, subject_id)
+#   - 필요성: 과목 정보(이름, 연도, 학기)를 조회함. 코드 중복 방지.
+#   - 사용처: 과목 정보가 필요한 모든 곳에서 사용됨.
+#
+# get_subject_name(cursor, subject_id)
+#   - 필요성: 과목 이름만 조회함. 간단한 조회 시 사용.
+#   - 사용처: 과목 이름만 필요한 곳에서 사용됨.
+#
+# get_student_enrolled_subjects(cursor, student_id)
+#   - 필요성: 학생이 수강하는 모든 과목을 조회함. 코드 중복 방지.
+#   - 사용처: 학생 수강 과목 목록이 필요한 곳에서 사용됨.
 #

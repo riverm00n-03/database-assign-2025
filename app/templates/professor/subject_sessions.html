@@ -5,53 +5,31 @@
 {% block styles %}
     <link rel="stylesheet" href="{{ url_for('static', filename='time_table.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='professor.css') }}">
-    <style>
-        .session-list-container {
-            max-height: calc(100vh - 280px);
-            overflow-y: auto;
-            overflow-x: auto;
-            position: relative;
-        }
-        
-        .session-list-container::-webkit-scrollbar {
-            width: 10px;
-            height: 10px;
-        }
-        
-        .session-list-container::-webkit-scrollbar-track {
-            background: var(--bg-tertiary, #f8fafc);
-            border-radius: 5px;
-        }
-        
-        .session-list-container::-webkit-scrollbar-thumb {
-            background: var(--border-dark, #cbd5e1);
-            border-radius: 5px;
-        }
-        
-        .session-list-container::-webkit-scrollbar-thumb:hover {
-            background: var(--text-muted, #64748b);
-        }
-        
-        @media (max-width: 768px) {
-            .session-list-container {
-                max-height: calc(100vh - 240px);
-            }
-        }
-    </style>
 {% endblock %}
 
 {% block header %}
     <header class="full-title-header">
-        <div class="title-wrap" style="flex-wrap: wrap; gap: var(--spacing-sm);">
-            <h1 class="page-title">{{ subject_name }} - 수업 목록</h1>
-            <a href="{{ url_for('professor.lecture_list') }}" class="btn btn-secondary btn-sm" style="white-space: nowrap;">← 담당 과목 목록으로</a>
+        <div class="title-wrap" style="flex-wrap: wrap; gap: var(--spacing-md); align-items: center;">
+            <div style="flex: 1; min-width: 0;">
+                <h1 class="page-title" style="font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: var(--spacing-xs);">
+                    {{ subject_name }}
+                </h1>
+                <span style="font-size: 15px; color: var(--text-secondary); font-weight: 500;">수업 목록</span>
+            </div>
+            <a href="{{ url_for('professor.lecture_list') }}" class="btn btn-secondary btn-sm" style="white-space: nowrap; display: inline-flex; align-items: center; gap: var(--spacing-xs);">
+                <svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                담당 과목 목록으로
+            </a>
         </div>
     </header>
 {% endblock %}
 
 {% block content %}
-        <div class="session-list-container card fade-in" style="max-width: 1200px; margin: 0 auto; padding: 0;">
-            <table class="session-table table">
+        <div class="session-list-container fade-in">
+            <div class="session-table-wrapper">
+            <table class="session-table">
                 <thead>
                     <tr>
                         <th>날짜</th>
@@ -102,6 +80,7 @@
                     {% endfor %}
                 </tbody>
             </table>
+            </div>
         </div>
 {% endblock %}
 

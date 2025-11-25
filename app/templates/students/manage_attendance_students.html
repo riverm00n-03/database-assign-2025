@@ -17,13 +17,14 @@
 
 {% block content %}
 <div class="attendance-container">
-    <div class="hint alert alert-info">
-        <span>💡</span>
-        <span>과목별 출석 현황을 확인하고, 상세 내역을 보려면 카드를 클릭하세요.</span>
-    </div>
     <div class="attendance-calculation-hint">
         <span class="calculation-link" id="show-calculation-modal">
-            📊 출석률 계산 방식
+            <svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+            출석률 계산 방식
         </span>
     </div>
 
@@ -31,7 +32,14 @@
     <div id="calculation-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">📊 출석률 계산 방식</h2>
+                <h2 class="modal-title">
+                    <svg class="icon-inline" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                    출석률 계산 방식
+                </h2>
                 <button class="modal-close" id="close-calculation-modal">&times;</button>
             </div>
             <div class="modal-body">
@@ -112,8 +120,12 @@
             {% endfor %}
         </div>
     {% else %}
-        <div class="empty-state card">
-            <p class="empty-message">수강 중인 과목이 없습니다.</p>
+        <div class="empty-state-attendance">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.3; margin-bottom: var(--spacing-md);">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+            <p class="empty-message-attendance">수강 중인 과목이 없습니다.</p>
         </div>
     {% endif %}
 </div>

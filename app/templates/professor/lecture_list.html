@@ -9,7 +9,10 @@
 
 {% block header %}
     <header class="full-title-header">
-        <h1 class="page-title">담당 과목</h1>
+        <div class="title-wrap">
+            <h1 class="page-title" style="font-size: 24px; font-weight: 700; letter-spacing: -0.02em;">담당 과목</h1>
+            <p style="margin: var(--spacing-xs) 0 0 0; font-size: 15px; color: var(--text-secondary); font-weight: 500;">담당하고 계신 과목을 선택하여 출석을 관리하세요</p>
+        </div>
     </header>
 {% endblock %}
 
@@ -20,16 +23,19 @@
         <div class="class-list fade-in">
             {% if subjects %}
                 {% for subject in subjects %}
-                <div class="class-card card" style="transition: transform var(--transition-base);">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-lg); border-bottom: 1px solid var(--border-light);">
-                        <h3 class="card-title" style="margin: 0; font-size: 20px;">{{ subject.name }}</h3>
+                <a href="{{ url_for('professor.list_subject_sessions', subject_id=subject.subject_id) }}" class="class-card" style="text-decoration: none; color: inherit;">
+                    <div class="card-header">
+                        <h3 class="card-title">{{ subject.name }}</h3>
                     </div>
-                    <div class="card-actions" style="padding: var(--spacing-lg); text-align: right; background: var(--bg-tertiary);">
-                        <a href="{{ url_for('professor.list_subject_sessions', subject_id=subject.subject_id) }}" class="btn btn-primary">
-                            출석 관리 →
-                        </a>
+                    <div class="card-actions">
+                        <span class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: var(--spacing-xs); pointer-events: none;">
+                            <span>출석 관리</span>
+                            <svg class="icon-inline" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </span>
                     </div>
-                </div>
+                </a>
                 {% endfor %}
             {% else %}
                 <div class="card" style="text-align: center; padding: var(--spacing-xl);">

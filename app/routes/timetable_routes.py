@@ -1,8 +1,10 @@
 from flask import Blueprint, render_template, session
 from app.utils.auth import login_required
-from mysql.connector import connect, Error
-from config import DB_CONFIG
-from datetime import timedelta, time, datetime, date
+from app.utils.db_helpers import get_db_connection, to_time
+from app.utils.session_helpers import get_session_info
+from app.utils.constants import WEEKDAY_TO_STR, KOREAN_TO_WEEKDAY, WEEKDAY_NAMES
+from mysql.connector import Error
+from datetime import time, datetime, date
 
 timetable_bp = Blueprint('timetable', __name__, url_prefix='/timetable')
 
@@ -14,26 +16,15 @@ def timetable():
     사용자의 시간표 페이지를 표시합니다.
     학생인 경우 수강 과목, 교수인 경우 담당 과목의 시간표를 보여줍니다.
     """
-    username = session.get('username', '사용자')
-    role = session.get('role', 'student')
-    user_id = session.get('user_id')
+    session_info = get_session_info()
+    username = session_info['username']
+    role = session_info['role']
+    user_id = session_info['user_id']
 
     error = None
 
     try:
-        # TIME 컬럼이 timedelta로 읽히는 경우를 위한 헬퍼 함수
-        def to_time_obj(value):
-            """
-            timedelta 객체를 time 객체로 변환합니다.
-            """
-            if isinstance(value, timedelta):
-                total_seconds = int(value.total_seconds())
-                hours = total_seconds // 3600
-                minutes = (total_seconds % 3600) // 60
-                return time(hours, minutes)
-            return value
-
-        with connect(**DB_CONFIG) as connection:
+        with get_db_connection() as connection:
             with connection.cursor(dictionary=True) as cursor:
                 query = ""
                 params = (user_id,)
@@ -71,17 +62,14 @@ def timetable():
                 slots = [(h, m) for h in range(9, 22) for m in (0, 30)]
                 # 시간표 그리드 초기화
                 timetable_grid = {
-                    slot: {day: None for day in ['MON', 'TUE', 'WED', 'THU', 'FRI']}
+                    slot: {day: None for day in WEEKDAY_NAMES[:5]}  # 월~금만 사용
                     for slot in slots
                 }
 
-                # 한글 요일을 영문 요일로 매핑
-                day_map = {'월': 'MON', '화': 'TUE', '수': 'WED', '목': 'THU', '금': 'FRI'}
-
                 # 각 스케줄을 시간표 그리드에 배치
                 for item in schedules:
-                    # 요일 형식 통일
-                    item['day_of_week'] = day_map.get(item['day_of_week'], item['day_of_week'])
+                    # 요일 형식 통일 (한글 -> 영문)
+                    item['day_of_week'] = KOREAN_TO_WEEKDAY.get(item['day_of_week'], item['day_of_week'])
 
                     # 시간을 초 단위로 변환
                     start_total_seconds = item['start_time'].total_seconds()
@@ -126,8 +114,7 @@ def timetable():
                 current_weekday = now.weekday()  # 0=월요일, 1=화요일, ...
                 
                 # 요일 매핑 (Python weekday -> DB 요일)
-                weekday_map = {0: 'MON', 1: 'TUE', 2: 'WED', 3: 'THU', 4: 'FRI', 5: 'SAT', 6: 'SUN'}
-                today_day = weekday_map.get(current_weekday)
+                today_day = WEEKDAY_TO_STR.get(current_weekday)
                 
                 if today_day:
                     # 오늘 날짜에 실제로 진행되는 수업만 조회 (class_session 테이블 조인)
@@ -164,28 +151,14 @@ def timetable():
                         cursor.execute(today_query, (user_id, today))
                         today_schedules = cursor.fetchall()
                     
-                    # 요일 형식 통일
+                    # 요일 형식 통일 (한글 -> 영문)
                     for schedule in today_schedules:
-                        schedule['day_of_week'] = day_map.get(schedule['day_of_week'], schedule['day_of_week'])
-                    
-                    # 시간 문자열을 time 객체로 변환하는 헬퍼
-                    def parse_time(time_val):
-                        if isinstance(time_val, timedelta):
-                            total_seconds = int(time_val.total_seconds())
-                            hours = total_seconds // 3600
-                            minutes = (total_seconds % 3600) // 60
-                            return time(hours, minutes)
-                        elif isinstance(time_val, time):
-                            return time_val
-                        elif isinstance(time_val, str):
-                            parts = time_val.split(':')
-                            return time(int(parts[0]), int(parts[1]))
-                        return time_val
+                        schedule['day_of_week'] = KOREAN_TO_WEEKDAY.get(schedule['day_of_week'], schedule['day_of_week'])
                     
                     # 오늘의 모든 수업을 시간 순으로 정렬하여 리스트 생성
                     for schedule in today_schedules:
-                        start_time = parse_time(schedule['start_time'])
-                        end_time = parse_time(schedule['end_time'])
+                        start_time = to_time(schedule['start_time'])
+                        end_time = to_time(schedule['end_time'])
                         
                         # 남은 시간 계산
                         start_datetime = datetime.combine(today, start_time)
@@ -227,14 +200,14 @@ def timetable():
                     future_schedules = []
                     
                     for schedule in today_schedules:
-                        start_time = parse_time(schedule['start_time'])
-                        end_time = parse_time(schedule['end_time'])
+                        start_time = to_time(schedule['start_time'])
+                        end_time = to_time(schedule['end_time'])
                         
                         # 현재 수업이 있는 경우: 현재 수업과 다른 수업이고, 현재 수업 종료 시간 이후에 시작하는 수업
                         # 현재 수업이 없는 경우: 현재 시간 이후에 시작하는 수업
                         if current_class:
-                            current_start = parse_time(current_class['start_time'])
-                            current_end = parse_time(current_class['end_time'])
+                            current_start = to_time(current_class['start_time'])
+                            current_end = to_time(current_class['end_time'])
                             # 현재 수업과 다른 수업이고, 현재 수업 종료 시간 이후에 시작하는 수업
                             if start_time != current_start or end_time != current_end:
                                 if start_time > current_end:
@@ -247,9 +220,9 @@ def timetable():
                     if future_schedules:
                         # 가장 가까운 수업 선택
                         next_schedule = min(future_schedules, 
-                                          key=lambda s: parse_time(s['start_time']))
-                        start_time = parse_time(next_schedule['start_time'])
-                        end_time = parse_time(next_schedule['end_time'])
+                                          key=lambda s: to_time(s['start_time']))
+                        start_time = to_time(next_schedule['start_time'])
+                        end_time = to_time(next_schedule['end_time'])
                         
                         # 남은 시간 계산
                         start_datetime = datetime.combine(today, start_time)
@@ -279,7 +252,7 @@ def timetable():
         error = f"데이터베이스 오류: {e}"
         slots = [(h, m) for h in range(9, 22) for m in (0, 30)]
         timetable_grid = {
-            slot: {day: None for day in ['MON', 'TUE', 'WED', 'THU', 'FRI']}
+            slot: {day: None for day in WEEKDAY_NAMES[:5]}  # 월~금만 사용
             for slot in slots
         }
         current_class = None
@@ -324,7 +297,7 @@ def timetable():
         current_page='시간표',
         timetable=timetable_grid,
         error=error,
-        days=['MON', 'TUE', 'WED', 'THU', 'FRI'],
+        days=WEEKDAY_NAMES[:5],  # 월~금만 사용
         current_class=current_class,
         next_class=next_class,
         today_classes=today_classes if 'today_classes' in locals() else [],

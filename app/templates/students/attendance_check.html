@@ -24,7 +24,11 @@
 {% block content %}
 <div class="attendance-container">
     <div class="hint alert alert-info">
-        <span>ℹ️</span>
+        <svg class="icon-inline" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
         <span>수업 시작 <b>10분 전 ~ 10분 후</b>에만 출석이 가능합니다.</span>
     </div>
 
@@ -60,11 +64,16 @@
                         <div class="card-center">
                             <div class="time-info">
                                 <div class="time-badge">
-                                    <span class="time-icon">🕐</span>
+                                    <svg class="time-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <polyline points="12 6 12 12 16 14"></polyline>
+                                    </svg>
                                     <span class="time-text">{{ cls.start_time_str }} ~ {{ cls.end_time_str }}</span>
                                 </div>
                                 <div class="window-range">
-                                    <span class="window-icon">✓</span>
+                                    <svg class="window-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
                                     <span>출석 가능: {{ cls.window_from_str }} ~ {{ cls.window_to_str }}</span>
                                 </div>
                             </div>
@@ -92,8 +101,14 @@
                 </div>
             {% endfor %}
         {% else %}
-            <div class="empty-state">
-                <p class="empty-message">오늘 예정된 수업이 없습니다.</p>
+            <div class="empty-state-attendance">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.3; margin-bottom: var(--spacing-md);">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <p class="empty-message-attendance">오늘 예정된 수업이 없습니다.</p>
             </div>
         {% endif %}
     </div>

@@ -1,49 +1,58 @@
 /* --- lecture_list.html --- */
 .class-list {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-md);
     width: 100%;
-    max-width: 900px; /* 카드의 최대 너비 설정 */
-    padding: 0 20px;
+    padding: 0;
     box-sizing: border-box;
 }
 
+@media (max-width: 768px) {
+    .class-list {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
+}
+
 .class-card {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--border-color);
     overflow: hidden;
-    transition: box-shadow 0.3s ease;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
 }
 
 .class-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: var(--border-dark);
 }
 
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 24px;
-    border-bottom: 1px solid #e5e7eb;
+.class-card .card-header {
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-light);
 }
 
-.card-header h3 {
+.class-card .card-header h3 {
     margin: 0;
-    font-size: 19px;
+    font-size: 18px;
     font-weight: 600;
-    color: #111827;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+    line-height: 1.4;
 }
 
 .location-info span {
     font-size: 14px;
-    color: #4b5563;
+    color: var(--text-secondary);
 }
 
-.card-actions {
-    padding: 20px 24px;
-    background-color: #f9fafb;
+.class-card .card-actions {
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--bg-tertiary);
     text-align: right;
 }
 
@@ -133,68 +142,147 @@
     background-color: #4b5563;
 }
 
+/* ============================
+   수업 목록 컨테이너
+============================ */
 .session-list-container {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     width: 100%;
-    max-width: 1200px;
-    padding: 0;
-    overflow-x: auto;
-    overflow-y: auto;
-    max-height: calc(100vh - 200px);
+    height: calc(100vh - 180px);
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(255, 255, 255, 0.98) 100%);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
     position: relative;
 }
 
+.session-list-container .session-table-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
 /* 스크롤바 스타일 */
-.session-list-container::-webkit-scrollbar {
+.session-list-container .session-table-wrapper::-webkit-scrollbar {
     width: 10px;
     height: 10px;
 }
 
-.session-list-container::-webkit-scrollbar-track {
-    background: var(--bg-tertiary, #f8fafc);
+.session-list-container .session-table-wrapper::-webkit-scrollbar-track {
+    background: var(--bg-tertiary);
     border-radius: 5px;
 }
 
-.session-list-container::-webkit-scrollbar-thumb {
-    background: var(--border-dark, #cbd5e1);
+.session-list-container .session-table-wrapper::-webkit-scrollbar-thumb {
+    background: var(--border-dark);
     border-radius: 5px;
 }
 
-.session-list-container::-webkit-scrollbar-thumb:hover {
-    background: var(--text-muted, #64748b);
+.session-list-container .session-table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
 }
 
-.session-table {
+/* ============================
+   수업 목록 테이블 - 완전히 새로 작성
+============================ */
+.session-list-container .session-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 15px;
     min-width: 560px;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
 }
 
-.session-table th, .session-table td {
-    padding: 16px 24px;
-    text-align: left;
-    border-bottom: 1px solid #e5e7eb;
+/* 테이블 헤더 - common.css 스타일 완전히 덮어쓰기 */
+.session-list-container .session-table thead {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-hover) 100%);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.session-list-container .session-table thead::after {
+    display: none !important;
+}
+
+.session-list-container .session-table thead th {
+    padding: 20px 24px !important;
+    text-align: left !important;
+    border: none !important;
+    border-bottom: 1px solid var(--border-light) !important;
     border-right: none !important;
     border-left: none !important;
+    vertical-align: middle !important;
+    font-weight: 600 !important;
+    font-size: 15px !important;
+    color: var(--text-primary) !important;
+    letter-spacing: -0.01em !important;
+    position: static !important;
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-hover) 100%) !important;
 }
 
-.session-table th:first-child,
-.session-table td:first-child {
+.session-list-container .session-table thead th:first-child {
     padding-left: 24px !important;
 }
 
-.session-table th:last-child,
-.session-table td:last-child {
+.session-list-container .session-table thead th:last-child {
     padding-right: 24px !important;
 }
 
-.session-table thead th {
-    background-color: #f9fafb;
-    color: #4b5563;
-    font-weight: 600;
+.session-list-container .session-table thead th[style*="text-align: center"] {
+    text-align: center !important;
+}
+
+/* 테이블 본문 - common.css 스타일 완전히 덮어쓰기 */
+.session-list-container .session-table tbody {
+    background: transparent;
+}
+
+.session-list-container .session-table tbody tr {
+    position: static !important;
+    border: none !important;
+    background: transparent;
+}
+
+.session-list-container .session-table tbody tr::before {
+    display: none !important;
+}
+
+.session-list-container .session-table tbody tr:hover {
+    background: linear-gradient(90deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.02) 100%);
+}
+
+.session-list-container .session-table tbody td {
+    padding: 20px 24px !important;
+    text-align: left !important;
+    border: none !important;
+    border-bottom: 1px solid var(--border-light) !important;
+    border-right: none !important;
+    border-left: none !important;
+    vertical-align: middle !important;
+    font-size: 15px !important;
+    color: var(--text-primary) !important;
+    letter-spacing: -0.01em !important;
+    position: static !important;
+    background: transparent !important;
+}
+
+.session-list-container .session-table tbody td:first-child {
+    padding-left: 24px !important;
+}
+
+.session-list-container .session-table tbody td:last-child {
+    padding-right: 24px !important;
+}
+
+.session-list-container .session-table tbody td.session-actions {
+    text-align: center !important;
 }
 
 .session-table .no-data {
@@ -286,39 +374,48 @@
 }
 
 @media screen and (max-width: 768px) {
-    .class-list {
-        padding: 0 12px;
+    .session-list-container {
+        height: calc(100vh - 160px);
+        min-height: 500px;
     }
 
-    .card-header,
-    .card-actions {
-        padding: 16px 18px;
-    }
-
-    .session-table {
+    .session-list-container .session-table {
         min-width: 480px;
     }
 
-    .session-table th,
-    .session-table td {
-        padding: 12px 16px;
-        font-size: 14px;
+    .session-list-container .session-table thead th,
+    .session-list-container .session-table tbody td {
+        padding: 16px 20px !important;
+        font-size: 14px !important;
     }
 
     .session-actions {
         flex-wrap: wrap;
     }
+
+    .class-card .card-header {
+        padding: var(--spacing-md);
+    }
+
+    .class-card .card-actions {
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
 }
 
 @media screen and (max-width: 480px) {
-    .session-table {
+    .session-list-container {
+        height: calc(100vh - 140px);
+        min-height: 400px;
+    }
+
+    .session-list-container .session-table {
         min-width: 400px;
     }
 
-    .session-table th,
-    .session-table td {
-        padding: 10px 12px;
-        font-size: 13px;
+    .session-list-container .session-table thead th,
+    .session-list-container .session-table tbody td {
+        padding: 12px 16px !important;
+        font-size: 13px !important;
     }
 
     .btn-view-att,

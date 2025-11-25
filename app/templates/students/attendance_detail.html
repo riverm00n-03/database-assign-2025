@@ -48,13 +48,29 @@
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="5" class="empty">해당 과목의 출석 기록이 없습니다.</td>
+                        <td colspan="5">
+                            <div class="empty-state-attendance">
+                                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.3; margin-bottom: var(--spacing-md);">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                                <p class="empty-message-attendance">해당 과목의 출석 기록이 없습니다.</p>
+                            </div>
+                        </td>
                     </tr>
                 {% endif %}
                 </tbody>
             </table>
-            <div class="back-button-container" style="margin-top: var(--spacing-lg); text-align: center;">
-                <button class="btn btn-secondary" onclick="history.back()">← 뒤로 가기</button>
+            <div class="back-button-container">
+                <button class="btn btn-secondary" onclick="history.back()">
+                    <svg class="icon-inline" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                    뒤로 가기
+                </button>
             </div>
         </div>
 {% endblock %}

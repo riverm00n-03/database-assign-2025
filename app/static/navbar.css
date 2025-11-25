@@ -43,6 +43,20 @@
     letter-spacing: -0.02em;
 }
 
+.navbar-brand-emoji {
+    display: inline-block;
+    font-size: 22px;
+    line-height: 1;
+    vertical-align: middle;
+    transition: all var(--transition-base);
+    /* 필터 제거 - 이모지가 정상적으로 보이도록 */
+}
+
+/* 호버 시 이모지도 함께 변화하도록 */
+.navbar-brand:hover .navbar-brand-emoji {
+    transform: scale(1.05);
+}
+
 .navbar-brand:hover {
     background: linear-gradient(135deg, var(--primary-color) 0%, #8b5cf6 100%);
     -webkit-background-clip: text;

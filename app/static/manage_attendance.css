@@ -47,78 +47,119 @@
 
 .student-list-container {
     width: 100%;
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    overflow-x: auto;
-    overflow-y: auto;
-    min-width: 0;
-    max-height: calc(100vh - 250px);
+    height: calc(100vh - 180px);
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(255, 255, 255, 0.98) 100%);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
     position: relative;
 }
 
 /* 스크롤바 스타일 */
-.student-list-container::-webkit-scrollbar {
+.student-list-container .student-table::-webkit-scrollbar {
     width: 10px;
     height: 10px;
 }
 
-.student-list-container::-webkit-scrollbar-track {
+.student-list-container .student-table::-webkit-scrollbar-track {
     background: var(--bg-tertiary, #f8fafc);
     border-radius: 5px;
 }
 
-.student-list-container::-webkit-scrollbar-thumb {
+.student-list-container .student-table::-webkit-scrollbar-thumb {
     background: var(--border-dark, #cbd5e1);
     border-radius: 5px;
 }
 
-.student-list-container::-webkit-scrollbar-thumb:hover {
+.student-list-container .student-table::-webkit-scrollbar-thumb:hover {
     background: var(--text-muted, #64748b);
+}
+
+.student-list-container form {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.student-list-container .student-table {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+    display: block;
 }
 
 .student-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     min-width: 560px;
+    table-layout: fixed;
+    display: table;
 }
 
-.student-table.table th,
-.student-table.table td {
-    text-align: left;
-    border-bottom: 1px solid #f1f5f9;
-    border-right: none !important;
-    border-left: none !important;
-    vertical-align: middle;
+/* 테이블의 모든 border와 padding을 완전히 재설정 */
+.student-table.table {
+    border: none !important;
 }
 
-/* 헤더와 본문의 패딩을 정확히 일치시킴 */
+.student-table.table thead {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-hover) 100%);
+}
+
+.student-table.table thead::after {
+    display: none !important;
+}
+
+/* 헤더와 본문의 패딩을 완전히 동일하게 설정 */
 .student-table.table th {
-    padding: 16px !important;
+    padding: 20px 24px !important;
+    text-align: left;
+    border: none !important;
+    border-bottom: 1px solid var(--border-light) !important;
+    vertical-align: middle;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+    position: static !important;
 }
 
 .student-table.table td {
-    padding: 16px !important;
+    padding: 20px 24px !important;
+    text-align: left;
+    border: none !important;
+    border-bottom: 1px solid var(--border-light) !important;
+    vertical-align: middle;
+    font-size: 15px;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+    position: static !important;
 }
 
-.student-table.table th:first-child {
-    padding-left: 16px !important;
-}
-
+/* 첫 번째와 마지막 컬럼의 패딩 조정 */
+.student-table.table th:first-child,
 .student-table.table td:first-child {
-    padding-left: 16px !important;
+    padding-left: 24px !important;
 }
 
-.student-table.table th:last-child {
-    padding-right: 16px !important;
-}
-
+.student-table.table th:last-child,
 .student-table.table td:last-child {
-    padding-right: 16px !important;
+    padding-right: 24px !important;
 }
 
 .student-table.table tbody tr {
     position: static !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.student-table.table tbody tr:hover {
+    background: linear-gradient(90deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.02) 100%);
 }
 
 .student-table.table tbody tr::before {
@@ -126,15 +167,17 @@
 }
 
 .student-table th {
-    background-color: #f8fafc;
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-hover) 100%);
     font-size: 14px;
     font-weight: 600;
-    color: #475569;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
 }
 
 .student-table td {
     font-size: 15px;
-    color: #1e293b;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
 }
 
 .student-table .col-name { width: 20%; }
@@ -145,7 +188,25 @@
 .no-student {
     text-align: center;
     padding: 40px;
-    color: #64748b;
+    color: var(--text-muted);
+}
+
+/* 출석 관리 페이지 빈 상태 (attendance.css의 스타일 재사용) */
+.student-table .empty-state-attendance {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-2xl) var(--spacing-lg);
+    text-align: center;
+}
+
+.student-table .empty-message-attendance {
+    color: var(--text-secondary);
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0;
+    letter-spacing: -0.01em;
 }
 
 /* ============================
@@ -162,28 +223,72 @@
 }
 
 .status-selector label {
-    padding: 8px 16px;
-    border: 1px solid #cbd5e1;
-    border-radius: 20px;
+    padding: 8px 18px;
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-full);
     cursor: pointer;
     font-size: 13px;
-    font-weight: 500;
-    transition: all 0.2s ease;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    letter-spacing: -0.01em;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: hidden;
 }
 
-/* 선택됐을 때 스타일 */
-.status-selector input[value="PRESENT"]:checked + label { background-color: #dbeafe; border-color: #93c5fd; color: #1e40af; }
-.status-selector input[value="LATE"]:checked + label { background-color: #fef3c7; border-color: #fde68a; color: #92400e; }
-.status-selector input[value="ABSENT"]:checked + label { background-color: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+.status-selector label::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+.status-selector label:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.status-selector label:hover::before {
+    left: 100%;
+}
+
+/* 선택됐을 때 스타일 - 감성적인 그라데이션 */
+.status-selector input[value="PRESENT"]:checked + label {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.08) 100%);
+    border-color: rgba(16, 185, 129, 0.4);
+    color: #059669;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.status-selector input[value="LATE"]:checked + label {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.08) 100%);
+    border-color: rgba(245, 158, 11, 0.4);
+    color: #d97706;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+}
+
+.status-selector input[value="ABSENT"]:checked + label {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.08) 100%);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #dc2626;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
 
 /* ============================
    저장 버튼
 ============================ */
 .form-actions {
-    padding: 20px;
+    padding: var(--spacing-lg) var(--spacing-xl);
     text-align: right;
-    background-color: #f8fafc;
-    border-top: 1px solid #e2e8f0;
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-hover) 100%);
+    border-top: 1px solid var(--border-light);
+    flex-shrink: 0;
 }
 
 .btn-save {
@@ -203,15 +308,9 @@
 }
 
 @media screen and (max-width: 768px) {
-    .manage-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-        padding: 20px;
-    }
-
-    .main-content {
-        padding: 16px 20px;
+    .student-list-container {
+        height: calc(100vh - 160px);
+        min-height: 500px;
     }
 
     .student-table {
@@ -220,7 +319,7 @@
 
     .student-table th,
     .student-table td {
-        padding: 12px;
+        padding: 16px 20px !important;
         font-size: 14px;
     }
 
@@ -228,15 +327,16 @@
         flex-wrap: wrap;
         gap: 6px;
     }
+
+    .form-actions {
+        padding: var(--spacing-md) var(--spacing-lg);
+    }
 }
 
 @media screen and (max-width: 480px) {
-    .manage-header {
-        padding: 16px;
-    }
-
-    .main-content {
-        padding: 14px 16px;
+    .student-list-container {
+        height: calc(100vh - 140px);
+        min-height: 400px;
     }
 
     .student-table {
@@ -245,7 +345,7 @@
 
     .student-table th,
     .student-table td {
-        padding: 10px;
+        padding: 12px 16px !important;
         font-size: 13px;
     }
 
@@ -254,7 +354,11 @@
         font-size: 12px;
     }
 
-    .btn-save {
+    .form-actions {
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+
+    .form-actions .btn {
         width: 100%;
     }
 }

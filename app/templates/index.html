@@ -3,43 +3,75 @@
 {% block title %}환영합니다 - WCheck{% endblock %}
 
 {% block content %}
-<div class="welcome-container fade-in">
-    <div class="welcome-card card">
-        <div class="card-header">
-            <h1 class="card-title">환영합니다, {{ username }}님! 👋</h1>
-        </div>
-        <div class="card-body">
-            <p class="welcome-message">성공적으로 로그인되었습니다.</p>
-            
-            {% if today_classes %}
-            <div class="today-classes-section">
-                <h2 class="today-classes-title">오늘의 수업</h2>
-                <div class="today-classes-grid">
-                    {% for class in today_classes %}
-                    <div class="today-class-card">
-                        <div class="today-class-subject">{{ class.subject_name }}</div>
-                        <div class="today-class-info">
-                            <span class="today-class-time">{{ class.start_time_str }} ~ {{ class.end_time_str }}</span>
-                            <span class="today-class-location">{{ class.location }}</span>
-                        </div>
-                        <div class="today-class-professor">{{ class.professor_name }}</div>
+<div class="welcome-container">
+    <!-- 공통 헤더 (데스크톱/모바일 공통) -->
+    <div class="welcome-header">
+        <h1 class="welcome-name">{{ username }}님</h1>
+        <p class="welcome-greeting">환영합니다</p>
+    </div>
+    
+    {% if today_classes %}
+    <div class="today-classes-section">
+        <h2 class="today-classes-title">오늘의 수업</h2>
+        
+        <!-- 데스크톱: 가로로 긴 카드 (한 줄에 2개씩) -->
+        <div class="today-classes-list-desktop">
+            {% for class in today_classes %}
+            <div class="today-class-card-desktop">
+                <div class="class-card-number-desktop">{{ loop.index }}</div>
+                <div class="class-card-content">
+                    <div class="class-card-subject">{{ class.subject_name }}</div>
+                    <div class="class-card-details">
+                        <span class="class-card-time">{{ class.start_time_str }} ~ {{ class.end_time_str }}</span>
+                        <span class="class-card-separator">·</span>
+                        <span class="class-card-location">{{ class.location }}</span>
+                        {% if class.professor_name %}
+                        <span class="class-card-separator">·</span>
+                        <span class="class-card-professor">{{ class.professor_name }}</span>
+                        {% endif %}
                     </div>
-                    {% endfor %}
                 </div>
             </div>
-            {% endif %}
-            
-            <div class="welcome-actions">
-                <a href="{{ url_for('timetable.timetable') }}" class="btn btn-primary btn-lg">
-                    📅 시간표 보기
-                </a>
-                {% if role == 'student' %}
-                <a href="{{ url_for('attendance.show_attendance') }}" class="btn btn-success btn-lg">
-                    ✅ 출석 체크
-                </a>
-                {% endif %}
-            </div>
+            {% endfor %}
         </div>
+        
+        <!-- 모바일: 리스트 형식 -->
+        <ol class="today-classes-list-mobile">
+            {% for class in today_classes %}
+            <li class="today-class-item-mobile">
+                <div class="class-item-number">{{ loop.index }}</div>
+                <div class="class-item-content">
+                    <div class="class-item-subject">{{ class.subject_name }}</div>
+                    <div class="class-item-details">
+                        <span class="class-item-time">{{ class.start_time_str }} ~ {{ class.end_time_str }}</span>
+                        <span class="class-item-separator">·</span>
+                        <span class="class-item-location">{{ class.location }}</span>
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+        </ol>
+    </div>
+    {% endif %}
+    
+    <div class="welcome-actions welcome-actions-desktop">
+        <a href="{{ url_for('timetable.timetable') }}" class="btn btn-primary btn-lg">
+            <svg class="icon-inline" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            시간표 보기
+        </a>
+        {% if role == 'student' %}
+        <a href="{{ url_for('attendance.show_attendance') }}" class="btn btn-success btn-lg">
+            <svg class="icon-inline" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            출석 체크
+        </a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

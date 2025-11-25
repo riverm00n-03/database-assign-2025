@@ -1,11 +1,16 @@
 from flask import Blueprint, render_template, session, flash, redirect, url_for, request
 from app.utils.auth import login_required
-from app.utils.db_helpers import get_db_connection, to_time, format_time_to_str, get_student_id_by_number
+from app.utils.db_helpers import (
+    get_db_connection, to_time, format_time_to_str, get_student_id_by_number,
+    get_or_create_session, get_subject_info, get_student_enrolled_subjects
+)
+from app.utils.session_helpers import get_student_session_info
 from app.utils.attendance_test import now #테스트 추가
 from app.utils.constants import (
     ATTENDANCE_WINDOW_MINUTES,
     ATTENDANCE_STATUS_DISPLAY,
     WEEKDAY_MAP,
+    WEEKDAY_TO_STR,
     get_semester_dates,
     MAX_WEEKS_PER_SEMESTER
 )
@@ -13,7 +18,8 @@ from app.utils.attendance_helpers import (
     get_attendance_window,
     format_attendance_status,
     calculate_week_dates,
-    build_session_map
+    build_session_map,
+    calculate_weeks_info
 )
 from datetime import datetime, timedelta
 
@@ -27,9 +33,10 @@ def show_attendance():
     오늘의 출석 체크 페이지를 표시합니다.
     학생이 오늘 수강하는 수업 목록과 출석 가능 여부를 보여줍니다.
     """
-    username = session.get('username', '학생')
-    role = session.get('role', 'student')
-    student_number = session.get('student_number')
+    session_info = get_student_session_info()
+    username = session_info['username']
+    role = session_info['role']
+    student_number = session_info['student_number']
 
     server_now = datetime.now() # 테스트 원래 datetime.now()
     # 오늘 요일 인덱스 가져오기 (0: 월요일, 6: 일요일)
@@ -48,8 +55,7 @@ def show_attendance():
         )
 
     # 요일 인덱스를 DB 형식으로 변환
-    weekday_map = {0: 'MON', 1: 'TUE', 2: 'WED', 3: 'THU', 4: 'FRI'}
-    today_weekday = weekday_map[today_index]
+    today_weekday = WEEKDAY_TO_STR.get(today_index)
     today_classes = []
 
     try:
@@ -86,7 +92,7 @@ def show_attendance():
                     row['end_time'] = to_time(row['end_time'])
 
                     # 오늘 날짜의 수업 세션이 없으면 생성
-                    session_id = _get_or_create_session(cursor, conn, row['schedule_id'], server_now.date())
+                    session_id = get_or_create_session(cursor, conn, row['schedule_id'], server_now.date())
 
                     # 출석 가능 시간 범위 계산 (수업 시작 전후 10분)
                     window_from, window_to, within_window = get_attendance_window(
@@ -135,39 +141,6 @@ def show_attendance():
     )
 
 
-def _get_or_create_session(cursor, conn, schedule_id, class_date):
-    """
-    특정 날짜의 수업 세션을 조회하거나 없으면 생성합니다.
-    
-    Args:
-        cursor: 데이터베이스 커서
-        conn: 데이터베이스 연결
-        schedule_id: 스케줄 ID
-        class_date: 수업 날짜
-        
-    Returns:
-        session_id: 수업 세션 ID
-    """
-    # 기존 세션 조회
-    cursor.execute(
-        "SELECT session_id FROM class_session WHERE schedule_id = %s AND class_date = %s",
-        (schedule_id, class_date)
-    )
-    session_result = cursor.fetchone()
-
-    # 세션이 존재하면 기존 ID 반환
-    if session_result:
-        return session_result['session_id']
-    # 세션이 없으면 새로 생성
-    else:
-        cursor.execute(
-            "INSERT INTO class_session (schedule_id, class_date) VALUES (%s, %s)",
-            (schedule_id, class_date)
-        )
-        conn.commit()
-        return cursor.lastrowid
-
-
 def _get_checkin_status(cursor, session_id, student_id):
     """
     특정 학생의 특정 세션에 대한 출석 상태를 조회합니다.
@@ -195,7 +168,8 @@ def check_attendance():
     학생의 출석을 기록합니다.
     """
     schedule_id = request.form.get('schedule_id')
-    student_number = session.get('student_number')
+    session_info = get_student_session_info()
+    student_number = session_info['student_number']
 
     # 세션에 학번이 없으면 로그인 페이지로 리다이렉트
     if not student_number:
@@ -206,13 +180,11 @@ def check_attendance():
         with get_db_connection() as conn:
             with conn.cursor(dictionary=True) as cursor:
                 # 학생 ID 조회
-                cursor.execute("SELECT student_id FROM student WHERE student_number = %s", (student_number,))
-                student_result = cursor.fetchone()
+                student_id = get_student_id_by_number(cursor, student_number)
                 # 학생 정보가 없으면 에러 처리
-                if not student_result:
+                if not student_id:
                     flash("학생 정보를 찾을 수 없습니다.", "error")
                     return redirect(url_for('attendance.show_attendance'))
-                student_id = student_result['student_id']
 
                 # 오늘 날짜의 수업 세션 ID 조회
                 server_now = datetime.now()
@@ -305,9 +277,10 @@ def manage_attendance_students():
     학생의 출석 관리 페이지를 표시합니다.
     수강 중인 모든 과목의 출석 현황을 보여줍니다.
     """
-    username = session.get('username', '학생')
-    role = session.get('role', 'student')
-    student_number = session.get('student_number')
+    session_info = get_student_session_info()
+    username = session_info['username']
+    role = session_info['role']
+    student_number = session_info['student_number']
 
     # 학생이 아닌 경우 접근 제한
     if role != 'student':
@@ -325,23 +298,14 @@ def manage_attendance_students():
         with get_db_connection() as conn:
             with conn.cursor(dictionary=True) as cursor:
                 # 학생 ID 조회
-                cursor.execute("SELECT student_id FROM student WHERE student_number = %s", (student_number,))
-                student_result = cursor.fetchone()
+                student_id = get_student_id_by_number(cursor, student_number)
                 # 학생 정보가 없으면 로그인 페이지로 리다이렉트
-                if not student_result:
+                if not student_id:
                     flash("학생 정보를 찾을 수 없습니다.", "error")
                     return redirect(url_for('auth.login'))
-                student_id = student_result['student_id']
 
                 # 학생이 수강하는 모든 과목을 가져온다.
-                cursor.execute("""
-                    SELECT s.subject_id, s.name AS subject_name, p.name AS professor_name
-                    FROM enrollment e
-                    JOIN subject s ON e.subject_id = s.subject_id
-                    LEFT JOIN professor p ON s.professor_id = p.professor_id
-                    WHERE e.student_id = %s
-                """, (student_id,))
-                enrolled_subjects = cursor.fetchall()
+                enrolled_subjects = get_student_enrolled_subjects(cursor, student_id)
 
                 # 각 수강 과목에 대해 출석 통계 계산
                 for subject in enrolled_subjects:
@@ -351,12 +315,7 @@ def manage_attendance_students():
                     today = date.today()
                     
                     # 과목 정보 조회 (연도, 학기)
-                    cursor.execute("""
-                        SELECT subject_year, subject_semester
-                        FROM subject
-                        WHERE subject_id = %s
-                    """, (subject_id,))
-                    subject_info = cursor.fetchone()
+                    subject_info = get_subject_info(cursor, subject_id)
                     
                     if not subject_info or not subject_info['subject_year'] or not subject_info['subject_semester']:
                         # 과목 정보가 없으면 기본값 사용
@@ -368,19 +327,10 @@ def manage_attendance_students():
                     # 학기 시작일과 종료일 계산
                     semester_start, semester_end = get_semester_dates(subject_year, subject_semester)
                     
-                    # 전체 주차 수 계산 (학기 시작일부터 종료일까지)
-                    total_weeks = ((semester_end - semester_start).days // 7) + 1
-                    if total_weeks > MAX_WEEKS_PER_SEMESTER:
-                        total_weeks = MAX_WEEKS_PER_SEMESTER
-                    
-                    # 현재 주차 계산 (학기 시작일부터 오늘까지)
-                    days_since_start = (today - semester_start).days
-                    current_week = (days_since_start // 7) + 1
-                    # 학기 시작 전이면 1주차로, 학기 종료 후면 전체 주차로 제한
-                    if current_week < 1:
-                        current_week = 1
-                    elif current_week > total_weeks:
-                        current_week = total_weeks
+                    # 주차 정보 계산
+                    weeks_info = calculate_weeks_info(semester_start, semester_end, today)
+                    total_weeks = weeks_info['total_weeks']
+                    current_week = weeks_info['current_week']
                     
                     # 주차 당 수업 수 (subject_schedule 개수)
                     cursor.execute("""
@@ -510,9 +460,10 @@ def attendance_detail(subject_id):
     Args:
         subject_id: 과목 ID
     """
-    username = session.get('username', '학생')
-    role = session.get('role', 'student')
-    student_number = session.get('student_number')
+    session_info = get_student_session_info()
+    username = session_info['username']
+    role = session_info['role']
+    student_number = session_info['student_number']
 
     # 학생이 아닌 경우 접근 제한
     if role != 'student':
@@ -532,21 +483,14 @@ def attendance_detail(subject_id):
         with get_db_connection() as conn:
             with conn.cursor(dictionary=True) as cursor:
                 # 학생 ID 조회
-                cursor.execute("SELECT student_id FROM student WHERE student_number = %s", (student_number,))
-                student_result = cursor.fetchone()
+                student_id = get_student_id_by_number(cursor, student_number)
                 # 학생 정보가 없으면 로그인 페이지로 리다이렉트
-                if not student_result:
+                if not student_id:
                     flash("학생 정보를 찾을 수 없습니다.", "error")
                     return redirect(url_for('auth.login'))
-                student_id = student_result['student_id']
 
                 # 과목 정보를 가져온다 (이름, 연도, 학기)
-                cursor.execute("""
-                    SELECT name, subject_year, subject_semester 
-                    FROM subject 
-                    WHERE subject_id = %s
-                """, (subject_id,))
-                subject_result = cursor.fetchone()
+                subject_result = get_subject_info(cursor, subject_id)
                 if not subject_result:
                     flash("과목 정보를 찾을 수 없습니다.", "error")
                     return redirect(url_for('attendance.manage_attendance'))
@@ -609,9 +553,6 @@ def attendance_detail(subject_id):
                         'day_of_week': session_data['day_of_week']
                     }
 
-                # 요일 문자열을 숫자로 매핑 (Python weekday: 0=월요일, 6=일요일)
-                weekday_map = {'MON': 0, 'TUE': 1, 'WED': 2, 'THU': 3, 'FRI': 4, 'SAT': 5, 'SUN': 6}
-                
                 # 주차별 출석 기록 리스트 초기화
                 attendance_records = []
                 current_date = semester_start
@@ -620,7 +561,7 @@ def attendance_detail(subject_id):
                 # 각 스케줄의 첫 번째 수업 날짜 계산
                 first_week_dates = {}
                 for schedule in schedules:
-                    day_of_week = weekday_map[schedule['day_of_week']]
+                    day_of_week = WEEKDAY_MAP.get(schedule['day_of_week'])
                     # 학기 시작일부터 해당 요일까지의 일수 계산
                     days_ahead = day_of_week - current_date.weekday()
                     # 음수인 경우 다음 주로 이동

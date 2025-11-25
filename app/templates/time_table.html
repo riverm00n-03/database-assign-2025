@@ -82,7 +82,12 @@
         {% if current_class %}
         <div class="class-notification-card card current-class-card">
             <div class="notification-header">
-                <div class="notification-icon current-icon">📚</div>
+                <div class="notification-icon current-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                </div>
                 <h3 class="notification-title">현재 수업</h3>
             </div>
             <div class="notification-content">
@@ -91,7 +96,13 @@
                     {% if role == 'student' %}
                         <div class="class-professor-name">{{ current_class.professor_name }}</div>
                     {% endif %}
-                    <div class="class-location">📍 {{ current_class.location }}</div>
+                    <div class="class-location">
+                        <svg class="icon-inline" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        {{ current_class.location }}
+                    </div>
                 </div>
                 <div class="class-time-info">
                     <div class="time-range">
@@ -105,7 +116,12 @@
         {% if next_class %}
         <div class="class-notification-card card next-class-card">
             <div class="notification-header">
-                <div class="notification-icon next-icon">⏰</div>
+                <div class="notification-icon next-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                </div>
                 <h3 class="notification-title">다음 수업</h3>
             </div>
             <div class="notification-content">
@@ -114,7 +130,13 @@
                     {% if role == 'student' %}
                         <div class="class-professor-name">{{ next_class.professor_name }}</div>
                     {% endif %}
-                    <div class="class-location">📍 {{ next_class.location }}</div>
+                    <div class="class-location">
+                        <svg class="icon-inline" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        {{ next_class.location }}
+                    </div>
                 </div>
                 <div class="class-time-info">
                     <div class="time-range">
@@ -157,7 +179,13 @@
                         {% if role == 'student' %}
                             <div class="today-class-professor">{{ class_item.professor_name }}</div>
                         {% endif %}
-                        <div class="today-class-location">📍 {{ class_item.location }}</div>
+                        <div class="today-class-location">
+                            <svg class="icon-inline" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                            {{ class_item.location }}
+                        </div>
                         <div class="today-class-time">{{ class_item.start_time }} - {{ class_item.end_time }}</div>
                     </div>
                 </div>

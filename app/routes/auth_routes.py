@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
-from mysql.connector import connect, Error
-from config import DB_CONFIG
+from app.utils.db_helpers import get_db_connection
+from mysql.connector import Error
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -17,7 +17,7 @@ def login():
         user_id = request.form.get('user_id')
 
         try:
-            with connect(**DB_CONFIG) as connection:
+            with get_db_connection() as connection:
                 with connection.cursor(dictionary=True) as cursor:
                     # 역할에 따라 다른 쿼리 실행
                     if role == 'student':

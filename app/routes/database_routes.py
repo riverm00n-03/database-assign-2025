@@ -1,7 +1,6 @@
 from flask import Blueprint, jsonify, render_template
-from mysql.connector import connect
+from app.utils.db_helpers import get_db_connection, format_timedelta_to_str
 import datetime
-from config import DB_CONFIG
 
 db_bp = Blueprint('database', __name__)
 
@@ -14,7 +13,7 @@ def show_database():
     """
     db_data = {}
     try:
-        with connect(**DB_CONFIG) as connection:
+        with get_db_connection() as connection:
             with connection.cursor(dictionary=True) as cursor:
                 # 모든 테이블 목록 조회
                 cursor.execute("SHOW TABLES")
@@ -34,11 +33,7 @@ def show_database():
                                 processed_row[key] = value.isoformat()
                             # timedelta 객체인 경우 HH:MM:SS 형식으로 변환
                             elif isinstance(value, datetime.timedelta):
-                                total_seconds = int(value.total_seconds())
-                                hours = total_seconds // 3600
-                                minutes = (total_seconds % 3600) // 60
-                                seconds = total_seconds % 60
-                                processed_row[key] = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+                                processed_row[key] = format_timedelta_to_str(value)
                             # time 객체인 경우 ISO 형식으로 변환
                             elif isinstance(value, datetime.time):
                                 processed_row[key] = value.isoformat()
@@ -62,7 +57,7 @@ def show_database_html():
     db_data = {}
     tables = []
     try:
-        with connect(**DB_CONFIG) as connection:
+        with get_db_connection() as connection:
             with connection.cursor(dictionary=True) as cursor:
                 # 데이터베이스 선택
                 cursor.execute("USE wcheck")
@@ -84,11 +79,7 @@ def show_database_html():
                                 processed_row[key] = value.isoformat()
                             # timedelta 객체인 경우 HH:MM:SS 형식으로 변환
                             elif isinstance(value, datetime.timedelta):
-                                total_seconds = int(value.total_seconds())
-                                hours = total_seconds // 3600
-                                minutes = (total_seconds % 3600) // 60
-                                seconds = total_seconds % 60
-                                processed_row[key] = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+                                processed_row[key] = format_timedelta_to_str(value)
                             # time 객체인 경우 ISO 형식으로 변환
                             elif isinstance(value, datetime.time):
                                 processed_row[key] = value.isoformat()
